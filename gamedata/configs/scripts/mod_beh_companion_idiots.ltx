@@ -1,0 +1,43 @@
+@[logic]
+on_combat = combat
+
+
+![combat]
+combat_type = {+npcx_beh_combat_tactics_camper} camper, {+npcx_beh_combat_tactics_monolith} monolith, nil
+
+
+![beh@general]
+sound_idle = state
+
+; behaviors and targets
+behavior_state = {+npcx_beh_substate_relax} beh_relax,  {+npcx_beh_patrol_mode} beh_path, {+npcx_beh_wait +npcx_beh_use_cover} beh_cover,  {+npcx_beh_wait} beh_wait, beh_move
+target         = {+npcx_beh_substate_relax} relax_spot, {+npcx_beh_patrol_mode} waypoint, {+npcx_beh_wait +npcx_beh_use_cover} cover_spot, {+npcx_beh_wait} look_around, {+npcx_beh_use_cover} cover_actor, follow_actor
+path_end       = {+npcx_beh_patrol_mode} loop, nil
+
+; animations
+walk_anim   = {=is_wounded} wounded, {=actor_prone =following_actor} sneak,     {=actor_crouch =following_actor} sneak,     {+npcx_beh_substate_prone} sneak,     {+npcx_beh_substate_stealth} sneak, patrol
+jog_anim    = {=is_wounded} wounded, {=actor_prone =following_actor} sneak_run, {=actor_crouch =following_actor} sneak_run, {+npcx_beh_substate_prone} sneak_run, {+npcx_beh_substate_stealth} sneak_run, rush
+run_anim    = {=is_wounded} wounded, {=actor_prone =following_actor} assault,   {=actor_crouch =following_actor} assault,   {+npcx_beh_substate_prone} assault,   {+npcx_beh_substate_stealth} assault, panic
+sprint_anim = {=is_wounded} wounded, {=actor_prone =following_actor} assault,   {=actor_crouch =following_actor} assault,   {+npcx_beh_substate_prone} assault,   {+npcx_beh_substate_stealth} assault, panic
+wait_anim   = {=is_wounded} wounded, {+npcx_beh_substate_relax} sit_ass, {=actor_prone =following_actor} prone_idle, {=actor_crouch =following_actor} hide, {+npcx_beh_substate_prone} prone_idle, {+npcx_beh_substate_stealth} hide, guard
+delay_anim  = {=is_wounded} wounded, {+npcx_beh_substate_relax} sit_ass, {=actor_prone =following_actor} prone_idle, {=actor_crouch =following_actor} hide, {+npcx_beh_substate_prone} prone_idle, {+npcx_beh_substate_stealth} hide, guard
+
+; distances
+keep_dist         = {+npcx_beh_distance_far} far, near
+near_desired_dist = {+npcx_beh_patrol_mode} 1, 6
+far_desired_dist  = {+npcx_beh_patrol_mode} 1, 12
+walk_dist         = {+npcx_beh_hurry} 1, {+npcx_beh_substate_relax} 24, {+npcx_beh_patrol_mode} 64, 4
+jog_dist          = {+npcx_beh_hurry} 2, {+npcx_beh_substate_relax} 48, {+npcx_beh_patrol_mode} 128, 8
+
+; gathering/looting/etc.
+combat_ignore_cond            = {=check_enemy_name(actor)} true, {+npcx_beh_ignore_combat} true, {+npcx_beh_ignore_actor_enemies !is_enemy_fighting_actor} true, false
+gather_items_enabled          = {+npcx_beh_gather_items} true, false
+gather_artefact_items_enabled = {+npcx_beh_gather_artifacts} true, false
+corpse_detection_enabled      = {+npcx_beh_loot_corpses} true, false
+help_wounded_enabled          = {+npcx_beh_help_wounded} true, false
+
+
+![meet]
+close_anim     = nil
+close_distance = {=is_wounded} 1, 0
+far_distance   = 0

@@ -1,0 +1,426 @@
+local U   = z_idiots_utils
+local C   = z_idiots_companions
+local XML = modxml_idiots_ui
+
+
+GUI   = nil
+DELAY = 0
+
+
+class "CompanionManager" (CUIScriptWnd)
+
+
+function CompanionManager:__init(id) super()
+  self.xml = CScriptXmlInit()
+  self.xml:ParseFile("idiots_ui.xml")
+
+  local companions = U.getCompanions()
+  self.singleMode = #companions == 1
+
+  if id and U.isCompanion(id) then
+    self.ID = id
+  elseif self.singleMode then
+    self.ID = companions[1]:id()
+  end
+
+  self:InitIndexes()
+  self:InitContainer()
+  self:InitTabs()
+  self:InitTitlebar()
+  self:InitButtons()
+end
+
+
+function CompanionManager:InitContainer()
+  self:SetWndRect(
+    Frect():set(0, 0, 1024, 768)
+  )
+
+  self.dialog = self.xml:InitStatic("container", self)
+  self.dialog:InitTexture("idiots_ui_black")
+end
+
+-- Indexes
+
+function CompanionManager:InitIndexes()
+  self.indexes = {}
+
+  for index = 1, 10 do
+    local name = "index_" ..index
+    local path = "container:" ..name
+    local item = self.xml:InitStatic(path, self)
+    item.label = self.xml:InitTextWnd(path.. ":label", item)
+
+    self.indexes[index] = item
+    item:Show(false)
+  end
+end
+
+
+function CompanionManager:UpdateIndexes()
+  local companions = U.getCompanions()
+
+  for index = 1, 10 do
+    local companion = companions[index]
+    if not companion then
+      return
+    end
+
+    local item = self.indexes[index]
+
+    local texture = self.ID == companion:id()
+      and "idiots_ui_circle_light"
+      or  "idiots_ui_circle_dark"
+
+    item:InitTexture(texture)
+    item:SetTextureColor(
+      self.ID == companion:id()
+        and GetARGB(255, 255, 255, 255)
+        or  GetARGB(112, 255, 255, 255)
+    )
+
+    local wpos = utils_obj.safe_bone_pos(companion, "bip01_head")
+
+    local position = game.world2ui(
+      vector():set(wpos.x, wpos.y + 0.51, wpos.z)
+    )
+
+    if position.x < 0 then
+      item:Show(false)
+    else
+      local w = item:GetWidth()
+      local h = item:GetHeight()
+
+      item:SetWndPos(vector2():set(position.x - w/2, position.y - w/2))
+      item:Show(true)
+    end
+  end
+end
+
+-- Tabs
+
+function CompanionManager:InitTabs()
+  self.tabbar = self.xml:InitStatic("container:tabs", self.dialog)
+  self.tabs   = {}
+
+  for index = 0, 10 do
+    local isGlobalTab = index == 0
+
+    local name = isGlobalTab
+      and "tab_global"
+      or  "tab" ..index
+
+    local path = "container:tabs:" ..name
+    local tab  = self.xml:Init3tButton(path, self.tabbar)
+    tab.label  = self.xml:InitTextWnd(path.. ":label", tab)
+
+    tab:InitTexture("idiots_ui_stateless")
+
+    self:Register(tab, name)
+    self:AddCallback(name, ui_events.BUTTON_CLICKED, function()
+      self:OnClickTab(index)
+    end, self)
+
+    if isGlobalTab then
+      self.globalTab = tab
+    else
+      self.tabs[#self.tabs + 1] = tab
+    end
+  end
+
+  self:UpdateTabs()
+end
+
+
+function CompanionManager:UpdateTabs()
+  local companions = U.getCompanions()
+
+  if self.globalTab then
+    self.globalTab:InitTexture(self.ID and "idiots_ui" or "idiots_ui_active")
+    self.globalTab:Enable(not self.singleMode)
+
+    local textColor = self.singleMode
+      and GetARGB(255, 48, 48, 48)
+      or  GetARGB(255, 255, 255, 255)
+
+    self.globalTab.label:SetTextColor(textColor)
+  end
+
+  for index = 1, 10 do
+    local tab       = self.tabs[index]
+    local companion = companions[index]
+    local isActive  = companion and companion:id() == self.ID
+
+    tab:Show(companion ~= nil)
+    tab:Enable(companion ~= nil)
+    tab:InitTexture(isActive and "idiots_ui_active" or "idiots_ui")
+  end
+end
+
+
+function CompanionManager:OnClickTab(index)
+  local companions = U.getCompanions()
+
+  if companions[index] then
+    self.ID = companions[index]:id()
+  else
+    self.ID = nil
+  end
+
+  self:UpdateTabs()
+  self:UpdateTitlebar()
+  self:UpdateButtons()
+end
+
+-- Titlebar
+
+function CompanionManager:InitTitlebar()
+  local titlebar = self.xml:InitStatic("container:titlebar", self.dialog)
+  titlebar.icon  = self.xml:InitStatic("container:titlebar:icon", titlebar)
+  titlebar.title = self.xml:InitTextWnd("container:titlebar:title", titlebar)
+
+  self.titlebar = titlebar
+  self:UpdateTitlebar()
+end
+
+
+function CompanionManager:UpdateTitlebar()
+  if self.ID then
+    local companion = U.getCompanion(self.ID)
+
+    if companion then
+      local texture = "ui_mm_faction_" ..companion:character_community()
+      self.titlebar.icon:InitTexture(texture)
+      self.titlebar.icon:Show(true)
+      self.titlebar.title:SetText(companion:character_name())
+      return
+    end
+  end
+
+  self.titlebar.icon:Show(false)
+  self.titlebar.title:SetText("All Companions")
+end
+
+-- Buttons
+
+function CompanionManager:InitButtons()
+  self.buttons = {}
+
+  local layout = dup_table(XML.UI_LAYOUT)
+  layout[#layout + 1] = XML.TITLE_BUTTONS
+
+  for _, column in ipairs(layout) do
+    for _, item in ipairs(column) do
+      local action, value, options = unpack(item)
+
+      local path   = "container:" ..action
+      local button = self.xml:Init3tButton(path, self.dialog)
+      button.label = self.xml:InitTextWnd(path.. ":label", button)
+
+      self:Register(button, action)
+
+      self:AddCallback(action, ui_events.BUTTON_CLICKED, function()
+        self:OnClickButton(action)
+      end, self)
+
+      self.buttons[action] = button
+    end
+  end
+
+  self:UpdateButtons()
+end
+
+
+function CompanionManager:UpdateButtons()
+  local waypointCount = self.ID
+    and #U.getAllWaypoints(self.ID)
+    or  0
+
+  self.buttons.INVENTORY:Show(self.ID)
+  self.buttons.ADD_WAYPOINT:Show(self.ID)
+  self.buttons.CLEAR_WAYPOINTS:Show(self.ID)
+  self.buttons.PATROL:Show(self.ID)
+  self.buttons.CLEAR_WAYPOINTS:Enable(waypointCount > 0)
+  self.buttons.PATROL:Enable(waypointCount > 1)
+  self.buttons.LOOT_ARTIFACTS:Enable(C.getState(self.ID, "LOOT_ITEMS"))
+  self.buttons.RESET.label:SetText(self.ID and "Re-sync" or "Sync All")
+  self.buttons.BUNCH:Enable(not self.ID or self.singleMode)
+  self.buttons.SPREAD:Enable(not self.ID or self.singleMode)
+  self.buttons.LINE:Enable(not self.ID or self.singleMode)
+
+  for action, button in pairs(self.buttons) do
+    local enabled  = button:IsEnabled()
+    local stateful = C.isStateful(action)
+    local active   = enabled and stateful and C.getState(self.ID, action)
+
+    local textColor = not enabled
+      and GetARGB(255, 48, 48, 48)
+      or  GetARGB(255, 255, 255, 255)
+
+    local texture = active
+      and "idiots_ui_active"
+      or (stateful or not enabled) and "idiots_ui"
+      or "idiots_ui_stateless"
+
+    self.buttons[action].label:SetTextColor(textColor)
+    self.buttons[action]:InitTexture(texture)
+  end
+end
+
+
+function CompanionManager:OnClickButton(action)
+  SendScriptCallback("on_companion_manager_button_click", action, self)
+
+  if C.isStateful(action) then
+    return self:UpdateState(self.ID, action)
+  end
+
+  if action == "RESET" then
+    if self.ID then
+      C.setAllStates(self.ID, C.GLOBAL_STATE)
+    else
+      for _, npc in ipairs(U.getCompanions()) do
+        C.setAllStates(npc, C.GLOBAL_STATE)
+      end
+    end
+  end
+
+  if action == "ADD_WAYPOINT" then
+    if self.ID then
+      U.addWaypoint(self.ID, db.actor:position())
+      self:UpdateButtons()
+    end
+  end
+
+  if action == "CLEAR_WAYPOINTS" then
+    if self.ID then
+      U.clearWaypoints(self.ID)
+      self:UpdateButtons()
+    end
+  end
+
+  if action == "INVENTORY" then
+    local npc = self.ID and U.getCompanion(self.ID)
+    if npc then
+      self:Close()
+      ui_companion_inv.start(npc)
+    end
+  end
+end
+
+-- Misc
+
+function CompanionManager:OnKeyboard(dik, action)
+	local res = CUIScriptWnd.OnKeyboard(self, dik, action)
+
+  if res ~= false or action ~= ui_events.WINDOW_KEY_RELEASED then
+    return res
+  end
+
+  local bind = dik_to_bind(dik)
+
+  if time_global() <= DELAY + 100 then
+    return
+  end
+
+  if
+    bind == key_bindings.kQUIT
+    or bind == key_bindings.kUSE
+    or bind == key_bindings.kCUSTOM18
+  then
+    self:Close()
+  end
+
+  return res
+end
+
+
+function CompanionManager:UpdateState(id, state, enabled)
+  if enabled == nil then
+    enabled = not C.getState(id, state)
+  end
+
+  C.setState(id, state, enabled)
+
+  if id then
+    return
+  end
+
+  for _, npc in ipairs(U.getCompanions()) do
+    self:UpdateState(npc:id(), state, enabled)
+  end
+end
+
+
+function CompanionManager:Close()
+  self:HideDialog()
+  Unregister_UI("CompanionManager")
+  GUI = nil
+end
+
+
+function CompanionManager:__finalize()
+end
+
+-- Callbacks
+
+function openCompanionManager()
+  hide_hud_inventory()
+
+  if not GUI then
+    local target = U.getTargetCompanion()
+
+    if not target and #U.getCompanions() == 0 then
+      actor_menu.set_msg(1, game.translate_string("st_no_companions"), 8)
+      return
+    end
+
+    GUI = CompanionManager(target and target:id() or nil)
+  end
+
+	if GUI and not GUI:IsShown() then
+    GUI:SetAutoDelete(true)
+    GUI:AllowMovement(true)
+		GUI:ShowDialog(true)
+    GUI:Show(true)
+
+    DELAY = time_global()
+    Register_UI("CompanionManager", "idiots_ui")
+  end
+end
+
+
+function onStateChange(id, state, enabled)
+  if GUI and GUI.ID == id then
+    GUI:UpdateButtons(state, enabled)
+  end
+end
+
+
+function onKeyRelease(key)
+  if (dik_to_bind(key) == key_bindings.kCUSTOM18) then
+    openCompanionManager()
+	end
+end
+
+
+local onUpdate = U.throttle(function()
+  if GUI and GUI:IsShown() then
+    GUI:UpdateIndexes()
+  end
+end, 25)
+
+
+function on_game_start()
+  RegisterScriptCallback("actor_on_update", onUpdate)
+  RegisterScriptCallback("on_key_release", onKeyRelease)
+  RegisterScriptCallback("on_idiot_set_state", onStateChange)
+end
+
+
+function axr_companions.on_key_release()
+  -- disable companion wheel
+end
+
+
+AddScriptCallback("on_companion_manager_button_click")

@@ -1,0 +1,297 @@
+local U = z_idiots_utils
+local C = z_idiots_companions
+
+
+EVAL_FACER          = xrs_facer.evid_facer
+EVAL_FACER_STEAL_UP = xrs_facer.evid_steal_up_facer
+EVAL_ENEMY          = stalker_ids.property_enemy
+EVAL_LOGIC          = xr_evaluators_id.state_mgr + 4
+EVAL_CAMPER         = xr_evaluators_id.combat_camper_base
+EVAL_MONOLITH       = xr_evaluators_id.combat_monolith_base
+ACTION_CAMPER       = xr_actions_id.combat_camper_base
+ACTION_MONOLITH     = xr_actions_id.combat_monolith_base
+
+
+local __combat_evaluate = xr_combat.evaluator_check_combat.evaluate
+local __try_go_cover    = axr_fight_from_cover.action_fight_from_cover.try_go_cover
+local __is_enemy        = xr_combat_ignore.is_enemy
+
+
+-- utils: combat --
+
+TEAM_SIGHT  = true
+SEE_TIME    = {5000, 7000}
+SEARCH_TIME = {5000, 7000}
+ROTATE_TIME = {1000, 2000}
+
+COMBAT_ANIMATIONS = {
+  stand = {
+    idle = {
+      snipe  = "threat_sniper_fire",
+      fire   = "threat_fire",
+      reload = "hide_fire",
+      hold   = "threat_na",
+    },
+    move = {
+      snipe  = "assault_fire",
+      fire   = "assault_fire",
+      reload = "assault_fire",
+      hold   = "assault",
+    }
+  },
+  sneak = {
+    idle = {
+      snipe  = "hide_sniper_fire",
+      fire   = "hide_fire",
+      reload = "hide_fire",
+      hold   = "hide_na",
+    },
+    move = {
+      snipe  = "assault_fire",
+      fire   = "assault_fire",
+      reload = "assault_fire",
+      hold   = "assault",
+    }
+  },
+  prone = {
+    idle = {
+      snipe  = "prone_sniper_fire",
+      fire   = "prone_fire",
+      reload = "prone_fire",
+      hold   = "prone_idle",
+    },
+    move = {
+      snipe  = "sneak_fire",
+      fire   = "sneak_fire",
+      reload = "sneak_fire",
+      hold   = "sneak_run",
+    }
+  }
+}
+
+
+function U.updateEnemy(npc, st)
+  local enemy = npc:best_enemy()
+
+  st.enemyID      = nil
+  st.enemySeen    = false
+  st.enemyPredict = false
+  st.enemyWounded = false
+
+  if not (enemy and enemy:alive()) then
+    st.enemyPos   = nil
+    st.enemyDist  = nil
+    st.searchTime = nil
+    st.seeTime    = nil
+    return
+  end
+
+  st.enemySeen    = npc:see(enemy)
+  st.enemyPredict = st.seeTime and time_global() <= st.seeTime
+
+  local newPos = nil
+
+  if st.enemySeen then
+    U.resetEnemyTimers(st)
+    newPos = enemy:position()
+
+  elseif TEAM_SIGHT and U.teamSeesEnemy(npc, enemy) then
+    U.resetEnemyTimers(st)
+    newPos = enemy:position()
+
+  elseif st.enemyPredict then
+    newPos = enemy:position()
+
+  elseif npc:memory_position(enemy) then
+    newPos = npc:memory_position(enemy)
+  end
+
+  if newPos then
+    st.enemyPos     = newPos
+    st.enemyID      = enemy:id()
+    st.enemyWounded = IsWounded(enemy)
+    st.enemyDist    = npc:position():distance_to(newPos)
+  end
+end
+
+
+function U.resetEnemyTimers(st)
+  st.searchTime = time_global() + U.random(SEARCH_TIME[1], SEARCH_TIME[2])
+  st.seeTime    = time_global() + U.random(SEE_TIME[1], SEE_TIME[2])
+end
+
+
+function U.getCombatMoveState(npc, st)
+  local cover = st.coverFn(npc, st.enemyPos)
+  local keys  = {"stand", "idle", "hold"}
+
+  if C.getState(npc, "PRONE") then
+    keys[1] = "prone"
+  elseif C.getState(npc, "SNEAK") then
+    keys[1] = "sneak"
+  end
+
+  if not st.reached then
+    keys[2] = "move"
+  elseif cover.mid then
+    keys[1] = "stand"
+  elseif cover.low and keys[1] == "prone" then
+    keys[1] = "sneak"
+  end
+
+  if st.status == "RELOAD" then
+    keys[3] = "reload"
+  elseif st.enemySeen and IsSniper(npc:active_item()) then
+    keys[3] = "snipe"
+  elseif st.enemySeen then
+    keys[3] = "fire"
+  end
+
+  return COMBAT_ANIMATIONS[keys[1]][keys[2]][keys[3]]
+end
+
+
+function U.getCombatLookState(npc, st)
+  if st.enemySeen then
+    return {look_object = level.object_by_id(st.enemyID)}
+  end
+
+  local dir = st.enemyPos
+    and vdir(npc:position(), st.enemyPos)
+    or  npc:direction()
+
+  if not st.reached or st.enemyPredict then
+    return {look_dir = dir}
+  end
+
+  local fov = C.getState(npc, "PRONE")
+    and 40 or 80
+
+  if not st.rotateFn then
+    st.rotateFn = U.throttle(U.randomRotate, ROTATE_TIME[1], ROTATE_TIME[2])
+  end
+
+  return {look_dir = st.rotateFn(dir, fov)}
+end
+
+
+function U.teamSeesEnemy(npc, enemy)
+  if not U.isCompanion(npc) then
+    return U.squadSeesEnemy(npc, enemy)
+  end
+
+  if db.actor:see(enemy) then
+    return true
+  end
+
+  for i, companion in ipairs(U.getCompanions()) do
+    if companion:see(enemy) then
+      return true
+    end
+  end
+
+  return false
+end
+
+
+function U.squadSeesEnemy(npc, enemy)
+  local squad = get_object_squad(npc)
+
+  if squad then
+    for member in squad:squad_members() do
+      local squaddie = U.getNPC(member.id)
+
+      if squaddie and squaddie:see(enemy) then
+        return true
+      end
+    end
+  end
+
+  return false
+end
+
+
+-- shared scripted combat evaluator
+class "evaluator_combat_type" (property_evaluator)
+
+
+function evaluator_combat_type:__init(name, storage, type) super(nil, name)
+  self.st   = storage
+  self.type = type
+end
+
+
+function evaluator_combat_type:evaluate()
+  return db.storage[self.object:id()].script_combat_type == self.type
+end
+
+
+-- shared scripted combat callback to update enemy position when hit
+function hit_callback(self, obj, amount, direction, who, bone)
+  if not who then
+    return
+  end
+
+  local st    = self.st
+  local npc   = self.object
+  local enemy = npc:best_enemy()
+
+  if enemy and enemy:id() == who:id() then
+    U.resetEnemyTimers(st)
+    st.enemyPos = who:position()
+  end
+end
+
+
+-- fix: update combat type before evaluating
+-- prevents NPCs from getting permanently stuck in scripted combat
+function xr_combat.evaluator_check_combat:evaluate()
+  xr_combat.set_combat_type(self.object, db.actor, self.st)
+  return __combat_evaluate(self)
+end
+
+
+-- fix: prevent stealthy companions and enemies from ignoring each other by
+-- temporarily removing their companion flags to bypass a buggy if statement
+-- in the original function
+function xr_combat_ignore.is_enemy(npc, enemy, no_memory)
+  local npcIsCompanion   = npc:has_info("npcx_is_companion")
+  local enemyIsCompanion = enemy:has_info("npcx_is_companion")
+
+  npc:disable_info_portion("npcx_is_companion")
+  enemy:disable_info_portion("npcx_is_companion")
+
+  local isEnemy = __is_enemy(npc, enemy, no_memory)
+
+  if npcIsCompanion then
+    npc:give_info_portion("npcx_is_companion")
+  end
+
+  if enemyIsCompanion then
+    enemy:give_info_portion("npcx_is_companion")
+  end
+
+  return isEnemy
+end
+
+
+-- fix: replace try_go_cover() to help nudge companions closer to enemies
+-- so they don't just shuffle around in one place far away forever
+-- I'll rewrite axr_fight_from_cover later
+function axr_fight_from_cover.action_fight_from_cover:try_go_cover(npc, enemyPos)
+  if not U.isCompanion(npc) then
+    return __try_go_cover(self, npc, enemyPos)
+  end
+
+  local vid = U.findBestCover(npc, enemyPos)
+
+  if not U.isValidLVID(npc, vid) then
+    return
+  end
+
+  self.st.vid = vid
+  U.setDestination(npc, vid)
+  U.claimLVID(npc, vid)
+
+  return vid
+end

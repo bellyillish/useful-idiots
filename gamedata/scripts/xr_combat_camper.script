@@ -1,0 +1,196 @@
+local WP     = world_property
+local U      = z_idiots_utils
+local C      = z_idiots_companions
+local Combat = z_idiots_combat
+
+
+-- health range to trigger "EVADE"
+EVADE_HEALTH = {0.4, 0.7}
+
+
+-- combat camper action
+class "action_combat_camper" (action_base)
+
+action_combat_camper.hit_callback = Combat.hit_callback
+
+
+function action_combat_camper:__init(name, storage) super(nil, name)
+  self.st = storage
+end
+
+
+function action_combat_camper:initialize()
+  action_base.initialize(self)
+
+  local npc = self.object
+  local st  = self.st
+
+  st.startPos     = npc:position()
+  st.setStateFn   = U.throttle(state_mgr.set_state, 100)
+  st.coverFn      = U.throttle(U.evaluateCover, 250)
+  st.rotateFn     = nil
+  st.vid          = nil
+  st.prevStatus   = nil
+  st.status       = nil
+  st.seeTime      = nil
+  st.enemyID      = nil
+  st.enemyPos     = nil
+  st.enemyDist    = nil
+  st.reached      = false
+  st.enemySeen    = false
+  st.enemyPredict = false
+end
+
+
+function action_combat_camper:updateStorage()
+  local npc = self.object
+  local st  = self.st
+
+  U.updateEnemy(npc, st)
+
+  st.prevStatus = st.status
+  st.status     = nil
+
+  if st.expires and time_global() > st.expires then
+    st.vid     = nil
+    st.expires = nil
+  end
+
+  if npc.health <= EVADE_HEALTH[1] then
+    st.status = "EVADE"
+  elseif st.prevStatus == "EVADE" and npc.health < EVADE_HEALTH[2] then
+    st.status = "EVADE"
+  elseif U.isReloading(npc) then
+    st.status = "RELOAD"
+  else
+    st.status = "FIGHT"
+  end
+
+  if st.status == "EVADE" and st.prevStatus ~= "EVADE" then
+    st.vid = nil
+  end
+  if st.status == "FIGHT" and st.prevStatus == "EVADE" then
+    st.vid = nil
+  end
+  if st.status == "RELOAD" and st.prevStatus == "FIGHT" then
+    if U.random(1, 3) == 1 then
+      st.vid = nil
+    end
+  end
+
+  st.reached = st.vid
+    and st.vid == npc:level_vertex_id()
+    or  false
+end
+
+
+function action_combat_camper:execute()
+  action_base.execute(self)
+  self:updateStorage()
+
+  if self.st.status == "EVADE" then
+    self:evade()
+  else
+    self:fight()
+  end
+end
+
+
+function action_combat_camper:fight()
+  local npc = self.object
+  local st  = self.st
+
+  if not st.vid then
+    local vid
+
+    if not C.getState(npc, "PRONE") then
+      vid = U.findCover(npc, {
+        enemyPos  = st.enemyPos,
+        position  = st.startPos,
+        maxRadius = 8,
+        radius    = 4,
+      })
+    end
+
+    if not U.isValidLVID(npc, vid) then
+      vid = npc:level_vertex_id()
+    end
+
+    st.vid = vid
+    st.reached = st.vid == npc:level_vertex_id()
+  end
+
+  U.setDestination(npc, st.vid)
+  U.claimLVID(npc, st.vid)
+
+  local move = U.getCombatMoveState(npc, st)
+  local look = U.getCombatLookState(npc, st)
+
+  st.setStateFn(npc, move, nil, nil, look, {fast_set = true})
+end
+
+
+function action_combat_camper:evade()
+  local npc = self.object
+  local st  = self.st
+
+  if not st.vid then
+    local dir = vdir(st.enemyPos, npc:position())
+    local pos = U.vectorOffset(npc:position(), dir, U.random(8, 16))
+
+    local vid = U.findSafeCover(npc, {
+      radius   = 16,
+      position = pos,
+    })
+
+    if not U.isValidLVID(npc, vid) then
+      vid = npc:level_vertex_id()
+    end
+
+    st.vid = vid
+    st.reached = st.vid == npc:level_vertex_id()
+  end
+
+  U.setDestination(npc, st.vid)
+  U.claimLVID(npc, st.vid)
+
+  local move = U.getCombatMoveState(npc, st)
+  local look = U.getCombatLookState(npc, st)
+
+  st.setStateFn(npc, move, nil, nil, look, {fast_set = true})
+end
+
+
+-- binders
+function add_to_binder(npc, ini, storage, planner, temp)
+  if not U.isCompanion(npc) then
+    return
+  end
+
+  local planner = npc:motivation_action_manager()
+
+  if not planner then
+    return
+  end
+
+  planner:add_evaluator(Combat.EVAL_CAMPER,
+    Combat.evaluator_combat_type("combat_camper", storage, "camper")
+  )
+
+  local action = action_combat_camper("combat_camper", storage)
+
+  if action then
+    action:add_precondition(WP(Combat.EVAL_LOGIC, true))
+    action:add_precondition(WP(Combat.EVAL_ENEMY, true))
+    action:add_precondition(WP(Combat.EVAL_CAMPER, true))
+    action:add_precondition(WP(Combat.EVAL_FACER, false))
+    action:add_precondition(WP(Combat.EVAL_FACER_STEAL_UP, false))
+
+    action:add_effect(WP(Combat.EVAL_LOGIC, false))
+    action:add_effect(WP(Combat.EVAL_ENEMY, false))
+    action:add_effect(WP(Combat.EVAL_CAMPER, false))
+
+    planner:add_action(Combat.ACTION_CAMPER, action)
+    xr_logic.subscribe_action_for_events(npc, storage, action)
+  end
+end

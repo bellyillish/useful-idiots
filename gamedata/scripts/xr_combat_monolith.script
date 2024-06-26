@@ -1,0 +1,357 @@
+local WP     = world_property
+local U      = z_idiots_utils
+local Combat = z_idiots_combat
+
+
+-- health range to trigger "EVADE"
+EVADE_HEALTH = {0.4, 0.7}
+
+-- distance ranges
+NEAR_RANGE = {18, 22}
+FAR_RANGE  = {40, 48}
+HOLD_TIME  = {500,  2500}
+
+
+-- combat monolith action
+class "action_combat_monolith" (action_base)
+
+action_combat_monolith.hit_callback = Combat.hit_callback
+
+
+function action_combat_monolith:__init(name, storage) super(nil, name)
+  self.st = storage
+end
+
+
+function action_combat_monolith:initialize()
+  action_base.initialize(self)
+
+  local npc = self.object
+  local st  = self.st
+
+  st.nearDist     = U.random(NEAR_RANGE[1], NEAR_RANGE[2], 1)
+  st.farDist      = U.random(FAR_RANGE[1], FAR_RANGE[2], 1)
+  st.setStateFn   = U.throttle(state_mgr.set_state, 100)
+  st.coverFn      = U.throttle(U.evaluateCover, 250)
+  st.rotateFn     = nil
+  st.vid          = nil
+  st.expires      = nil
+  st.prevStatus   = nil
+  st.status       = nil
+  st.searchTime   = nil
+  st.seeTime      = nil
+  st.enemyID      = nil
+  st.enemyPos     = nil
+  st.enemyDist    = nil
+  st.reached      = false
+  st.enemySeen    = false
+  st.enemyPredict = false
+  st.enemyWounded = false
+end
+
+
+function action_combat_monolith:updateStorage()
+  local npc = self.object
+  local st  = self.st
+
+  U.updateEnemy(npc, st)
+
+  st.prevStatus = st.status
+  st.status     = nil
+
+  if st.expires and time_global() > st.expires then
+    st.vid     = nil
+    st.expires = nil
+  end
+
+  if npc.health <= EVADE_HEALTH[1] then
+    st.status = "EVADE"
+
+  elseif st.prevStatus == "EVADE" and npc.health < EVADE_HEALTH[2] then
+    st.status = "EVADE"
+
+  elseif U.isReloading(npc) then
+    st.status = "RELOAD"
+
+  elseif not st.enemyDist or st.searchTime and time_global() > st.searchTime then
+    st.status = "SEARCH"
+
+  elseif st.enemyWounded then
+    st.status = "SEARCH"
+
+  elseif st.enemyDist <= st.nearDist then
+    st.status = "FIGHT_NEAR"
+
+  elseif st.enemyDist >= st.farDist then
+    st.status = "FIGHT_FAR"
+
+  else
+    st.status = "FIGHT_MID"
+  end
+
+  if st.status ~= st.prevStatus then
+    st.vid     = nil
+    st.expires = nil
+  end
+
+  st.reached = st.vid
+    and st.vid == npc:level_vertex_id()
+    or  false
+
+  if st.reached and st.expires == nil then
+    st.expires = time_global() + U.random(HOLD_TIME[1], HOLD_TIME[2])
+  end
+end
+
+
+function action_combat_monolith:execute()
+  action_base.execute(self)
+  self:updateStorage()
+
+  local npc = self.object
+  local st  = self.st
+
+  if st.status == "EVADE" then
+    self:evade()
+
+  elseif st.status == "RELOAD" then
+    self:reload()
+
+  elseif st.status == "SEARCH" then
+    self:search()
+
+  elseif st.status == "FIGHT_NEAR" then
+    self:fight_near()
+
+  elseif st.status == "FIGHT_FAR" then
+    self:fight_far()
+
+  elseif st.status == "FIGHT_MID" then
+    self:fight_mid()
+  end
+end
+
+
+function action_combat_monolith:fight_far()
+  local npc = self.object
+  local st  = self.st
+
+  if not st.vid then
+    local lerp = U.random(0.32, 0.56, 2)
+    local pos  = vector():lerp(npc:position(), st.enemyPos, lerp)
+
+    local vid = U.findCover(npc, {
+      enemyPos = st.enemyPos,
+      position = pos,
+      radius   = 32,
+    })
+
+    if not U.isValidLVID(npc, vid) then
+      vid = npc:level_vertex_id()
+    end
+
+    st.vid = vid
+    st.reached = st.vid == npc:level_vertex_id()
+  end
+
+  U.setDestination(npc, st.vid)
+  U.claimLVID(npc, st.vid)
+
+  local move = U.getCombatMoveState(npc, st)
+  local look = U.getCombatLookState(npc, st)
+
+  st.setStateFn(npc, move, nil, nil, look, {fast_set = true})
+end
+
+
+function action_combat_monolith:fight_mid()
+  local npc = self.object
+  local st  = self.st
+
+  if not st.vid then
+    local dir = vdir(st.enemyPos, npc:position())
+    local pos = U.vectorOffset(st.enemyPos, dir, NEAR_RANGE[1])
+
+    local vid = U.findCover(npc, {
+      enemyPos = st.enemyPos,
+      position = pos,
+      radius   = 16,
+    })
+
+    if not U.isValidLVID(npc, vid) then
+      vid = npc:level_vertex_id()
+    end
+
+    st.vid = vid
+    st.reached = st.vid == npc:level_vertex_id()
+  end
+
+  U.setDestination(npc, st.vid)
+  U.claimLVID(npc, st.vid)
+
+  local move = U.getCombatMoveState(npc, st)
+  local look = U.getCombatLookState(npc, st)
+
+  st.setStateFn(npc, move, nil, nil, look, {fast_set = true})
+end
+
+
+function action_combat_monolith:fight_near()
+  local npc = self.object
+  local st  = self.st
+
+  if not st.vid then
+    local vid = U.findCover(npc, {
+      enemyPos = st.enemyPos,
+      radius   = U.random(2, 6),
+    })
+
+    if not U.isValidLVID(npc, vid) then
+      vid = npc:level_vertex_id()
+    end
+
+    st.vid = vid
+    st.reached = st.vid == npc:level_vertex_id()
+  end
+
+  U.setDestination(npc, st.vid)
+  U.claimLVID(npc, st.vid)
+
+  local move = U.getCombatMoveState(npc, st)
+  local look = U.getCombatLookState(npc, st)
+
+  st.setStateFn(npc, move, nil, nil, look, {fast_set = true})
+end
+
+
+function action_combat_monolith:search()
+  local npc = self.object
+  local st  = self.st
+
+  if not st.vid then
+    local vid
+
+    if st.enemyPos then
+      vid = U.bestValidLVID(npc, st.enemyPos)
+    end
+
+    if not U.isValidLVID(npc, vid) then
+      vid = npc:level_vertex_id()
+    end
+
+    st.vid = vid
+    st.reached = st.vid == npc:level_vertex_id()
+  end
+
+  U.setDestination(npc, st.vid)
+  U.claimLVID(npc, st.vid)
+
+  local move = U.getCombatMoveState(npc, st)
+  local look = U.getCombatLookState(npc, st)
+
+  st.setStateFn(npc, move, nil, nil, look, {fast_set = true})
+  st.expires = false
+end
+
+
+function action_combat_monolith:evade()
+  local npc = self.object
+  local st  = self.st
+
+  if st.reached and st.enemyDist and st.enemyDist < st.nearDist then
+    st.vid = nil
+  end
+
+  if not st.vid then
+    local vid = U.findSafeCover(npc, {
+      radius   = U.random(st.nearDist, st.farDist),
+      position = st.enemyPos or nil,
+      minDist  = 12,
+    })
+
+    if not U.isValidLVID(npc, vid) then
+      vid = npc:level_vertex_id()
+    end
+
+    st.vid = vid
+    st.reached = st.vid == npc:level_vertex_id()
+  end
+
+  U.setDestination(npc, st.vid)
+  U.claimLVID(npc, st.vid)
+
+  local move = U.getCombatMoveState(npc, st)
+  local look = U.getCombatLookState(npc, st)
+
+  st.setStateFn(npc, move, nil, nil, look, {fast_set = true})
+  st.expires = false
+end
+
+
+function action_combat_monolith:reload()
+  local npc = self.object
+  local st  = self.st
+
+  if not st.vid then
+    local cover = U.evaluateCover(npc, st.enemyPos)
+    local vid
+
+    if not cover.mid then
+      vid = U.findSafeCover(npc, {
+        minDist = 4,
+        radius  = 8,
+      })
+    end
+
+    if not U.isValidLVID(npc, vid) then
+      vid = npc:level_vertex_id()
+    end
+
+    st.vid = vid
+    st.reached = st.vid == npc:level_vertex_id()
+  end
+
+  U.setDestination(npc, st.vid)
+  U.claimLVID(npc, st.vid)
+
+  local move = U.getCombatMoveState(npc, st)
+  local look = U.getCombatLookState(npc, st)
+
+  st.setStateFn(npc, move, nil, nil, look, {fast_set = true})
+  st.expires = false
+end
+
+
+-- binders
+function add_to_binder(npc, ini, storage, planner, temp)
+  if not U.isCompanion(npc) then
+    return
+  end
+
+  local planner = npc:motivation_action_manager()
+
+  if not planner then
+    return
+  end
+
+  planner:add_evaluator(Combat.EVAL_MONOLITH,
+    Combat.evaluator_combat_type("combat_monolith", storage, "monolith")
+  )
+
+  local action = action_combat_monolith("combat_monolith", storage)
+
+  if action then
+    action:add_precondition(WP(Combat.EVAL_LOGIC, true))
+    action:add_precondition(WP(Combat.EVAL_ENEMY, true))
+    action:add_precondition(WP(Combat.EVAL_MONOLITH, true))
+    action:add_precondition(WP(Combat.EVAL_FACER, false))
+    action:add_precondition(WP(Combat.EVAL_FACER_STEAL_UP, false))
+
+    action:add_effect(WP(Combat.EVAL_LOGIC, false))
+    action:add_effect(WP(Combat.EVAL_ENEMY, false))
+    action:add_effect(WP(Combat.EVAL_MONOLITH, false))
+
+    planner:add_action(Combat.ACTION_MONOLITH, action)
+    xr_logic.subscribe_action_for_events(npc, storage, action)
+  end
+end

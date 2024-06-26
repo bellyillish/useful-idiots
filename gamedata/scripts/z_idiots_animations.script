@@ -1,0 +1,29 @@
+local U  = z_idiots_utils
+local C  = z_idiots_companions
+
+
+-- fix: states for prone
+state_lib.states.prone.movement              = move.stand
+state_lib.states.prone_idle.movement         = move.stand
+state_lib.states.prone_fire.movement         = move.stand
+state_lib.states.prone_sniper_fire.movement  = move.stand
+state_lib.states.prone_sniper_fire.direction = nil
+
+-- fix: animations for prone
+state_mgr_animation_list.animations.prone.prop.moving      = nil
+state_mgr_animation_list.animations.prone_idle.prop.moving = nil
+
+
+local __set_state = state_mgr.set_state
+
+-- fix: force {fast_set = true} on all companionos state animations
+-- it's heavy handed, but seems to fix a lot of issues with companions
+-- getting stuck or being sluggish or unresponsive
+function state_mgr.set_state(npc, state_name, callback, timeout, target, extra)
+  if U.isCompanion(npc) then
+    extra = extra or {}
+    extra.fast_set = extra.fast_set ~= false
+  end
+
+  return __set_state(npc, state_name, callback, timeout, target, extra)
+end

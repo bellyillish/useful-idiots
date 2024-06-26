@@ -1,0 +1,3 @@
+# syntax highlighting in GitHub
+*.script linguist-language=lua
+*.ltx linguist-language=ini

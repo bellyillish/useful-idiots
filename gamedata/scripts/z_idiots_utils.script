@@ -1,0 +1,555 @@
+local C = z_idiots_companions
+
+
+INVALID_LVID = 4294967295
+USED_LVIDS   = db.used_level_vertex_ids
+
+
+-- utils: misc --
+
+function throttle(fn, ms1, ms2)
+  local lastRun = 0
+  local delay   = 0
+  local result  = nil
+
+  return function(...)
+    local time = time_global()
+    if lastRun + delay <= time then
+      delay   = math.random(ms1, ms2 or ms1)
+      lastRun = time
+      result  = fn(...)
+    end
+
+    return result
+  end
+end
+
+
+function merge(...)
+  local args   = {...}
+  local result = {}
+
+  for _, arg in ipairs(args) do
+    for key, value in pairs(arg) do
+      result[key] = value
+    end
+  end
+
+  return result
+end
+
+
+function keyof(obj, value)
+  for k, v in pairs(obj) do
+    if v == value or type(value) == "function" and value(v) then
+      return k
+    end
+  end
+end
+
+
+function round(val, prec)
+  local e = 10 ^ (prec or 0)
+  return math.floor(val * e + 0.5) / e
+end
+
+
+function random(min, max, prec)
+  local e    = 10 ^ (prec or 0)
+  local emin = math.floor(min * e + 0.5)
+  local emax = math.floor(max * e + 0.5)
+
+  return math.random(emin, emax) / e
+end
+
+
+function randomRange(mag, prec)
+  return random(-mag, mag, prec)
+end
+
+
+-- utils: vertices/vectors --
+
+function _G.vec(...)
+  return vector():set(...)
+end
+
+
+function _G.lvpos(vid)
+  return vec(level.vertex_position(vid))
+end
+
+
+function _G.lvid(pos)
+  return level.vertex_id(pos) or INVALID_LVID
+end
+
+
+function _G.lvsnap(pos)
+  return lvpos(lvid(pos))
+end
+
+
+function _G.vdir(v1, v2)
+  return vec(v2):sub(v1):normalize()
+end
+
+
+function vertexBetween(v1, v2, mag)
+  mag = mag or v1:distance_to(v2)
+  return level.vertex_in_direction(lvid(v1), vdir(v1, v2), mag)
+end
+
+
+function vectorOffset(vector, dir, mag)
+  return vec(vector):add(
+    vec(dir):normalize():mul(mag)
+  )
+end
+
+
+function vectorAverage(vectors)
+  local total = vec(0, 0, 0)
+
+  for _, point in ipairs(vectors) do
+    total:add(point)
+  end
+
+  return total:div(#vectors)
+end
+
+
+function randomRotate(vector, range)
+  return vector_rotate_y(vector or vec(1, 0, 0), randomRange(range or 180))
+end
+
+
+function isValidLVID(npc, vid)
+  return npc and vid
+    and vid ~= INVALID_LVID
+    and npc:accessible(vid)
+end
+
+
+function isUnclaimedLVID(npc, vid)
+  if not isValidLVID(npc, vid) then
+    return false
+  end
+
+  return USED_LVIDS[vid] == nil or USED_LVIDS[vid] == npc:id()
+end
+
+
+function isFreeLVID(npc, vid, minDist)
+  minDist = minDist or 0.8
+
+  if not isUnclaimedLVID(npc, vid) then
+    return false
+  end
+
+  local pos = lvpos(vid)
+  local crowded = false
+
+  level.iterate_nearest(pos, 1, function(obj)
+    if not obj:is_stalker() or obj:id() == npc:id() or crowded then
+      return
+    end
+
+    local objPos  = obj:position()
+    local usedVid = keyof(USED_LVIDS, obj:id())
+
+    if usedVid and usedVid ~= vid then
+      objPos = lvpos(usedVid)
+    end
+
+    local dist = objPos:distance_to(pos)
+
+    if dist < minDist then
+      crowded = true
+    end
+  end)
+
+  if crowded then
+    return false
+  end
+
+  for v, n in pairs(USED_LVIDS) do
+    if n ~= npc:id() then
+      if lvpos(v):distance_to(pos) < minDist then
+        return false
+      end
+    end
+  end
+
+  return true
+end
+
+
+function claimLVID(npc, vid)
+  if type(npc) == "number" then
+    npc = getNPC(npc)
+  end
+
+  unclaimLVID(npc)
+
+  if not (npc and vid) then
+    abort("ERROR: invalid args passed to claimLVID")
+    callstack()
+    return
+  end
+
+  USED_LVIDS[vid] = npc:id()
+end
+
+
+function unclaimLVID(npc, vid)
+  if type(npc) == "number" then
+    npc = getNPC(npc)
+  end
+
+  if not npc then
+    return
+  end
+
+  if vid and USED_LVIDS[vid] == npc:id() then
+    USED_LVIDS[vid] = nil
+    return
+  end
+
+  for v, n in pairs(USED_LVIDS) do
+    if n == npc:id() then
+      USED_LVIDS[v] = nil
+    end
+  end
+end
+
+
+function setDestination(npc, vid)
+  if type(npc) == "number" then
+    npc = getNPC(npc)
+  end
+
+  if not npc then
+    abort("ERROR: invalid args passed to setDestination")
+    callstack()
+    return
+  end
+
+  clearDestination(npc)
+  npc:set_dest_level_vertex_id(vid)
+end
+
+
+function clearDestination(npc)
+  if type(npc) == "number" then
+    npc = getNPC(npc)
+  end
+
+  if not npc then
+    abort("ERROR: invalid arg passed to clearDestination")
+    callstack()
+    return
+  end
+
+  npc:set_desired_direction()
+  npc:set_desired_position()
+  npc:set_path_type(game_object.level_path)
+  npc:set_detail_path_type(move.line)
+end
+
+
+function bestLVID(npc, pos, validator)
+  if not (npc and pos and type(validator) == "function") then
+    return INVALID_LVID
+  end
+
+  local vid = lvid(pos)
+
+  if validator(npc, vid) then
+    return vid
+  end
+
+  vid = vertexBetween(npc:position(), pos)
+
+  if not isValidLVID(npc, vid) then
+    vid = npc:level_vertex_id()
+  end
+
+  local dist = math.floor(lvpos(vid):distance_to(pos))
+  local dir  = vdir(pos, lvpos(vid))
+
+  for mag = 0, dist do
+    vid = lvid(vectorOffset(pos, dir, mag))
+    if isFreeLVID(npc, vid) then
+      return vid
+    end
+  end
+
+  return INVALID_LVID
+end
+
+
+function bestValidLVID(npc, pos)
+  return bestLVID(npc, pos, isValidLVID)
+end
+
+
+function bestUnclaimedLVID(npc, pos)
+  return bestLVID(npc, pos, isUnclaimedLVID)
+end
+
+
+function bestFreeLVID(npc, pos)
+  return bestLVID(npc, pos, isFreeLVID)
+end
+
+
+-- utils: NPCs/companions --
+
+function getNPC(id)
+  local  npc = db.storage[id] and db.storage[id].object
+  return npc or level.object_by_id(id)
+end
+
+
+function isCompanion(npc)
+  if type(npc) == "number" then
+    npc = getNPC(npc)
+  end
+
+  return npc
+    and not axr_task_manager.hostages_by_id[npc:id()]
+    and npc:has_info("npcx_is_companion")
+    and npc:alive()
+    and true or false
+end
+
+
+function isFollowing(npc)
+  if type(npc) == "number" then
+    npc = getNPC(npc)
+  end
+
+  return npc
+    and isCompanion(npc)
+    and (C.getState(npc, "FOLLOW"))
+end
+
+
+function getCompanion(id)
+  local npc = getNPC(id)
+  return isCompanion(npc) and npc or nil
+end
+
+
+function getCompanions()
+  local companions = {}
+
+  for sid, squad in pairs(axr_companions.companion_squads) do
+    if
+      squad
+      and squad.commander_id
+      and not axr_task_manager.hostages_by_id[squad:commander_id()]
+    then
+      for member in squad:squad_members() do
+        local companion = getCompanion(member.id)
+        if companion then
+          companions[#companions + 1] = companion
+        end
+      end
+    end
+  end
+
+  return companions
+end
+
+
+function getFollowers()
+  local following = {}
+
+  for _, npc in ipairs(getCompanions()) do
+    if isFollowing(npc) then
+      following[#following + 1] = npc
+    end
+  end
+
+  return following
+end
+
+
+function getTargetCompanion()
+  local target = level.get_target_obj()
+  local dist   = 8
+
+  return isCompanion(target)
+    and distance_between(target, db.actor) <= dist
+    and target or nil
+end
+
+
+function indexOfCompanion(id)
+  if type(id.id) == "function" then
+    id = id:id()
+  end
+
+  return keyof(getCompanions(), function(npc)
+    return npc:id() == id
+  end)
+end
+
+
+function indexOfFollower(id)
+  if type(id.id) == "function" then
+    id = id:id()
+  end
+
+  return keyof(getFollowers(), function(npc)
+    return npc:id() == id
+  end)
+end
+
+
+function getAvgPosition(npcs)
+  local pos = {}
+  local dir = {}
+
+  for i, npc in ipairs(npcs) do
+    pos[i] = npc:position()
+    dir[i] = npc:direction()
+  end
+
+  return vectorAverage(pos), vectorAverage(dir)
+end
+
+
+function isReloading(npc)
+  local item = npc:active_item()
+  return IsWeapon(item) and item:get_ammo_in_magazine() <= 0
+end
+
+
+-- utils: cover --
+
+function evaluateCover(npc, enemyPos)
+  if not npc then
+    return
+  end
+
+  local pos = npc:position()
+
+  if not enemyPos then
+    enemyPos = lvsnap(vectorOffset(pos, npc:direction(), 8))
+  end
+
+  local positions = {
+    low  = {vec(pos), vec(enemyPos), 0.75},
+    mid  = {vec(pos), vec(enemyPos), 1.10},
+    high = {vec(pos), vec(enemyPos), 1.60},
+  }
+
+  local covers = {}
+
+  for k, v in pairs(positions) do
+    v[1].y = v[1].y + v[3]
+    v[2].y = v[2].y + v[3]
+
+    local dist = v[1]:distance_to(v[2])
+    local dir  = vdir(v[1], v[2])
+    local ray  = ray_pick()
+
+    ray:set_flags(2)
+    ray:set_position(v[1])
+    ray:set_direction(dir)
+    ray:set_range(dist)
+    ray:query()
+
+    local raydist = ray:get_distance()
+
+    covers[k] = raydist > 0
+      and math.floor(dist - raydist) > 0
+  end
+
+  return covers
+end
+
+
+function findSafeCover(npc, ops)
+  ops = merge({
+    position = npc:position(),
+    radius   = 32,
+    minDist  = 1,
+  }, ops)
+
+  local cover = npc:safe_cover(ops.position, ops.radius, ops.minDist)
+
+  if cover then
+    return bestFreeLVID(npc, cover:position())
+  end
+
+  return INVALID_LVID
+end
+
+
+function findBestCover(npc, enemyPos)
+  local cover = npc:find_best_cover(enemyPos or db.actor:position())
+
+  if cover then
+    return bestFreeLVID(npc, cover:position())
+  end
+
+  return INVALID_LVID
+end
+
+
+function findCover(npc, ops)
+  ops = merge({
+    position  = npc:position(),
+    enemyPos  = db.actor:position(),
+    maxRadius = 32,
+    radius    = 8,
+    distance  = 0,
+  }, ops)
+
+  local dir = vdir(ops.position, ops.enemyPos):invert()
+  local pos = vectorOffset(ops.position, dir, ops.distance)
+
+  local radius = ops.radius
+
+  while true do
+    local cover = npc:best_cover(pos, ops.enemyPos, radius, 1, 128)
+
+    if cover then
+      return bestFreeLVID(npc, cover:position())
+    end
+
+    if radius >= ops.maxRadius then
+      break
+    end
+
+    radius = math.min(radius + math.min(radius, 4), ops.maxRadius)
+  end
+
+  return INVALID_LVID
+end
+
+
+-- xr_conditions --
+
+function xr_conditions.actor_crouch()
+  return IsMoveState("mcCrouch")
+end
+
+
+function xr_conditions.actor_prone()
+  return IsMoveState("mcCrouch") and IsMoveState("mcAccel")
+end
+
+
+function xr_conditions.following_actor(actor, npc)
+  return isFollowing(npc)
+end
+
+
+function xr_conditions.fight_from_point(actor, npc)
+  return npc and C.getState(npc, "COMBAT_COVER")
+end

@@ -1,0 +1,26 @@
+<w>
+  <file name="ui\idiots_ui">
+		<texture id="idiots_ui_light" x="0"  y="0"  width="64" height="64" />
+		<texture id="idiots_ui_med"   x="64" y="0"  width="64" height="64" />
+		<texture id="idiots_ui_dark"  x="64" y="64" width="64" height="64" />
+		<texture id="idiots_ui_black" x="0"  y="64" width="64" height="64" />
+
+		<texture id="idiots_ui_e" x="0"  y="64" width="64" height="64" />
+		<texture id="idiots_ui_d" x="0"  y="64" width="64" height="64" />
+		<texture id="idiots_ui_t" x="64" y="0"  width="64" height="64" />
+		<texture id="idiots_ui_h" x="64" y="0"  width="64" height="64" />
+
+		<texture id="idiots_ui_active_e" x="0" y="0" width="64" height="64" />
+		<texture id="idiots_ui_active_d" x="0" y="0" width="64" height="64" />
+		<texture id="idiots_ui_active_t" x="0" y="0" width="64" height="64" />
+		<texture id="idiots_ui_active_h" x="0" y="0" width="64" height="64" />
+
+		<texture id="idiots_ui_stateless_e" x="64" y="64" width="64" height="64" />
+		<texture id="idiots_ui_stateless_d" x="64" y="64" width="64" height="64" />
+		<texture id="idiots_ui_stateless_t" x="64" y="0"  width="64" height="64" />
+		<texture id="idiots_ui_stateless_h" x="64" y="0"  width="64" height="64" />
+
+		<texture id="idiots_ui_circle_dark"  x="128"  y="0" width="32" height="32" />
+		<texture id="idiots_ui_circle_light" x="160" y="0"  width="32" height="32" />
+	</file>
+</w>

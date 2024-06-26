@@ -1,0 +1,270 @@
+--
+-- NOTE: Clean this up later. It's a mess.
+--
+
+TITLE_BUTTONS = {
+  {"RESET", "Reset"},
+  {"INVENTORY", "Inventory"},
+  {"CLEAR_WAYPOINTS", "Clear Waypoints"},
+  {"ADD_WAYPOINT", "Add Waypoint"},
+}
+
+UI_LAYOUT = {
+  {
+    {"FOLLOW", "Follow"},
+    {"WAIT", "Wait"},
+    {"RELAX", "Relax"},
+    {"PATROL", "Patrol"},
+  },
+  {
+    {"STAND", "Stand"},
+    {"SNEAK", "Sneak"},
+    {"PRONE", "Prone"},
+  },
+  {
+    {"COVER", "Use Cover"},
+    {"FAR", "Stay Far"},
+    {"HURRY", "Hurry Up"},
+  },
+  {
+    {"COMBAT_DEFAULT", "Default Combat"},
+    {"COMBAT_COVER", "Fight in Cover"},
+    {"COMBAT_MONOLITH", "Monolith Combat"},
+    {"COMBAT_CAMPER", "Camper Combat"},
+  },
+  {
+    {"ATTACK", "Attack"},
+    {"DEFEND", "Defend Only"},
+    {"IGNORE", "Ignore Combat"},
+  },
+  {
+    {"LOOT_ITEMS", "Gather Items"},
+    {"LOOT_ARTIFACTS", "And Artifacts"},
+    {"LOOT_CORPSES", "Loot Corpses"},
+    {"HELP_WOUNDED", "Help Wounded"},
+  },
+  {
+    {"BUNCH", "Bunch Formation"},
+    {"SPREAD", "Spread Formation"},
+    {"LINE", "Line Formation"},
+  },
+}
+
+BUTTON_FONT       = "arial_14"
+TITLE_FONT        = "arial_14"
+INDEX_FONT        = "small"
+TAB_FONT          = "arial_14"
+TITLE_BUTTON_FONT = "small"
+CONTAINER_GAP     = 12
+CONTAINER_PAD     = {12, 24}
+INDEX_SIZE        = {15, 15}
+TAB_SIZE          = {30, 30}
+TAB_GAP           = {0, 0}
+TITLE_HEIGHT      = 48
+TITLE_GAP         = {8, 0}
+TITLE_BUTTON_SIZE = {84, 20}
+TITLE_BUTTON_GAP  = {12, -4}
+ICON_SIZE         = {17, 17}
+ICON_GAP          = {12, 8}
+COLUMN_GAP        = {3, 0}
+BUTTON_SIZE       = {112, 26}
+BUTTON_GAP        = {0, 2}
+SEPARATOR_GAP     = 12
+
+
+RATIO = 1024/768 * device().height / device().width
+  COLUMN_GAP[1]        = COLUMN_GAP[1]        * RATIO
+  BUTTON_SIZE[1]       = BUTTON_SIZE[1]       * RATIO
+  TAB_SIZE[1]          = TAB_SIZE[1]          * RATIO
+  TAB_GAP[1]           = TAB_GAP[1]           * RATIO
+  TITLE_GAP[1]         = TITLE_GAP[1]         * RATIO
+  ICON_SIZE[1]         = ICON_SIZE[1]         * RATIO
+  ICON_GAP[1]          = ICON_GAP[1]          * RATIO
+  INDEX_SIZE[1]        = INDEX_SIZE[1]        * RATIO
+  TITLE_BUTTON_SIZE[1] = TITLE_BUTTON_SIZE[1] * RATIO
+  BUTTON_GAP[1]        = BUTTON_GAP[1]        * RATIO
+  CONTAINER_PAD[1]     = CONTAINER_PAD[1]     * RATIO
+
+
+function createIndex(tag, w, h, index)
+  local template = [[
+    <%s width="%s" height="%s" stretch="1">
+      <label width="%s" height="%s">
+        <text complex_mode="1" align="c" vert_align="c" font="%s">
+          %s
+        </text>
+      </label>
+    </%s>
+  ]]
+
+  return template:format(tag, w, h, w, h, INDEX_FONT, index, tag)
+end
+
+
+function createContainer(tag, x, y, w, h, content)
+  local template = [[
+    <%s x="%s" y="%s" width="%s" height="%s" stretch="1">
+      %s
+    </%s>
+  ]]
+
+  return template:format(tag, x, y, w, h, content, tag)
+end
+
+
+function createButton(tag, x, y, w, h, label, font)
+  local template = [[
+    <%s x="%s" y="%s" width="%s" height="%s" stretch="1">
+      <label width="%s" height="%s">
+        <text complex_mode="1" align="c" vert_align="c" font="%s">
+          %s
+        </text>
+      </label>
+    </%s>
+  ]]
+
+  return template:format(tag, x, y, w, h, w, h, font, label, tag),
+    {y, x + w, y + h, x}
+end
+
+
+function createTitlebar(x, y, w, h, ttl)
+  local icon = [[
+    <icon x="%s" y="%s" width="%s" height="%s" stretch="1" />
+  ]]
+
+  local title = [[
+    <title x="%s" width="%s" height="%s">
+      <text complex_mode="1" align="l" vert_align="c" font="%s">
+        %s
+      </text>
+    </title>
+  ]]
+
+  local shell = [[
+    <titlebar x="%s" y="%s" width="%s" height="%s" stretch="1">
+      %s
+    </titlebar>
+  ]]
+
+  icon  = icon:format(TITLE_GAP[1], (TITLE_HEIGHT - ICON_SIZE[2]) / 2, ICON_SIZE[1], ICON_SIZE[2])
+  title = title:format(ICON_SIZE[1] + TITLE_GAP[1] + ICON_GAP[1], w - (x + ICON_SIZE[2] + ICON_GAP[1]), h, TITLE_FONT, ttl)
+  shell = shell:format(x, y, w, h, table.concat({icon, title}, "\n"))
+
+  return shell, {y, x + w, y + h, x}
+end
+
+
+function createTabs(x, y)
+  local tabs = {}
+  local w, h
+
+  for index = 0, 10 do
+    local isGlobalTab = index == 0
+
+    local tag = isGlobalTab
+      and "tab_global"
+      or  "tab" ..index
+
+    local label = isGlobalTab
+      and "G"
+      or  index
+
+    local tx = (TAB_SIZE[1] + TAB_GAP[1]) * index
+    local ty = 0
+
+    local tab, trbl = createButton(tag, tx, ty, TAB_SIZE[1], TAB_SIZE[2], label, BUTTON_FONT)
+    tabs[#tabs + 1] = tab
+
+    w = trbl[2]
+    h = trbl[3] + TAB_GAP[2]
+  end
+
+  return createContainer("tabs", x, y, w, h, table.concat(tabs, "\n")),
+    {y, x + w, y + h, x}
+end
+
+
+function createButtons(x, y)
+  local buttons = {}
+  local w = 0
+  local h = 0
+
+  for icol, column in ipairs(UI_LAYOUT) do
+    local cx = (BUTTON_SIZE[1] + COLUMN_GAP[1]) * (icol - 1)
+    local ch = 0
+
+    for irow, item in ipairs(column) do
+      local action, label, options = unpack(item)
+
+      if options and options.separator then
+        ch = ch + SEPARATOR_GAP
+      end
+
+      local button, trbl = createButton(action, x + cx, y + ch, BUTTON_SIZE[1], BUTTON_SIZE[2], label, BUTTON_FONT)
+      buttons[#buttons + 1] = button
+
+      ch = ch + BUTTON_SIZE[2] + BUTTON_GAP[2]
+      w  = trbl[2]
+    end
+
+    h = math.max(h, ch)
+  end
+
+  for i, item in ipairs(TITLE_BUTTONS) do
+    local action, label, options = unpack(item)
+    buttons[#buttons + 1] = createButton(
+      action,
+      x + w + CONTAINER_PAD[1] - TITLE_BUTTON_GAP[1] - COLUMN_GAP[1] - TITLE_BUTTON_SIZE[1] * i - BUTTON_GAP[1] * (i - 1),
+      y - TITLE_HEIGHT + TITLE_BUTTON_GAP[2] - TITLE_GAP[2] - COLUMN_GAP[2] + (TITLE_HEIGHT - TITLE_BUTTON_SIZE[2]) / 2,
+      TITLE_BUTTON_SIZE[1],
+      TITLE_BUTTON_SIZE[2],
+      label,
+      TITLE_BUTTON_FONT
+    )
+  end
+
+  return table.concat(buttons, "\n"),
+    {y, x + w, y + h, x}
+end
+
+
+function onReadHUDXML(name, XML)
+  if name ~= "ui\\idiots_ui.xml" then
+    return
+  end
+
+  local x, y, w, h = 0, 0, 0, 0
+
+  local tabs, trblTabs = createTabs(0, 0)
+  h = trblTabs[3]
+
+  local titlebar, trblTitlebar = createTitlebar(COLUMN_GAP[1], h + COLUMN_GAP[2], 480, TITLE_HEIGHT, "All Companions")
+  h = trblTitlebar[3]
+
+  local buttons, trblButtons = createButtons(CONTAINER_PAD[1] + COLUMN_GAP[1], h + COLUMN_GAP[2])
+
+  w = trblButtons[2] + CONTAINER_PAD[1]
+  h = trblButtons[3] + CONTAINER_PAD[2] + COLUMN_GAP[2]
+
+  x = (1024 - w) / 2
+  y = (768 - h) - CONTAINER_GAP
+
+  local indexes = {}
+  for index = 1, 10 do
+    indexes[index] = createIndex("index_" ..index, INDEX_SIZE[1], INDEX_SIZE[2], index)
+  end
+
+  indexes = table.concat(indexes, "\n")
+
+  local container, trblContainer = createContainer("container", x, y, w, h,
+    table.concat({tabs, titlebar, buttons, indexes}, "")
+  )
+
+  XML:insertFromXMLString(container)
+end
+
+
+function on_xml_read()
+  RegisterScriptCallback("on_xml_read", onReadHUDXML)
+end

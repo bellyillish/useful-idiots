@@ -1,0 +1,447 @@
+local U = z_idiots_utils
+
+
+-- default global companion state for new saves
+DEFAULT_STATE = {
+  FOLLOW          = true,
+  WAIT            = false,
+  PATROL          = false,
+  RELAX           = false,
+  ATTACK          = true,
+  DEFEND          = false,
+  IGNORE          = false,
+  STAND           = true,
+  SNEAK           = false,
+  PRONE           = false,
+  BUNCH           = true,
+  SPREAD          = false,
+  LINE            = false,
+  COMBAT_DEFAULT  = true,
+  COMBAT_COVER    = false,
+  COMBAT_MONOLITH = false,
+  COMBAT_CAMPER   = false,
+  FAR             = false,
+  HURRY           = false,
+  COVER           = false,
+  LOOT_ITEMS      = false,
+  LOOT_CORPSES    = false,
+  LOOT_ARTIFACTS  = false,
+  HELP_WOUNDED    = false,
+}
+
+-- active working global companion state
+GLOBAL_STATE = dup_table(DEFAULT_STATE)
+
+
+local __add_to_actor_squad = axr_companions.add_to_actor_squad
+
+
+-- public: set a companion's state value
+-- changes any other dependent state's value automatically
+function setState(npc, state, enabled)
+  -- behaviors
+  if state == "FOLLOW" or state == "WAIT" or state == "PATROL" or state == "RELAX" then
+    if enabled then
+      __setstate(npc, "FOLLOW", state == "FOLLOW")
+      __setstate(npc, "WAIT",   state == "WAIT")
+      __setstate(npc, "PATROL", state == "PATROL")
+      __setstate(npc, "RELAX",  state == "RELAX")
+    end return
+  end
+
+  -- formations
+  if state == "BUNCH" or state == "SPREAD" or state == "LINE" then
+    if enabled then
+      __setstate(npc, "BUNCH",  state == "BUNCH")
+      __setstate(npc, "SPREAD", state == "SPREAD")
+      __setstate(npc, "LINE",   state == "LINE")
+    end return
+  end
+
+  -- combat readiness
+  if state == "ATTACK" or state == "DEFEND" or state == "IGNORE" then
+    if enabled then
+      __setstate(npc, "ATTACK", state == "ATTACK")
+      __setstate(npc, "DEFEND", state == "DEFEND")
+      __setstate(npc, "IGNORE", state == "IGNORE")
+    end return
+  end
+
+  -- combat tactics
+  if state == "COMBAT_DEFAULT" or state == "COMBAT_COVER" or state == "COMBAT_MONOLITH" or state == "COMBAT_CAMPER" then
+    if enabled then
+      __setstate(npc, "COMBAT_DEFAULT",  state == "COMBAT_DEFAULT")
+      __setstate(npc, "COMBAT_COVER",    state == "COMBAT_COVER")
+      __setstate(npc, "COMBAT_MONOLITH", state == "COMBAT_MONOLITH")
+      __setstate(npc, "COMBAT_CAMPER",   state == "COMBAT_CAMPER")
+    end return
+  end
+
+  -- movement state
+  if state == "STAND" or state == "SNEAK" or state == "PRONE" then
+    if enabled then
+      __setstate(npc, "STAND", state == "STAND")
+      __setstate(npc, "SNEAK",  state == "SNEAK")
+      __setstate(npc, "PRONE",  state == "PRONE")
+    end return
+  end
+
+  -- independent states
+  __setstate(npc, state, enabled)
+end
+
+
+-- public: set multiple state values for a companion
+function setAllStates(npc, states)
+  for state, enabled in pairs(states) do
+    setState(npc, state, enabled)
+  end
+end
+
+
+-- public: get a companion's state value
+function getState(npc, state)
+  if not (state and DEFAULT_STATE[state] ~= nil) then
+    return abort("ERROR: empty or invalid state provided")
+  end
+
+  if npc == nil then
+    return GLOBAL_STATE[state]
+  end
+
+  return __getbeh(npc, state)
+end
+
+
+-- public: get all state values for a companion
+function getAllStates(npc)
+  if npc == nil then
+    return GLOBAL_STATE
+  end
+
+  local values = {}
+
+  for state in pairs(DEFAULT_STATE) do
+    values[state] = __getbeh(npc, state)
+  end
+
+  return values
+end
+
+
+-- public: check if a string is a valid state name
+function isStateful(state)
+  return DEFAULT_STATE[state] ~= nil
+end
+
+
+-- public: derive the active formation from state
+function getActiveFormation()
+  return GLOBAL_STATE.SPREAD and "SPREAD"
+    or   GLOBAL_STATE.BUNCH  and "BUNCH"
+    or   GLOBAL_STATE.LINE   and "LINE"
+end
+
+
+-- private: set/unset a companion's info_portion
+function __giveinfo(npc, info, enabled)
+  if not info then
+    return abort("ERROR: info_portion not provided")
+  end
+
+  if type(npc) == "number" then
+    npc = U.getCompanion(npc)
+  end
+  if not U.isCompanion(npc) then
+    return abort("ERROR: invalid companion provided")
+  end
+
+  if enabled then
+    npc:give_info_portion(info)
+  else
+    npc:disable_info_portion(info)
+  end
+end
+
+
+-- private: set/unset a companion's var
+function __savevar(npc, var, enabled)
+  if not var then
+    return abort("ERROR: var not provided")
+  end
+
+  if type(npc) == "number" then
+    npc = U.getCompanion(npc)
+  end
+  if not U.isCompanion(npc) then
+    return abort("ERROR: invalid companion provided")
+  end
+
+  save_var(npc, var, enabled and npc:level_vertex_id() or nil)
+end
+
+
+-- private: call either __giveinfo or __savevar
+-- trigger callback for individual companion state changes
+function __setbeh(npc, state, enabled)
+  if not state then
+    return abort("ERROR: state not provided")
+  end
+
+  if type(npc) == "number" then
+    npc = U.getCompanion(npc)
+  end
+  if not U.isCompanion(npc) then
+    return abort("ERROR: invalid companion provided")
+  end
+
+  local wasEnabled = __getbeh(npc, state)
+  if enabled == wasEnabled then
+    return
+  end
+
+  -- behaviors
+  if state == "WAIT" then
+    __giveinfo(npc, "npcx_beh_wait", enabled)
+
+  elseif state == "PATROL" then
+    __giveinfo(npc, "npcx_beh_patrol_mode", enabled)
+
+  elseif state == "RELAX" then
+    __giveinfo(npc, "npcx_beh_substate_relax", enabled)
+
+  -- formations
+  elseif state == "SPREAD" then
+    __giveinfo(npc, "npcx_beh_formation_spread", enabled)
+
+  elseif state == "LINE" then
+    __giveinfo(npc, "npcx_beh_formation_line", enabled)
+
+  -- movement states
+  elseif state == "SNEAK" then
+    __giveinfo(npc, "npcx_beh_substate_stealth", enabled)
+
+  elseif state == "PRONE" then
+    __giveinfo(npc, "npcx_beh_substate_prone", enabled)
+
+  -- combat readiness
+  elseif state == "DEFEND" then
+    __giveinfo(npc, "npcx_beh_ignore_actor_enemies", enabled)
+
+  elseif state == "IGNORE" then
+    __giveinfo(npc, "npcx_beh_ignore_combat", enabled)
+
+  -- combat tactics
+  elseif state == "COMBAT_COVER" then
+    __savevar(npc, "fight_from_point", enabled)
+
+  elseif state == "COMBAT_MONOLITH" then
+    __giveinfo(npc, "npcx_beh_combat_tactics_monolith", enabled)
+
+  elseif state == "COMBAT_CAMPER" then
+    __giveinfo(npc, "npcx_beh_combat_tactics_camper", enabled)
+
+  -- toggles
+  elseif state == "FAR" then
+    __giveinfo(npc, "npcx_beh_distance_far", enabled)
+
+  elseif state == "HURRY" then
+    __giveinfo(npc, "npcx_beh_hurry", enabled)
+
+  elseif state == "COVER" then
+    __giveinfo(npc, "npcx_beh_use_cover", enabled)
+
+  -- jobs
+  elseif state == "LOOT_ITEMS" then
+    __giveinfo(npc, "npcx_beh_gather_items", enabled)
+
+  elseif state == "LOOT_CORPSES" then
+    __giveinfo(npc, "npcx_beh_loot_corpses", enabled)
+
+  elseif state == "LOOT_ARTIFACTS" then
+    __giveinfo(npc, "npcx_beh_gather_artifacts", enabled)
+
+  elseif state == "HELP_WOUNDED" then
+    __giveinfo(npc, "npcx_beh_help_wounded", enabled)
+  end
+
+  SendScriptCallback("on_idiot_set_state", npc:id(), state, enabled)
+end
+
+
+-- private: set either companion or global state
+-- trigger callback for global state changes
+function __setstate(npc, state, enabled)
+  if not state then
+    return abort("ERROR: state not provided")
+  end
+
+  if npc then
+    return __setbeh(npc, state, enabled)
+  end
+
+  if enabled ~= GLOBAL_STATE[state] then
+    GLOBAL_STATE[state] = enabled
+    SendScriptCallback("on_idiot_set_state", nil, state, enabled)
+  end
+end
+
+
+-- private: retrieve state from either __giveinfo or __savevar
+function __getbeh(npc, state)
+  if not state then
+    return abort("ERROR: state not provided")
+  end
+
+  if type(npc) == "number" then
+    npc = U.getCompanion(npc)
+  end
+  if not U.isCompanion(npc) then
+    return abort("ERROR: invalid companion provided")
+  end
+
+  -- behaviors
+  if state == "FOLLOW" then
+    return not __getbeh(npc, "WAIT") and not __getbeh(npc, "PATROL") and not __getbeh(npc, "RELAX")
+
+  elseif state == "WAIT" then
+    return npc:has_info("npcx_beh_wait")
+
+  elseif state == "PATROL" then
+    return npc:has_info("npcx_beh_patrol_mode")
+
+  elseif state == "RELAX" then
+    return npc:has_info("npcx_beh_substate_relax")
+
+  -- formations
+  elseif state == "BUNCH" then
+    return not __getbeh(npc, "SPREAD") and not __getbeh(npc, "LINE")
+
+  elseif state == "SPREAD" then
+    return npc:has_info("npcx_beh_formation_spread")
+
+  elseif state == "LINE" then
+    return npc:has_info("npcx_beh_formation_line")
+
+  -- combat readiness
+  elseif state == "ATTACK" then
+    return not __getbeh(npc, "DEFEND") and not __getbeh(npc, "IGNORE")
+
+  elseif state == "DEFEND" then
+    return npc:has_info("npcx_beh_ignore_actor_enemies")
+
+  elseif state == "IGNORE" then
+    return npc:has_info("npcx_beh_ignore_combat")
+
+  -- movement states
+  elseif state == "STAND" then
+    return not __getbeh(npc, "SNEAK") and not __getbeh(npc, "PRONE")
+
+  elseif state == "SNEAK" then
+    return npc:has_info("npcx_beh_substate_stealth")
+
+  elseif state == "PRONE" then
+    return npc:has_info("npcx_beh_substate_prone")
+
+  -- combat tactics
+  elseif state == "COMBAT_DEFAULT" then
+    return not __getbeh(npc, "COMBAT_COVER") and not __getbeh(npc, "COMBAT_MONOLITH") and not __getbeh(npc, "COMBAT_CAMPER")
+
+  elseif state == "COMBAT_COVER" then
+    return load_var(npc, "fight_from_point") ~= nil
+
+  elseif state == "COMBAT_MONOLITH" then
+    return npc:has_info("npcx_beh_combat_tactics_monolith")
+
+  elseif state == "COMBAT_CAMPER" then
+    return npc:has_info("npcx_beh_combat_tactics_camper")
+
+  -- toggles
+  elseif state == "FAR" then
+    return npc:has_info("npcx_beh_distance_far")
+
+  elseif state == "HURRY" then
+    return npc:has_info("npcx_beh_hurry")
+
+  elseif state == "COVER" then
+    return npc:has_info("npcx_beh_use_cover")
+
+  -- jobs
+  elseif state == "LOOT_ITEMS" then
+    return npc:has_info("npcx_beh_gather_items")
+
+  elseif state == "LOOT_CORPSES" then
+    return npc:has_info("npcx_beh_loot_corpses")
+
+  elseif state == "LOOT_ARTIFACTS" then
+    return npc:has_info("npcx_beh_gather_artifacts")
+
+  elseif state == "HELP_WOUNDED" then
+    return npc:has_info("npcx_beh_help_wounded")
+  end
+end
+
+
+-- store companion states in game save
+function onSaveState(mdata)
+  mdata.IDIOTS_STATES = {
+    global     = GLOBAL_STATE,
+    companions = {}
+  }
+
+  for _, npc in ipairs(U.getCompanions()) do
+    mdata.IDIOTS_STATES.companions[npc:id()] = getAllStates(npc)
+  end
+end
+
+
+-- load companion states from game save
+-- "load_state" fires too early/late for this implementation (I forget which)
+function onFirstUpdate()
+  local mdata = alife_storage_manager.get_state()
+
+  if not mdata.IDIOTS_STATES then
+    return
+  end
+
+  GLOBAL_STATE = mdata.IDIOTS_STATES.global
+
+  for id, states in pairs(mdata.IDIOTS_STATES.companions) do
+    setAllStates(id, states)
+  end
+end
+
+
+function on_game_start()
+  RegisterScriptCallback("save_state", onSaveState)
+  RegisterScriptCallback("actor_on_first_update", onFirstUpdate)
+end
+
+
+AddScriptCallback("on_idiot_set_state")
+
+
+-- patch: sync all new companions with global state
+function axr_companions.add_to_actor_squad(npc)
+  __add_to_actor_squad(npc)
+  if U.isCompanion(npc) then
+    setAllStates(npc, GLOBAL_STATE)
+  end
+end
+
+
+-- patch: prevent companions in certain states from teleporting to new levels
+function axr_companions.companion_squad_can_teleport(squad)
+  local sim = alife()
+  local id  = squad:commander_id()
+  local se  = sim:object(id)
+
+  if se and se_load_var(se.id, se:name(), "companion_cannot_teleport") then
+    return false
+  end
+  if getState(id, "WAIT") or getState(id, "PATROL") or getState(id, "RELAX") then
+    return false
+  end
+
+  return true
+end
