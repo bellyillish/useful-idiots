@@ -255,21 +255,55 @@ end
 -- temporarily removing their companion flags to bypass a buggy if statement
 -- in the original function
 function xr_combat_ignore.is_enemy(npc, enemy, no_memory)
-  local npcIsCompanion   = npc:has_info("npcx_is_companion")
-  local enemyIsCompanion = enemy:has_info("npcx_is_companion")
+  local isNpcCompanion       = npc:has_info("npcx_is_companion")
+  local isEnemyCompanion     = enemy:has_info("npcx_is_companion")
+  local isNpcSneaking        = npc:has_info("npcx_beh_substate_stealth")
+  local isEnemySneaking      = enemy:has_info("npcx_beh_substate_stealth")
+  local isNpcFightingActor   = xr_combat_ignore.fighting_with_actor_npcs[npc:id()]
+  local isEnemyFightingActor = xr_combat_ignore.fighting_with_actor_npcs[enemy:id()]
+  local isWithin30meters     = enemy:position():distance_to_sqr(npc:position()) < 900
 
-  npc:disable_info_portion("npcx_is_companion")
-  enemy:disable_info_portion("npcx_is_companion")
+  -- to be extra safe, only apply fix if all of these conditions are not met
+  if
+    not    (isNpcCompanion or isEnemyCompanion)
+    or not (isNpcSneaking or isEnemySneaking)
+    or     (isNpcFightingActor or isEnemyFightingActor)
+    or not isWithin30meters
+  then
+    return __is_enemy(npc, enemy, no_memory)
+  end
+
+  local function disableCompanionInfo()
+    npc:disable_info_portion("npcx_is_companion")
+    enemy:disable_info_portion("npcx_is_companion")
+  end
+
+  local function restoreCompanionInfo()
+    if isNpcCompanion then
+      npc:give_info_portion("npcx_is_companion")
+    end
+    if isEnemyCompanion then
+      enemy:give_info_portion("npcx_is_companion")
+    end
+  end
+
+  -- disable after on_enemy_eval is complete (this should be the last callback)
+  RegisterScriptCallback("on_enemy_eval", disableCompanionInfo)
+
+  -- restore as soon as possible (before is_enemy() calls this funciton)
+  local ignoreByOverrides = xr_combat_ignore.ignore_enemy_by_overrides
+
+  function xr_combat_ignore.ignore_enemy_by_overrides(...)
+    restoreCompanionInfo()
+    xr_combat_ignore.ignore_enemy_by_overrides = ignoreByOverrides
+    return ignoreByOverrides(...)
+  end
 
   local isEnemy = __is_enemy(npc, enemy, no_memory)
 
-  if npcIsCompanion then
-    npc:give_info_portion("npcx_is_companion")
-  end
-
-  if enemyIsCompanion then
-    enemy:give_info_portion("npcx_is_companion")
-  end
+  -- restore again in case is_enemy() returned early
+  restoreCompanionInfo()
+  UnregisterScriptCallback("on_enemy_eval", disableCompanionInfo)
 
   return isEnemy
 end
@@ -295,3 +329,104 @@ function axr_fight_from_cover.action_fight_from_cover:try_go_cover(npc, enemyPos
 
   return vid
 end
+
+
+--[[ TEMP
+-- 0 = released / 1 = pressed \ 2 = held
+axr_keybind.bind("kCUSTOM3",function(p)
+  move_to_point(p)
+end)
+
+function on_key_release(key)
+  local bind = dik_to_bind(key)
+  if (bind == key_bindings.kCUSTOM18) then
+    start_CW()
+
+  elseif (bind == key_bindings.kCUSTOM1) then
+    cycle_companions_combat_mode()
+
+  elseif (bind == key_bindings.kCUSTOM2) then
+    cycle_companions_move_mode()
+
+  elseif (bind == key_bindings.kCUSTOM3) then
+    --move_to_point(p)
+
+  elseif (bind == key_bindings.kCUSTOM4) then
+    cycle_companions_stealth_mode()
+
+  elseif (bind == key_bindings.kCUSTOM5) then
+    cycle_companions_loot_mode()
+
+  end
+end
+
+local _draw_part
+
+function move_to_point(pressType)
+  local lvid
+
+  if pressType == 1 then
+    actor_menu.set_msg(1, game.translate_string("st_hold_then_release"), 8)
+    _draw_part = particles_object("_samples_particles_\\flash_light")
+
+  elseif pressType == 2 then
+    if _draw_part then
+      local r = level.get_target_dist and level.get_target_dist()
+
+      if (r) then
+        lvid = level.vertex_in_direction(
+          level.vertex_id(device().cam_pos),
+          device().cam_dir,
+          r
+        )
+
+        local pos = level.vertex_position(lvid)
+
+        _draw_part:play_at_pos(
+          vector():set(pos.x, pos.y - 0.5, pos.z)
+        )
+      end
+    end
+
+  else
+    if _draw_part then
+      _draw_part:stop()
+      _draw_part = nil
+    end
+
+    local r = level.get_target_dist and level.get_target_dist()
+
+    if (r) then
+      lvid = level.vertex_in_direction(
+        level.vertex_id(device().cam_pos),
+        device().cam_dir,
+        r
+      )
+
+      if (lvid) then
+        actor_menu.set_msg(1, game.translate_string("st_move_to_point"), 8)
+
+        for id, squad in pairs(companion_squads) do
+          if (squad and squad.commander_id) then
+            for k in squad:squad_members() do
+              st = db.storage[k.id]
+              local member = st and st.object
+
+              if (member and member:alive()) then
+                set_companion_to_follow_state(member)
+                save_var(member, "fight_from_point", lvid)
+              end
+
+              if (k.id == squad:commander_id() and not axr_task_manager.hostages_by_id[k.id]) then
+                if (st and st.beh) then
+                  st.beh.rally_lvid = lvid
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end
+--]]
