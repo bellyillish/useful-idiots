@@ -232,7 +232,7 @@ function action_combat_monolith:search()
     local vid
 
     if st.enemyPos then
-      vid = U.bestValidLVID(npc, st.enemyPos)
+      vid = U.closestValidLVID(npc, st.enemyPos)
     end
 
     if not U.isValidLVID(npc, vid) then

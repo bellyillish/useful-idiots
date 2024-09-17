@@ -95,12 +95,6 @@ function _G.vdir(v1, v2)
 end
 
 
-function vertexBetween(v1, v2, mag)
-  mag = mag or v1:distance_to(v2)
-  return level.vertex_in_direction(lvid(v1), vdir(v1, v2), mag)
-end
-
-
 function vectorOffset(vector, dir, mag)
   return vec(vector):add(
     vec(dir):normalize():mul(mag)
@@ -258,7 +252,54 @@ function clearDestination(npc)
 end
 
 
-function bestLVID(npc, pos, validator)
+function vertexBetween(v1, v2, mag)
+  mag = mag or v1:distance_to(v2)
+  return level.vertex_in_direction(lvid(v1), vdir(v1, v2), mag)
+end
+
+
+function insideLVID(npc, pos, validator)
+  if not (npc and pos and type(validator) == "function") then
+    return INVALID_LVID
+  end
+
+  local apos = db.actor:position()
+  local dist = math.floor(apos:distance_to(pos))
+
+  while dist >= 0 do
+    local vid = vertexBetween(apos, pos, dist)
+    if validator(npc, vid) then
+      return vid
+    end
+
+    dist = dist - 1
+  end
+
+  local vid = vertexBetween(npc:position(), pos)
+  if validator(npc, vid) then
+    return vid
+  end
+
+  return npc:level_vertex_id()
+end
+
+
+function insideValidLVID(npc, pos)
+  return insideLVID(npc, pos, isValidLVID)
+end
+
+
+function insideUnclaimedLVID(npc, pos)
+  return insideLVID(npc, pos, isUnclaimedLVID)
+end
+
+
+function insideFreeLVID(npc, pos)
+  return insideLVID(npc, pos, isFreeLVID)
+end
+
+
+function closestLVID(npc, pos, validator)
   if not (npc and pos and type(validator) == "function") then
     return INVALID_LVID
   end
@@ -289,18 +330,18 @@ function bestLVID(npc, pos, validator)
 end
 
 
-function bestValidLVID(npc, pos)
-  return bestLVID(npc, pos, isValidLVID)
+function closestValidLVID(npc, pos)
+  return closestLVID(npc, pos, isValidLVID)
 end
 
 
-function bestUnclaimedLVID(npc, pos)
-  return bestLVID(npc, pos, isUnclaimedLVID)
+function closestUnclaimedLVID(npc, pos)
+  return closestLVID(npc, pos, isUnclaimedLVID)
 end
 
 
-function bestFreeLVID(npc, pos)
-  return bestLVID(npc, pos, isFreeLVID)
+function closestFreeLVID(npc, pos)
+  return closestLVID(npc, pos, isFreeLVID)
 end
 
 
@@ -483,7 +524,7 @@ function findSafeCover(npc, ops)
   local cover = npc:safe_cover(ops.position, ops.radius, ops.minDist)
 
   if cover then
-    return bestFreeLVID(npc, cover:position())
+    return closestFreeLVID(npc, cover:position())
   end
 
   return INVALID_LVID
@@ -494,7 +535,7 @@ function findBestCover(npc, enemyPos)
   local cover = npc:find_best_cover(enemyPos or db.actor:position())
 
   if cover then
-    return bestFreeLVID(npc, cover:position())
+    return closestFreeLVID(npc, cover:position())
   end
 
   return INVALID_LVID
@@ -519,7 +560,7 @@ function findCover(npc, ops)
     local cover = npc:best_cover(pos, ops.enemyPos, radius, 1, 128)
 
     if cover then
-      return bestFreeLVID(npc, cover:position())
+      return closestFreeLVID(npc, cover:position())
     end
 
     if radius >= ops.maxRadius then

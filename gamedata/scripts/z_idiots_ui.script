@@ -236,7 +236,17 @@ function CompanionManager:UpdateButtons()
     and #U.getAllWaypoints(self.ID)
     or  0
 
+  local distance
+
+  if self.ID then
+    local npc = U.getCompanion(self.ID)
+    if npc then
+      distance = npc:position():distance_to(db.actor:position())
+    end
+  end
+
   self.buttons.INVENTORY:Show(self.ID)
+  self.buttons.INVENTORY:Enable(distance and distance <= 8)
   self.buttons.ADD_WAYPOINT:Show(self.ID)
   self.buttons.CLEAR_WAYPOINTS:Show(self.ID)
   self.buttons.PATROL:Show(self.ID)
@@ -404,15 +414,23 @@ function onKeyRelease(key)
 end
 
 
-local onUpdate = U.throttle(function()
+local onUpdateIndexes = U.throttle(function()
   if GUI and GUI:IsShown() then
     GUI:UpdateIndexes()
   end
 end, 25)
 
 
+local onUpdateButtons = U.throttle(function()
+  if GUI and GUI:IsShown() then
+    GUI:UpdateButtons()
+  end
+end, 250)
+
+
 function on_game_start()
-  RegisterScriptCallback("actor_on_update", onUpdate)
+  RegisterScriptCallback("actor_on_update", onUpdateIndexes)
+  RegisterScriptCallback("actor_on_update", onUpdateButtons)
   RegisterScriptCallback("on_key_release", onKeyRelease)
   RegisterScriptCallback("on_idiot_set_state", onStateChange)
 end

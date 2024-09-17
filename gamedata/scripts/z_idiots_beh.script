@@ -57,7 +57,7 @@ function U.getGroupFormation(npc, ops)
   local pos = U.vectorOffset(offsetPos, dir, radius)
 
   return {
-    vid       = U.bestUnclaimedLVID(npc, pos),
+    vid       = U.insideUnclaimedLVID(npc, pos),
     offsetPos = offsetPos,
     avgPos    = avgPos,
     avgDir    = avgDir,
@@ -90,7 +90,7 @@ function U.getLineFormation(npc, ops)
   local pos  = U.vectorOffset(offsetPos, dir, dist)
 
   return {
-    vid       = U.bestUnclaimedLVID(npc, pos),
+    vid       = U.insideUnclaimedLVID(npc, pos),
     offsetPos = offsetPos,
     avgPos    = avgPos,
     avgDir    = avgDir,
@@ -479,14 +479,16 @@ function U.setTargetFollowActor(npc, st)
     st.savedTarget.actorPos
 
   local actorMoved = not actorPos
-    or db.actor:position():distance_to(actorPos) >= 4
+    or db.actor:position():distance_to(actorPos) > 4
 
   if form ~= st.lastForm or keepDist ~= st.lastDist then
     vid = nil
   end
 
+  local oldVid
   if (not useCover or reached) and actorMoved then
-    vid = nil
+    oldVid = vid
+    vid    = nil
   end
 
   if not vid then
@@ -495,18 +497,18 @@ function U.setTargetFollowActor(npc, st)
     if form == "SPREAD" then
       formation = U.getGroupFormation(npc, {
         offset   = keepDist - 12,
-        angle    = 24,
+        angle    = 20,
         radius   = 12,
-        flatness = 4,
+        flatness = 8,
       })
 
     elseif form == "BUNCH" then
       formation = U.getGroupFormation(npc, {
-        offset     = keepDist - 1,
-        angle      = 24,
-        radius     = 4,
-        flatness   = 0,
-        varyRadius = 3,
+        offset     = keepDist + 2,
+        angle      = 45,
+        radius     = 3,
+        flatness   = -3,
+        varyRadius = 2,
       })
 
     elseif form == "LINE" then
@@ -533,6 +535,14 @@ function U.setTargetFollowActor(npc, st)
         enemyPos = enemyPos,
         radius   = 4,
       })
+    end
+
+    if oldVid then
+      local oldDist = db.actor:position():distance_to(lvpos(oldVid))
+      local newDist = db.actor:position():distance_to(lvpos(vid))
+      if newDist > oldDist then
+        vid = nil
+      end
     end
 
     if not U.isValidLVID(npc, vid) then

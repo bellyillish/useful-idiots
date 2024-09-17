@@ -24,10 +24,10 @@ delay_anim  = {=is_wounded} wounded, {+npcx_beh_substate_relax} sit_ass, {=actor
 
 ; distances
 keep_dist         = {+npcx_beh_distance_far} far, near
-near_desired_dist = {+npcx_beh_patrol_mode} 1, 6
-far_desired_dist  = {+npcx_beh_patrol_mode} 1, 12
-walk_dist         = {+npcx_beh_hurry} 1, {+npcx_beh_substate_relax} 24, {+npcx_beh_patrol_mode} 64, 4
-jog_dist          = {+npcx_beh_hurry} 2, {+npcx_beh_substate_relax} 48, {+npcx_beh_patrol_mode} 128, 8
+near_desired_dist = {+npcx_beh_patrol_mode} 1, 4
+far_desired_dist  = {+npcx_beh_patrol_mode} 1, 10
+walk_dist         = {+npcx_beh_substate_relax} 24, {+npcx_beh_patrol_mode} 64,  {+npcx_beh_hurry} 1, 12
+jog_dist          = {+npcx_beh_substate_relax} 48, {+npcx_beh_patrol_mode} 128, {+npcx_beh_hurry} 2, 20
 
 ; gathering/looting/etc.
 combat_ignore_cond            = {=check_enemy_name(actor)} true, {+npcx_beh_ignore_combat} true, {+npcx_beh_ignore_actor_enemies !is_enemy_fighting_actor} true, false
