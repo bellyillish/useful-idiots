@@ -1,231 +1,444 @@
---
--- NOTE: Clean this up later. It's a mess.
---
-
-TITLE_BUTTONS = {
-  {"RESET", "Reset"},
-  {"INVENTORY", "Inventory"},
-  {"CLEAR_WAYPOINTS", "Clear Waypoints"},
-  {"ADD_WAYPOINT", "Add Waypoint"},
-}
-
-UI_LAYOUT = {
-  {
-    {"FOLLOW", "Follow"},
-    {"WAIT", "Wait"},
-    {"RELAX", "Relax"},
-    {"PATROL", "Patrol"},
-  },
-  {
-    {"STAND", "Stand"},
-    {"SNEAK", "Sneak"},
-    {"PRONE", "Prone"},
-  },
-  {
-    {"COVER", "Use Cover"},
-    {"FAR", "Stay Far"},
-    {"HURRY", "Hurry Up"},
-  },
-  {
-    {"COMBAT_DEFAULT", "Default Combat"},
-    {"COMBAT_COVER", "Fight in Cover"},
-    {"COMBAT_MONOLITH", "Monolith Combat"},
-    {"COMBAT_CAMPER", "Camper Combat"},
-  },
-  {
-    {"ATTACK", "Attack"},
-    {"DEFEND", "Defend Only"},
-    {"IGNORE", "Ignore Combat"},
-  },
-  {
-    {"LOOT_ITEMS", "Gather Items"},
-    {"LOOT_ARTIFACTS", "And Artifacts"},
-    {"LOOT_CORPSES", "Loot Corpses"},
-    {"HELP_WOUNDED", "Help Wounded"},
-  },
-  {
-    {"BUNCH", "Bunch Formation"},
-    {"SPREAD", "Spread Formation"},
-    {"LINE", "Line Formation"},
-  },
-}
-
-BUTTON_FONT       = "arial_14"
-TITLE_FONT        = "arial_14"
-INDEX_FONT        = "small"
-TAB_FONT          = "arial_14"
-TITLE_BUTTON_FONT = "small"
-CONTAINER_GAP     = 12
-CONTAINER_PAD     = {12, 24}
-INDEX_SIZE        = {15, 15}
-TAB_SIZE          = {30, 30}
-TAB_GAP           = {0, 0}
-TITLE_HEIGHT      = 48
-TITLE_GAP         = {8, 0}
-TITLE_BUTTON_SIZE = {84, 20}
-TITLE_BUTTON_GAP  = {12, -4}
-ICON_SIZE         = {17, 17}
-ICON_GAP          = {12, 8}
-COLUMN_GAP        = {3, 0}
-BUTTON_SIZE       = {112, 26}
-BUTTON_GAP        = {0, 2}
-SEPARATOR_GAP     = 12
+local DXML  = require "gamedata.scripts.illish.dxml"
+local TABLE = require "gamedata.scripts.illish.table"
 
 
-RATIO = 1024/768 * device().height / device().width
-  COLUMN_GAP[1]        = COLUMN_GAP[1]        * RATIO
-  BUTTON_SIZE[1]       = BUTTON_SIZE[1]       * RATIO
-  TAB_SIZE[1]          = TAB_SIZE[1]          * RATIO
-  TAB_GAP[1]           = TAB_GAP[1]           * RATIO
-  TITLE_GAP[1]         = TITLE_GAP[1]         * RATIO
-  ICON_SIZE[1]         = ICON_SIZE[1]         * RATIO
-  ICON_GAP[1]          = ICON_GAP[1]          * RATIO
-  INDEX_SIZE[1]        = INDEX_SIZE[1]        * RATIO
-  TITLE_BUTTON_SIZE[1] = TITLE_BUTTON_SIZE[1] * RATIO
-  BUTTON_GAP[1]        = BUTTON_GAP[1]        * RATIO
-  CONTAINER_PAD[1]     = CONTAINER_PAD[1]     * RATIO
+function parseIndexers(XML, el)
+  local attrs = XML:getAttrWithInherit(el, {"font", "tabCount"})
+  local size, tabCount = attrs.size  or 0, attrs.tabCount or 0
 
+  for i = 0, attrs.tabCount do
+    local indexer = XML:convertElement({
+      name = "indexer_".. i,
+      attr = {
+        font    = attrs.font,
+        width   = size,
+        height  = size,
+        stretch = 1,
+        label   = i,
+      }
+    })
 
-function createIndex(tag, w, h, index)
-  local template = [[
-    <%s width="%s" height="%s" stretch="1">
-      <label width="%s" height="%s">
-        <text complex_mode="1" align="c" vert_align="c" font="%s">
-          %s
-        </text>
-      </label>
-    </%s>
-  ]]
-
-  return template:format(tag, w, h, w, h, INDEX_FONT, index, tag)
-end
-
-
-function createContainer(tag, x, y, w, h, content)
-  local template = [[
-    <%s x="%s" y="%s" width="%s" height="%s" stretch="1">
-      %s
-    </%s>
-  ]]
-
-  return template:format(tag, x, y, w, h, content, tag)
-end
-
-
-function createButton(tag, x, y, w, h, label, font)
-  local template = [[
-    <%s x="%s" y="%s" width="%s" height="%s" stretch="1">
-      <label width="%s" height="%s">
-        <text complex_mode="1" align="c" vert_align="c" font="%s">
-          %s
-        </text>
-      </label>
-    </%s>
-  ]]
-
-  return template:format(tag, x, y, w, h, w, h, font, label, tag),
-    {y, x + w, y + h, x}
-end
-
-
-function createTitlebar(x, y, w, h, ttl)
-  local icon = [[
-    <icon x="%s" y="%s" width="%s" height="%s" stretch="1" />
-  ]]
-
-  local title = [[
-    <title x="%s" width="%s" height="%s">
-      <text complex_mode="1" align="l" vert_align="c" font="%s">
-        %s
-      </text>
-    </title>
-  ]]
-
-  local shell = [[
-    <titlebar x="%s" y="%s" width="%s" height="%s" stretch="1">
-      %s
-    </titlebar>
-  ]]
-
-  icon  = icon:format(TITLE_GAP[1], (TITLE_HEIGHT - ICON_SIZE[2]) / 2, ICON_SIZE[1], ICON_SIZE[2])
-  title = title:format(ICON_SIZE[1] + TITLE_GAP[1] + ICON_GAP[1], w - (x + ICON_SIZE[2] + ICON_GAP[1]), h, TITLE_FONT, ttl)
-  shell = shell:format(x, y, w, h, table.concat({icon, title}, "\n"))
-
-  return shell, {y, x + w, y + h, x}
-end
-
-
-function createTabs(x, y)
-  local tabs = {}
-  local w, h
-
-  for index = 0, 10 do
-    local isGlobalTab = index == 0
-
-    local tag = isGlobalTab
-      and "tab_global"
-      or  "tab" ..index
-
-    local label = isGlobalTab
-      and "G"
-      or  index
-
-    local tx = (TAB_SIZE[1] + TAB_GAP[1]) * index
-    local ty = 0
-
-    local tab, trbl = createButton(tag, tx, ty, TAB_SIZE[1], TAB_SIZE[2], label, BUTTON_FONT)
-    tabs[#tabs + 1] = tab
-
-    w = trbl[2]
-    h = trbl[3] + TAB_GAP[2]
+    XML:insertElement(indexer, el)
+    addLabel(XML, indexer)
   end
-
-  return createContainer("tabs", x, y, w, h, table.concat(tabs, "\n")),
-    {y, x + w, y + h, x}
 end
 
 
-function createButtons(x, y)
-  local buttons = {}
-  local w = 0
-  local h = 0
+function parseTitlebarIcon(XML, el, pos)
+  local icon     = XML:queryOne("icon", el)
+  local attrs    = XML:getAttrWithInherit(icon, {"xgap"})
+  local tbheight = XML:getElementAttr(el).height or 0
 
-  for icol, column in ipairs(UI_LAYOUT) do
-    local cx = (BUTTON_SIZE[1] + COLUMN_GAP[1]) * (icol - 1)
-    local ch = 0
+  pos = pos or {0, 0}
 
-    for irow, item in ipairs(column) do
-      local action, label, options = unpack(item)
+  local width, height, xgap =
+    attrs.width  or 0,
+    attrs.height or 0,
+    attrs.xgap     or 0
 
-      if options and options.separator then
-        ch = ch + SEPARATOR_GAP
-      end
+  XML:setElementAttr(icon, {
+    x       = pos[1],
+    y       = pos[2] + (tbheight - height) / 2,
+    stretch = 1,
+  })
 
-      local button, trbl = createButton(action, x + cx, y + ch, BUTTON_SIZE[1], BUTTON_SIZE[2], label, BUTTON_FONT)
-      buttons[#buttons + 1] = button
+  pos[1] = pos[1] + width + xgap
+end
 
-      ch = ch + BUTTON_SIZE[2] + BUTTON_GAP[2]
-      w  = trbl[2]
+
+function parseTitlebarTitle(XML, el, pos)
+  local title    = XML:queryOne("title", el)
+  local attrs    = XML:getAttrWithInherit(title, {"font"})
+  local tbheight = XML:getElementAttr(el).height or 0
+
+  pos = pos or {0, 0}
+
+  XML:setElementAttr(title, {
+    x       = pos[1],
+    y       = pos[2],
+    height  = tbheight,
+    stretch = 1,
+  })
+
+  local text = XML:convertElement({
+    name = "text",
+    kids = {{el = "#".. (attrs.label or "")}},
+    attr = {
+      font         = attrs.font,
+      align        = "l",
+      vert_align   = "c",
+      complex_mode = 1,
+    },
+  })
+
+  XML:insertElement(text, title)
+  pos[1] = pos[1] + (attrs.width or 0)
+end
+
+
+function parseTitlebarActions(XML, el, pos)
+  local actions  = XML:queryOne("actions", el)
+  local tbheight = XML:getElementAttr(el).height or 0
+
+  pos = pos or {0, 0}
+
+  parseActions(XML, actions, {pos[1], 0})
+  local attrs = XML:getElementAttr(actions)
+
+  XML:setElementAttr(actions, {
+    x = pos[1] - (attrs.width or 0),
+    y = pos[2] + (tbheight - (attrs.height or 0)) / 2
+  })
+end
+
+
+function parseTitlebar(XML, el, pos)
+  local attrs = XML:getElementAttr(el)
+
+  local xpad, ypad, width, height =
+    attrs.xpad     or 0,
+    attrs.ypad     or 0,
+    attrs.width  or 0,
+    attrs.height or 0
+
+  local tbpos = {xpad, ypad}
+
+  parseTitlebarIcon(XML, el, tbpos)
+  parseTitlebarTitle(XML, el, tbpos)
+
+  tbpos[1] = attrs.width - xpad
+  parseTitlebarActions(XML, el, tbpos)
+
+  XML:setElementAttr(el, {
+    x       = pos and pos[1],
+    y       = pos and pos[2],
+    height  = attrs.height + ypad * 2,
+    stretch = 1,
+  })
+end
+
+
+function parseTabs(XML, el, pos)
+  local attrs = XML:getAttrWithInherit(el, {"font", "tabCount"})
+
+  local xpad, ypad, xgap, wtab, htab, tabCount =
+    attrs.xpad    or 0,
+    attrs.ypad    or 0,
+    attrs.xgap    or 0,
+    attrs.wtab    or 0,
+    attrs.htab    or 0,
+    attrs.tabCount or 0
+
+  local tpos = {xpad, ypad}
+
+  for i = 0, attrs.tabCount do
+    local label, name = i, "tab_".. i
+
+    if i == 0 then
+      label = attrs.label
+      name  = "tab_all"
+    else
+      tpos[1] = tpos[1] + xgap
     end
 
-    h = math.max(h, ch)
+    local tab = XML:convertElement({
+      name = name,
+      attr = {
+        label   = label,
+        font    = attrs.font,
+        x       = tpos[1],
+        y       = tpos[2],
+        width   = attrs.wtab,
+        height  = attrs.htab,
+        stretch = 1,
+      }
+    })
+
+    addLabel(XML, tab)
+
+    XML:insertElement(tab, el)
+    tpos[1] = tpos[1] + wtab
   end
 
-  for i, item in ipairs(TITLE_BUTTONS) do
-    local action, label, options = unpack(item)
-    buttons[#buttons + 1] = createButton(
-      action,
-      x + w + CONTAINER_PAD[1] - TITLE_BUTTON_GAP[1] - COLUMN_GAP[1] - TITLE_BUTTON_SIZE[1] * i - BUTTON_GAP[1] * (i - 1),
-      y - TITLE_HEIGHT + TITLE_BUTTON_GAP[2] - TITLE_GAP[2] - COLUMN_GAP[2] + (TITLE_HEIGHT - TITLE_BUTTON_SIZE[2]) / 2,
-      TITLE_BUTTON_SIZE[1],
-      TITLE_BUTTON_SIZE[2],
-      label,
-      TITLE_BUTTON_FONT
-    )
+  tpos[2] = tpos[2] + htab
+
+  XML:setElementAttr(el, {
+    x       = pos and pos[1],
+    y       = pos and pos[2],
+    width   = tpos[1] + xpad,
+    height  = tpos[2] + ypad,
+    stretch = 1,
+  })
+end
+
+
+function addToggle(XML, el, pos)
+  local attrs = XML:getAttrWithInherit(el, {"toggleSize", "togglePad"})
+  local name  = XML:getElementName(el)
+
+  pos = pos or {0, 0}
+
+  local toggleSize, togglePad, height =
+    attrs.toggleSize or 0,
+    attrs.togglePad  or 0,
+    attrs.height     or 0
+
+  local texture = XML:convertElement({
+    name = "texture",
+    kids = {{el = "#idiots_ui_dark"}}
+  })
+
+  pos[1] = pos[1] + togglePad
+
+  local toggle = XML:convertElement({
+    name = "toggle",
+    kids = {texture},
+    attr = {
+      x       = pos[1],
+      y       = pos[2] + (height - toggleSize) / 2,
+      width   = toggleSize,
+      height  = toggleSize,
+      stretch = 1,
+    },
+  })
+
+  pos[1] = pos[1] + toggleSize + togglePad
+  XML:insertElement(toggle, el)
+end
+
+
+function addIcon(XML, el, pos)
+  local attrs = XML:getAttrWithInherit(el, {"icon", "compact", "iconSize", "iconPad"})
+  local name  = XML:getElementName(el)
+
+  pos = pos or {0, 0}
+
+  local iconSize, iconPad, width, height =
+    attrs.iconSize or 0,
+    attrs.iconPad  or 0,
+    attrs.width    or 0,
+    attrs.height   or 0
+
+  local hint = attrs.hint == "1"
+    and "st_idiots_".. name:lower()
+    or  attrs.hint
+
+  local icon = attrs.icon == "1"
+    and "icon_idiots_".. name:lower()
+    or  attrs.icon
+
+  local texture = XML:convertElement({
+    name = "texture",
+    kids = {{el = "#".. icon}}
+  })
+
+  pos[1] = attrs.compact
+    and pos[1] + (width - pos[1] - iconSize) / 2
+    or  pos[1] + iconSize
+
+  local icon = XML:convertElement({
+    name = "icon",
+    kids = {texture},
+    attr = {
+      hint    = hint,
+      x       = pos[1],
+      y       = pos[2] + (height - iconSize) / 2,
+      width   = iconSize,
+      height  = iconSize,
+      stretch = 1,
+    },
+  })
+
+  pos[1] = attrs.compact
+    and width
+    or  pos[1] + iconSize + iconPad
+
+  XML:insertElement(icon, el)
+end
+
+
+function addLabel(XML, el, pos)
+  local attrs = XML:getAttrWithInherit(el, {"label", "toggle", "icon", "font"})
+  local name  = XML:getElementName(el)
+
+  pos = pos or {0, 0}
+  local width, height = attrs.width or 0, attrs.height or 0
+
+  local str = attrs.label
+    or "st_idiots_".. name:lower()
+
+  local align = (attrs.toggle or attrs.icon)
+    and "l" or "c"
+
+  local text = XML:convertElement({
+    name = "text",
+    kids = {{el = "#".. str}},
+    attr = {
+      font         = attrs.font,
+      align        = align,
+      vert_align   = "c",
+      complex_mode = 1
+    },
+  })
+
+  local label = XML:convertElement({
+    name = "label",
+    kids = {text},
+    attr = {
+      x       = pos[1],
+      y       = pos[2],
+      width   = width - pos[1],
+      height  = height,
+      stretch = 1,
+    },
+  })
+
+  pos[1] = width
+  XML:insertElement(label, el)
+end
+
+
+function parseAction(XML, el, pos)
+  local attrs = XML:getAttrWithInherit(el, {"waction", "haction", "xgap", "ygap", "toggle", "icon", "compact"})
+
+  local waction, haction, xgap, ygap, width, height =
+    attrs.waction     or 0,
+    attrs.haction     or 0,
+    attrs.xgap     or 0,
+    attrs.ygap     or 0,
+    attrs.width  or attrs.waction or 0,
+    attrs.height or attrs.haction or 0
+
+  XML:setElementAttr(el, {
+    stretch = 1,
+    width   = width,
+    height  = height,
+    x       = pos and pos[1],
+    y       = pos and pos[2],
+  })
+
+  pos[1] = pos[1] + width
+  local cpos = {0, 0}
+
+  if attrs.toggle then
+    addToggle(XML, el, cpos)
+  end
+  if attrs.icon then
+    addIcon(XML, el, cpos)
+  end
+  if not attrs.compact then
+    addLabel(XML, el, cpos)
+  end
+end
+
+
+function parseActions(XML, el, pos)
+  local cols  = XML:query("col", el)
+  local attrs = XML:getElementAttr(el)
+
+  local xpad, ypad  = attrs.xpad or 0, attrs.ypad or 0
+  local rpos    = {xpad, ypad}
+  local mw, mh  = 0, 0
+
+  for index, col in ipairs(cols) do
+    rpos[2], mw = ypad, 0
+
+    local attrs = XML:getAttrWithInherit(col, {"waction", "haction", "xgap", "ygap"})
+    local xgap    = attrs.xgap or 0
+
+    if index > 1 then
+      rpos[1] = rpos[1] + xgap
+    end
+
+    XML:iterateElements(col, function(child, index)
+      local attrs = XML:getAttrWithInherit(child, {"waction", "haction", "xgap", "ygap"})
+
+      local waction, haction, xgap, ygap =
+        attrs.width  or attrs.waction or 0,
+        attrs.height or attrs.haction or 0,
+        attrs.xgap or 0,
+        attrs.ygap or 0
+
+      if index > 1 then
+        rpos[2] = rpos[2] + ygap
+      end
+
+      local cpos = {rpos[1], rpos[2]}
+
+      if XML:getElementName(child) == "row" then
+        XML:setElementAttr(child, {
+          waction = (waction - xgap * (#child.kids - 1)) / #child.kids
+        })
+
+        XML:iterateElements(child, function(action, index)
+          if index > 1 then
+            cpos[1] = cpos[1] + xgap
+          end
+
+          parseAction(XML, action, cpos)
+          XML:insertElement(action, el)
+        end)
+      else
+        parseAction(XML, child, cpos)
+        XML:insertElement(child, el)
+      end
+
+      rpos[2] = rpos[2] + haction
+      mw = math.max(mw, waction)
+      mh = math.max(mh, rpos[2])
+    end)
+
+    XML:removeElement(col)
+    rpos[1] = rpos[1] + mw
   end
 
-  return table.concat(buttons, "\n"),
-    {y, x + w, y + h, x}
+  XML:setElementAttr(el, {
+    x       = pos and pos[1],
+    y       = pos and pos[2],
+    width   = rpos[1] + xpad,
+    height  = mh + ypad,
+    stretch = 1
+  })
+
+  pos[2] = pos[2] + mh + ypad
+
+
+  local names = XML:iterateElements(el, function(child)
+    return XML:getElementName(child)
+  end)
+
+  XML:setElementAttr(el, {names = table.concat(names, ',')})
+end
+
+
+function parseContainer(XML, el)
+  local bounds = XML:getChildBounds(el)
+
+  XML:setElementAttr(el, {
+    width   = bounds.w,
+    height  = bounds.h,
+    stretch = 1,
+  })
+
+  local attrs = XML:getElementAttr(el)
+  local x, y = 0, 0
+
+  if attrs.xalign == "center" then
+    x = (1024 - attrs.width) / 2
+  elseif attrs.xalign == "right" then
+    x = 1024 - attrs.width
+  end
+
+  if attrs.yalign == "center" then
+    y = (768 - attrs.height) / 2
+  elseif attrs.yalign == "bottom" then
+    y = 768 - attrs.height
+  end
+
+  XML:setElementAttr(el, {
+    x = x + (attrs.xoffset or 0),
+    y = y + (attrs.yoffset or 0)
+  })
 end
 
 
@@ -234,37 +447,45 @@ function onReadHUDXML(name, XML)
     return
   end
 
-  local x, y, w, h = 0, 0, 0, 0
+  DXML.extendXMLObject(XML)
 
-  local tabs, trblTabs = createTabs(0, 0)
-  h = trblTabs[3]
+  SendScriptCallback("idiots_on_read_ui_xml", XML)
 
-  local titlebar, trblTitlebar = createTitlebar(COLUMN_GAP[1], h + COLUMN_GAP[2], 480, TITLE_HEIGHT, "All Companions")
-  h = trblTitlebar[3]
+  local pos = {0, 0}
 
-  local buttons, trblButtons = createButtons(CONTAINER_PAD[1] + COLUMN_GAP[1], h + COLUMN_GAP[2])
+  local indexers = XML:queryOne("container > indexers")
+  parseIndexers(XML, indexers)
 
-  w = trblButtons[2] + CONTAINER_PAD[1]
-  h = trblButtons[3] + CONTAINER_PAD[2] + COLUMN_GAP[2]
+  local actions = XML:queryOne("container > actions")
+  parseActions(XML, actions, {0, 0})
 
-  x = (1024 - w) / 2
-  y = (768 - h) - CONTAINER_GAP
+  local width = XML:getElementAttr(actions).width
 
-  local indexes = {}
-  for index = 1, 10 do
-    indexes[index] = createIndex("index_" ..index, INDEX_SIZE[1], INDEX_SIZE[2], index)
-  end
+  local tabs = XML:queryOne("container > tabs")
+  XML:setElementAttr(tabs, {width = width})
+  parseTabs(XML, tabs, pos)
 
-  indexes = table.concat(indexes, "\n")
+  pos[2] = pos[2] + XML:getElementAttr(tabs).height
 
-  local container, trblContainer = createContainer("container", x, y, w, h,
-    table.concat({tabs, titlebar, buttons, indexes}, "")
-  )
+  local titlebar = XML:queryOne("container > titlebar")
+  XML:setElementAttr(titlebar, {width = width})
+  parseTitlebar(XML, titlebar, pos)
 
-  XML:insertFromXMLString(container)
+  local tbpy  = XML:getElementAttr(titlebar).ypad or 0
+  local actpy = XML:getElementAttr(actions).ypad  or 0
+  pos[2] = pos[2] + XML:getElementAttr(titlebar).height - math.min(tbpy, actpy)
+
+  XML:setElementAttr(actions, {y = pos[2]})
+
+  local container = XML:queryOne("container")
+  XML:fixAndScaleAll(container)
+  parseContainer(XML, container)
 end
 
 
 function on_xml_read()
   RegisterScriptCallback("on_xml_read", onReadHUDXML)
 end
+
+
+AddScriptCallback("idiots_on_read_ui_xml")
