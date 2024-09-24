@@ -1,3 +1,65 @@
-<!-- see modxml_idiots_ui.script -->
+<w>
+  <container xalign="center" yalign="bottom" xoffset="0" yoffset="-12" font="arial_14" tabCount="10">
+    <indexers size="15" font="small" />
+    <tabs xpad="0" ypad="0" wtab="30" htab="30" xgap="0" label="st_idiots_tab_all"/>
 
-<w />
+    <titlebar height="20" xpad="16" ypad="16" xgap="8" font="arial_14">
+      <icon width="17" height="17" />
+      <title width="240" label="st_idiots_title_all" />
+
+      <actions waction="88" haction="20" xgap="2">
+        <col><ADD_WAYPOINT /></col>
+        <col><CLEAR_WAYPOINTS /></col>
+        <col><INVENTORY /></col>
+        <col><RESET /></col>
+      </actions>
+    </titlebar>
+
+    <actions iconSize="16" iconPad="8" toggleSize="12" togglePad="8" xpad="16" ypad="16" waction="112" haction="26" xgap="8" ygap="4">
+      <col>
+        <FOLLOW />
+        <WAIT />
+        <RELAX />
+        <PATROL />
+      </col>
+
+      <col>
+        <STAND />
+        <SNEAK />
+        <PRONE />
+      </col>
+
+      <col toggle="1">
+        <COVER />
+        <FAR />
+        <HURRY />
+      </col>
+
+      <col>
+        <COMBAT_DEFAULT />
+        <COMBAT_COVER />
+        <COMBAT_MONOLITH />
+        <COMBAT_CAMPER />
+      </col>
+
+      <col>
+        <ATTACK />
+        <DEFEND />
+        <IGNORE />
+      </col>
+
+      <col toggle="1">
+        <LOOT_ITEMS />
+        <LOOT_ARTIFACTS />
+        <LOOT_CORPSES />
+        <HELP_WOUNDED />
+      </col>
+
+      <col>
+        <BUNCH />
+        <SPREAD />
+        <LINE />
+      </col>
+    </actions>
+  </container>
+</w>

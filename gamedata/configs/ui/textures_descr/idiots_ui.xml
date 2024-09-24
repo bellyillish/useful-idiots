@@ -20,7 +20,9 @@
 		<texture id="idiots_ui_stateless_t" x="64" y="0"  width="64" height="64" />
 		<texture id="idiots_ui_stateless_h" x="64" y="0"  width="64" height="64" />
 
-		<texture id="idiots_ui_circle_dark"  x="128"  y="0" width="32" height="32" />
-		<texture id="idiots_ui_circle_light" x="160" y="0"  width="32" height="32" />
+		<texture id="idiots_ui_circle_dark"  x="128" y="0" width="32" height="32" />
+		<texture id="idiots_ui_circle_light" x="160" y="0" width="32" height="32" />
+
+		<texture id="icon_idiots_sample" x="192" y="0" width="32" height="32" />
 	</file>
 </w>

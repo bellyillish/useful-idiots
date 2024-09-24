@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="windows-1251"?>
+
+<string_table>
+  <string id="st_idiots_tab_all">
+    <text>All</text>
+  </string>
+
+  <string id="st_idiots_title_all">
+    <text>All Companions</text>
+  </string>
+
+  <string id="st_idiots_reset_all">
+    <text>Sync All</text>
+  </string>
+
+  <string id="st_idiots_reset">
+    <text>Re-Sync</text>
+  </string>
+
+  <string id="st_idiots_inventory">
+    <text>Inventory</text>
+  </string>
+
+  <string id="st_idiots_clear_waypoints">
+    <text>Clear Waypoints</text>
+  </string>
+
+  <string id="st_idiots_add_waypoint">
+    <text>Add Waypoint</text>
+  </string>
+
+  <!-- buttons -->
+  <string id="st_idiots_follow">
+    <text>Follow</text>
+  </string>
+
+  <string id="st_idiots_wait">
+    <text>Wait</text>
+  </string>
+
+  <string id="st_idiots_relax">
+    <text>Relax</text>
+  </string>
+
+  <string id="st_idiots_patrol">
+    <text>Patrol</text>
+  </string>
+
+  <string id="st_idiots_stand">
+    <text>Stand</text>
+  </string>
+
+  <string id="st_idiots_sneak">
+    <text>Sneak</text>
+  </string>
+
+  <string id="st_idiots_prone">
+    <text>Prone</text>
+  </string>
+
+  <string id="st_idiots_cover">
+    <text>Use Cover</text>
+  </string>
+
+  <string id="st_idiots_far">
+    <text>Stay Far</text>
+  </string>
+
+  <string id="st_idiots_hurry">
+    <text>Hurry Up</text>
+  </string>
+
+  <string id="st_idiots_combat_default">
+    <text>Default Combat</text>
+  </string>
+
+  <string id="st_idiots_combat_cover">
+    <text>Fight in Cover</text>
+  </string>
+
+  <string id="st_idiots_combat_monolith">
+    <text>Monolith Combat</text>
+  </string>
+
+  <string id="st_idiots_combat_camper">
+    <text>Camper Combat</text>
+  </string>
+
+  <string id="st_idiots_attack">
+    <text>Attack</text>
+  </string>
+
+  <string id="st_idiots_defend">
+    <text>Defend Only</text>
+  </string>
+
+  <string id="st_idiots_ignore">
+    <text>Ignore Combat</text>
+  </string>
+
+  <string id="st_idiots_loot_items">
+    <text>Gather Items</text>
+  </string>
+
+  <string id="st_idiots_loot_artifacts">
+    <text>And Artifacts</text>
+  </string>
+
+  <string id="st_idiots_loot_corpses">
+    <text>Loot Corpses</text>
+  </string>
+
+  <string id="st_idiots_help_wounded">
+    <text>Help Wounded</text>
+  </string>
+
+  <string id="st_idiots_bunch">
+    <text>Bunch Formation</text>
+  </string>
+
+  <string id="st_idiots_spread">
+    <text>Spread Formation</text>
+  </string>
+
+  <string id="st_idiots_line">
+    <text>Line Formation</text>
+  </string>
+</string_table>
