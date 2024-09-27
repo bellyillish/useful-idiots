@@ -296,9 +296,9 @@ function U.getBehLookState(npc, st)
     st.lookFn = U.throttle(U.randomRotate, 5000, 30000)
   end
 
-  local fov = C.getState(npc, "RELAX")
+  local fov = C.getState(npc, "movement", "relax")
     and 0
-    or  C.getState(npc, "PRONE")
+    or  C.getState(npc, "stance", "prone")
     and 30
     or  60
 
@@ -383,9 +383,9 @@ function U.clearWaypoints(npc)
     end
   end
 
-  for _, action in ipairs({"FOLLOW", "WAIT", "RELAX"}) do
+  for _, action in ipairs({"follow", "wait", "relax"}) do
     if C.GLOBAL_STATE[action] then
-      C.setState(npc, action, true)
+      C.setState(npc, "movement", action, true)
       break
     end
   end
@@ -405,13 +405,18 @@ function U.setTargetLookAround(npc, st)
     st.savedTarget.direction,
     st.savedTarget.reached
 
+  if st.moveToPoint then
+    vid = nil
+  end
+
   if not vid then
-    vid = npc:level_vertex_id()
+    vid = st.moveToPoint and lvid(st.moveToPoint) or npc:level_vertex_id()
     pos = lvpos(vid)
     dir = vdir(pos, db.actor:position())
   end
 
   reached = vid == npc:level_vertex_id()
+  st.moveToPoint = nil
 
   U.setDestination(npc, vid)
   U.claimLVID(npc, vid)
@@ -435,9 +440,14 @@ function U.setTargetCoverSpot(npc, st)
     st.savedTarget.direction,
     st.savedTarget.reached
 
+  if st.moveToPoint then
+    vid = nil
+  end
+
   if not vid then
     vid = U.findCover(npc, {
-      distance = 8
+      position = st.moveToPoint,
+      distance = st.moveToPoint and nil or 8,
     })
 
     if not U.isValidLVID(npc, vid) then
@@ -448,10 +458,11 @@ function U.setTargetCoverSpot(npc, st)
     dir = vdir(pos, db.actor:position())
   end
 
+  reached = npc:level_vertex_id() == vid
+  st.moveToPoint = nil
+
   U.setDestination(npc, vid)
   U.claimLVID(npc, vid)
-
-  reached = npc:level_vertex_id() == vid
 
   st.desired_target = {
     look_dir        = reached and dir or nil,
@@ -467,7 +478,7 @@ end
 
 function U.setTargetFollowActor(npc, st)
   local target   = st.target
-  local form     = C.getActiveFormation()
+  local form     = C.getActiveState(nil, "formation")
   local keepDist = st.desired_distance
   local useCover = target:match("cover")
 
@@ -494,7 +505,7 @@ function U.setTargetFollowActor(npc, st)
   if not vid then
     local formation
 
-    if form == "SPREAD" then
+    if form == "spread" then
       formation = U.getGroupFormation(npc, {
         offset   = keepDist - 12,
         angle    = 20,
@@ -502,7 +513,7 @@ function U.setTargetFollowActor(npc, st)
         flatness = 8,
       })
 
-    elseif form == "BUNCH" then
+    elseif form == "bunch" then
       formation = U.getGroupFormation(npc, {
         offset     = keepDist + 2,
         angle      = 45,
@@ -511,7 +522,7 @@ function U.setTargetFollowActor(npc, st)
         varyRadius = 2,
       })
 
-    elseif form == "LINE" then
+    elseif form == "line" then
       formation = U.getLineFormation(npc, {
         offset  = keepDist - 2,
         spacing = 2,

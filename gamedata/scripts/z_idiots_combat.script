@@ -13,7 +13,6 @@ ACTION_MONOLITH     = xr_actions_id.combat_monolith_base
 
 
 local __combat_evaluate = xr_combat.evaluator_check_combat.evaluate
-local __try_go_cover    = axr_fight_from_cover.action_fight_from_cover.try_go_cover
 local __is_enemy        = xr_combat_ignore.is_enemy
 
 
@@ -125,9 +124,9 @@ function U.getCombatMoveState(npc, st)
   local cover = st.coverFn(npc, st.enemyPos)
   local keys  = {"stand", "idle", "hold"}
 
-  if C.getState(npc, "PRONE") then
+  if C.getState(npc, "stance", "prone") then
     keys[1] = "prone"
-  elseif C.getState(npc, "SNEAK") then
+  elseif C.getState(npc, "stance", "sneak") then
     keys[1] = "sneak"
   end
 
@@ -164,7 +163,7 @@ function U.getCombatLookState(npc, st)
     return {look_dir = dir}
   end
 
-  local fov = C.getState(npc, "PRONE")
+  local fov = C.getState(npc, "stance", "prone")
     and 40 or 80
 
   if not st.rotateFn then
@@ -307,126 +306,3 @@ function xr_combat_ignore.is_enemy(npc, enemy, no_memory)
 
   return isEnemy
 end
-
-
--- fix: replace try_go_cover() to help nudge companions closer to enemies
--- so they don't just shuffle around in one place far away forever
--- I'll rewrite axr_fight_from_cover later
-function axr_fight_from_cover.action_fight_from_cover:try_go_cover(npc, enemyPos)
-  if not U.isCompanion(npc) then
-    return __try_go_cover(self, npc, enemyPos)
-  end
-
-  local vid = U.findBestCover(npc, enemyPos)
-
-  if not U.isValidLVID(npc, vid) then
-    return
-  end
-
-  self.st.vid = vid
-  U.setDestination(npc, vid)
-  U.claimLVID(npc, vid)
-
-  return vid
-end
-
-
---[[ TEMP
--- 0 = released / 1 = pressed \ 2 = held
-axr_keybind.bind("kCUSTOM3",function(p)
-  move_to_point(p)
-end)
-
-function on_key_release(key)
-  local bind = dik_to_bind(key)
-  if (bind == key_bindings.kCUSTOM18) then
-    start_CW()
-
-  elseif (bind == key_bindings.kCUSTOM1) then
-    cycle_companions_combat_mode()
-
-  elseif (bind == key_bindings.kCUSTOM2) then
-    cycle_companions_move_mode()
-
-  elseif (bind == key_bindings.kCUSTOM3) then
-    --move_to_point(p)
-
-  elseif (bind == key_bindings.kCUSTOM4) then
-    cycle_companions_stealth_mode()
-
-  elseif (bind == key_bindings.kCUSTOM5) then
-    cycle_companions_loot_mode()
-
-  end
-end
-
-local _draw_part
-
-function move_to_point(pressType)
-  local lvid
-
-  if pressType == 1 then
-    actor_menu.set_msg(1, game.translate_string("st_hold_then_release"), 8)
-    _draw_part = particles_object("_samples_particles_\\flash_light")
-
-  elseif pressType == 2 then
-    if _draw_part then
-      local r = level.get_target_dist and level.get_target_dist()
-
-      if (r) then
-        lvid = level.vertex_in_direction(
-          level.vertex_id(device().cam_pos),
-          device().cam_dir,
-          r
-        )
-
-        local pos = level.vertex_position(lvid)
-
-        _draw_part:play_at_pos(
-          vector():set(pos.x, pos.y - 0.5, pos.z)
-        )
-      end
-    end
-
-  else
-    if _draw_part then
-      _draw_part:stop()
-      _draw_part = nil
-    end
-
-    local r = level.get_target_dist and level.get_target_dist()
-
-    if (r) then
-      lvid = level.vertex_in_direction(
-        level.vertex_id(device().cam_pos),
-        device().cam_dir,
-        r
-      )
-
-      if (lvid) then
-        actor_menu.set_msg(1, game.translate_string("st_move_to_point"), 8)
-
-        for id, squad in pairs(companion_squads) do
-          if (squad and squad.commander_id) then
-            for k in squad:squad_members() do
-              st = db.storage[k.id]
-              local member = st and st.object
-
-              if (member and member:alive()) then
-                set_companion_to_follow_state(member)
-                save_var(member, "fight_from_point", lvid)
-              end
-
-              if (k.id == squad:commander_id() and not axr_task_manager.hostages_by_id[k.id]) then
-                if (st and st.beh) then
-                  st.beh.rally_lvid = lvid
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-end
---]]

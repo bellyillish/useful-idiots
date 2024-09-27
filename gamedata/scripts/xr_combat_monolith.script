@@ -1,10 +1,11 @@
+local CONFIG = a_idiots_config
 local WP     = world_property
 local U      = z_idiots_utils
 local Combat = z_idiots_combat
 
 
 -- health range to trigger "EVADE"
-EVADE_HEALTH = {0.4, 0.7}
+EVADE_HEALTH = {0.3, 0.6}
 
 -- distance ranges
 NEAR_RANGE = {18, 22}

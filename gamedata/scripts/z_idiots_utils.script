@@ -405,7 +405,7 @@ function isFollowing(npc)
 
   return npc
     and isCompanion(npc)
-    and (C.getState(npc, "FOLLOW"))
+    and (C.getState(npc, "movement", "follow"))
 end
 
 
@@ -498,6 +498,24 @@ end
 function isReloading(npc)
   local item = npc:active_item()
   return IsWeapon(item) and item:get_ammo_in_magazine() <= 0
+end
+
+
+function setInfoPortion(npc, info, enabled)
+  if type(npc) == "number" then
+    npc = getCompanion(npc)
+  end
+
+  if not npc then
+    return
+  end
+
+  if not enabled then
+    npc:disable_info_portion(info)
+    return
+  end
+
+  npc:give_info_portion(info)
 end
 
 
@@ -620,9 +638,4 @@ end
 
 function xr_conditions.following_actor(actor, npc)
   return isFollowing(npc)
-end
-
-
-function xr_conditions.fight_from_point(actor, npc)
-  return npc and C.getState(npc, "COMBAT_COVER")
 end

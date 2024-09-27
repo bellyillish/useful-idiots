@@ -4,8 +4,6 @@ Overhauls the companion system for Anomaly/GAMMA. It includes a new UI, fixes se
 
 ## UI Replacement for Companion Wheel
 
-**Note:** the current UI was originally meant to be a placeholder. I decided it was good enough to roll with for now, but keep in mind that it was designed to be easy to develop/iterate over, not so much for aesthetics.
-
   - Less intrusive and blocks less of your view compared to the wheel.
   - Shows all useful commands in one place (no more digging through the dialogs or blindly toggling buttons in the wheel).
   - Indicates the current global state and state of all companions (which commands are currently active/selected)
@@ -16,7 +14,7 @@ Overhauls the companion system for Anomaly/GAMMA. It includes a new UI, fixes se
 ---
 #### 1. Follow / Follow in Cover
   - Companions either follow directly, or if "Use Cover" is enabled, they try to remain in cover if possible.
-  - Companions stay at least 6m away from the player, or if "Stay Far" is enabled, at least 12m away.
+  - Companions stay at least 4m away from the player, or if "Stay Far" is enabled, at least 10m away.
   - If "Hurry Up" is enabled, companions will sprint/run to their destination.
   - Companions can follow in one of 3 formations:
     1. "Bunch" - (closest to current behavior)
@@ -49,9 +47,6 @@ Overhauls the companion system for Anomaly/GAMMA. It includes a new UI, fixes se
 ---
 #### 1. Default Combat
 The original, engine-based combat system that companions used before.
-
-#### 2. Fight In Cover
-This existed in the code but was largely unused (at least by companions). Most of the original functionality is retained for now, however I did monkey patch how companions search for cover by trying to nudge them a little closer to the enemy. Before they tended to shuffle around endlessly between the same 2-3 covers far away and not really do anything. I might rewrite this entire scheme later.
 
 #### 3. Monolith Combat
 This existed in the code but was disabled. And for good reason as it was rudimentary and very buggy. I've completely rewritten this scheme but tried to keep the spirit of what the original author intended:

@@ -1,12 +1,13 @@
-local DXML  = require "gamedata.scripts.illish.dxml"
-local TABLE = require "gamedata.scripts.illish.table"
+local CONFIG = a_idiots_config
+local DXML   = require "illish.dxml"
+local TABLE  = require "illish.table"
 
 
-function parseIndexers(XML, el)
+function parseIndexers(XML, el, config)
   local attrs = XML:getAttrWithInherit(el, {"font", "tabCount"})
   local size, tabCount = attrs.size  or 0, attrs.tabCount or 0
 
-  for i = 0, attrs.tabCount do
+  for i = 1, attrs.tabCount do
     local indexer = XML:convertElement({
       name = "indexer_".. i,
       attr = {
@@ -92,7 +93,7 @@ function parseTitlebarActions(XML, el, pos)
 end
 
 
-function parseTitlebar(XML, el, pos)
+function parseTitlebar(XML, el, pos, config)
   local attrs = XML:getElementAttr(el)
 
   local xpad, ypad, width, height =
@@ -118,7 +119,7 @@ function parseTitlebar(XML, el, pos)
 end
 
 
-function parseTabs(XML, el, pos)
+function parseTabs(XML, el, pos, config)
   local attrs = XML:getAttrWithInherit(el, {"font", "tabCount"})
 
   local xpad, ypad, xgap, wtab, htab, tabCount =
@@ -258,14 +259,14 @@ end
 
 
 function addLabel(XML, el, pos)
-  local attrs = XML:getAttrWithInherit(el, {"label", "toggle", "icon", "font"})
+  local attrs = XML:getAttrWithInherit(el, {"label", "toggle", "icon", "font", "group"})
   local name  = XML:getElementName(el)
 
   pos = pos or {0, 0}
   local width, height = attrs.width or 0, attrs.height or 0
 
   local str = attrs.label
-    or "st_idiots_".. name:lower()
+    or "st_idiots_".. (attrs.group and attrs.group .."_" or "").. name:lower()
 
   local align = (attrs.toggle or attrs.icon)
     and "l" or "c"
@@ -299,18 +300,19 @@ end
 
 
 function parseAction(XML, el, pos)
-  local attrs = XML:getAttrWithInherit(el, {"waction", "haction", "xgap", "ygap", "toggle", "icon", "compact"})
+  local attrs = XML:getAttrWithInherit(el, {"waction", "haction", "xgap", "ygap", "toggle", "icon", "compact", "group"})
 
   local waction, haction, xgap, ygap, width, height =
-    attrs.waction     or 0,
-    attrs.haction     or 0,
-    attrs.xgap     or 0,
-    attrs.ygap     or 0,
-    attrs.width  or attrs.waction or 0,
-    attrs.height or attrs.haction or 0
+    attrs.waction or 0,
+    attrs.haction or 0,
+    attrs.xgap    or 0,
+    attrs.ygap    or 0,
+    attrs.width   or attrs.waction or 0,
+    attrs.height  or attrs.haction or 0
 
   XML:setElementAttr(el, {
     stretch = 1,
+    group   = attrs.group,
     width   = width,
     height  = height,
     x       = pos and pos[1],
@@ -332,7 +334,7 @@ function parseAction(XML, el, pos)
 end
 
 
-function parseActions(XML, el, pos)
+function parseActions(XML, el, pos, config)
   local cols  = XML:query("col", el)
   local attrs = XML:getElementAttr(el)
 
@@ -411,7 +413,7 @@ function parseActions(XML, el, pos)
 end
 
 
-function parseContainer(XML, el)
+function parseContainer(XML, el, config)
   local bounds = XML:getChildBounds(el)
 
   XML:setElementAttr(el, {
@@ -442,34 +444,73 @@ function parseContainer(XML, el)
 end
 
 
+function applyOptions(XML, config)
+  if not config.jobs then
+    local jobs = XML:queryOne("col[group=jobs]")
+    if jobs then
+      XML:removeElement(jobs)
+    end
+  end
+
+  if not config.artifacts then
+    local artifacts = XML:queryOne("loot_artifacts")
+    if artifacts then
+      XML:removeElement(artifacts)
+    end
+  end
+
+  local container = XML:queryOne("container")
+  if not container then
+    return
+  end
+
+  local attrs = XML:getElementAttr(container)
+
+  XML:setElementAttr(container, {
+    font    = config.font or attrs.font,
+    xoffset = config.offsetX or attrs.xoffset,
+    yoffset = config.offsetY or attrs.yoffset,
+  })
+end
+
+
 function onReadHUDXML(name, XML)
   if name ~= "ui\\idiots_ui.xml" then
     return
   end
 
-  DXML.extendXMLObject(XML)
+  local config = {
+    jobs       = ui_mcm.get("idiots/options/jobs"),
+    artifacts  = ui_mcm.get("idiots/options/artifacts"),
+    font       = ui_mcm.get("idiots/options/font"),
+    scaleX     = ui_mcm.get("idiots/options/scaleX"),
+    scaleY     = ui_mcm.get("idiots/options/scaleY"),
+    offsetX    = ui_mcm.get("idiots/options/offsetX"),
+    offsetY    = ui_mcm.get("idiots/options/offsetY"),
+  }
 
-  SendScriptCallback("idiots_on_read_ui_xml", XML)
+  DXML.extendXMLObject(XML)
+  applyOptions(XML, config)
 
   local pos = {0, 0}
 
   local indexers = XML:queryOne("container > indexers")
-  parseIndexers(XML, indexers)
+  parseIndexers(XML, indexers, config)
 
   local actions = XML:queryOne("container > actions")
-  parseActions(XML, actions, {0, 0})
+  parseActions(XML, actions, {0, 0}, config)
 
   local width = XML:getElementAttr(actions).width
 
   local tabs = XML:queryOne("container > tabs")
   XML:setElementAttr(tabs, {width = width})
-  parseTabs(XML, tabs, pos)
+  parseTabs(XML, tabs, pos, config)
 
   pos[2] = pos[2] + XML:getElementAttr(tabs).height
 
   local titlebar = XML:queryOne("container > titlebar")
   XML:setElementAttr(titlebar, {width = width})
-  parseTitlebar(XML, titlebar, pos)
+  parseTitlebar(XML, titlebar, pos, config)
 
   local tbpy  = XML:getElementAttr(titlebar).ypad or 0
   local actpy = XML:getElementAttr(actions).ypad  or 0
@@ -478,14 +519,33 @@ function onReadHUDXML(name, XML)
   XML:setElementAttr(actions, {y = pos[2]})
 
   local container = XML:queryOne("container")
-  XML:fixAndScaleAll(container)
-  parseContainer(XML, container)
+  XML:fixAndScaleAll(container, config.scaleX, config.scaleY)
+  parseContainer(XML, container, config)
+end
+
+
+function onReadKeybindingXML(name, XML)
+  if not name:match("^ui\\ui_keybinding") then
+    return
+  end
+
+  DXML.extendXMLObject(XML)
+
+  for i, element in ipairs({
+    XML:queryOne("command[id=kb_companion_combat]"),
+    XML:queryOne("command[id=kb_companion_movement]"),
+    XML:queryOne("command[id=kb_companion_move]"),
+    XML:queryOne("command[id=kb_companion_cover]"),
+    XML:queryOne("command[id=kb_companion_loot]"),
+  }) do
+    if element then
+      XML:removeElement(element)
+    end
+  end
 end
 
 
 function on_xml_read()
   RegisterScriptCallback("on_xml_read", onReadHUDXML)
+  RegisterScriptCallback("on_xml_read", onReadKeybindingXML)
 end
-
-
-AddScriptCallback("idiots_on_read_ui_xml")

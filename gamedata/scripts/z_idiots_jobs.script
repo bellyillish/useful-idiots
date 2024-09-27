@@ -1,6 +1,6 @@
-local WP = world_property
-local U  = z_idiots_utils
-local C  = z_idiots_companions
+local CONFIG = a_idiots_config
+local WP     = world_property
+local U      = z_idiots_utils
 
 
 EVAL_ITEMS  = stalker_ids.property_items
@@ -19,11 +19,14 @@ local __gather_initialize     = xr_gather_items.act_gather_itm.initialize
 local __corpse_finalize       = xr_corpse_detection.action_search_corpse.finalize
 local __gather_finalize       = xr_gather_items.act_gather_itm.finalize
 local __is_assigned_item      = axr_companions.is_assigned_item
+local __gather_find_item      = xr_gather_items.eva_gather_itm.find_valid_item
 
 
 -- patch: enable help_wounded for companions
 function xr_help_wounded.evaluator_wounded_exist:evaluate()
-  if U.isCompanion(self.object) then
+  local jobsEnabled = ui_mcm.get("idiots/options/jobs")
+
+  if jobsEnabled and U.isCompanion(self.object) then
     local st  = self.a
     local npc = self.object
 
@@ -48,7 +51,9 @@ LOOT_SHARING_NPCS = {}
 function axr_beh.add_to_binder(npc, ...)
   __beh_add_to_binder(npc, ...)
 
-  if not U.isCompanion(npc) then
+  local jobsEnabled = ui_mcm.get("idiots/options/jobs")
+
+  if not (U.isCompanion(npc) and jobsEnabled) then
     return
   end
 
@@ -75,6 +80,11 @@ end
 function xr_corpse_detection.add_to_binder(npc, ...)
   __corpse_add_to_binder(npc, ...)
 
+  local npcLooting = ui_mcm.get("idiots/options/npcLooting")
+  if npcLooting then
+    return
+  end
+
   local manager = npc:motivation_action_manager()
 
   if manager and not U.isCompanion(npc) then
@@ -83,9 +93,36 @@ function xr_corpse_detection.add_to_binder(npc, ...)
 end
 
 
+-- patch: disable loot_artifacts for companions
+function xr_gather_items.eva_gather_itm:find_valid_item()
+  if U.isCompanion(self.object) then
+    if not self.st.ARTIFACTS_ORIGINAL then
+      self.st.ARTIFACTS_ORIGINAL = self.st.gather_artefact_items_enabled
+      self.st.ARTIFACTS_DISABLER = {{"false"}}
+    end
+
+    local jobsEnabled      = ui_mcm.get("idiots/options/jobs")
+    local artifactsEnabled = ui_mcm.get("idiots/options/artifacts")
+
+    if not (jobsEnabled and artifactsEnabled) then
+      self.st.gather_artefact_items_enabled = self.st.ARTIFACTS_DISABLER
+    else
+      self.st.gather_artefact_items_enabled = self.st.ARTIFACTS_ORIGINAL
+    end
+  end
+
+  return __gather_find_item(self)
+end
+
+
 -- patch: disable gather_items for non-companion NPCs
 function xr_gather_items.add_to_binder(npc, ...)
   __gather_add_to_binder(npc, ...)
+
+  local npcLooting = ui_mcm.get("idiots/options/npcLooting")
+  if npcLooting then
+    return
+  end
 
   local manager = npc:motivation_action_manager()
 
@@ -156,25 +193,46 @@ end
 
 -- store tracked items in game save
 function onSaveItemState(mdata)
-  mdata.IDIOTS_SHARED_ITEMS = LOOT_SHARED_ITEMS
-  mdata.IDIOTS_SHARING_NPCS = LOOT_SHARING_NPCS
+  local data = mdata[CONFIG.MDATA_KEY]
+
+  data.sharedItems = LOOT_SHARED_ITEMS
+  data.sharingNPCs = LOOT_SHARING_NPCS
 end
 
 
 -- load tracked items from game save
 function onLoadItemState(mdata)
-  if mdata.IDIOTS_SHARED_ITEMS then
-    LOOT_SHARED_ITEMS = mdata.IDIOTS_SHARED_ITEMS
+  local data = mdata[CONFIG.MDATA_KEY]
+
+  if data.sharedItems then
+    LOOT_SHARED_ITEMS = data.sharedItems
   end
-  if mdata.IDIOTS_SHARING_NPCS then
-    LOOT_SHARING_NPCS = mdata.IDIOTS_SHARING_NPCS
+  if data.sharingNPCs then
+    LOOT_SHARING_NPCS = data.sharingNPCs
   end
 end
 
 
+function migrateJobStates(mdata)
+  local data = mdata[CONFIG.MDATA_KEY]
+
+  if mdata.IDIOTS_SHARED_ITEMS then
+    data.sharedItems = mdata.IDIOTS_SHARED_ITEMS
+  end
+
+  if mdata.IDIOTS_SHARING_NPCS then
+    data.sharingNPCs = mdata.IDIOTS_SHARING_NPCS
+  end
+
+  mdata.IDIOTS_SHARED_ITEMS = nil
+  mdata.IDIOTS_SHARING_NPCS = nil
+end
+
+
 function on_game_start()
+  RegisterScriptCallback("idiots_on_version", migrateJobStates)
+  RegisterScriptCallback("idiots_on_init", onLoadItemState)
+  RegisterScriptCallback("save_state", onSaveItemState)
   RegisterScriptCallback("npc_on_item_take", onTakeItem)
   RegisterScriptCallback("server_entity_on_unregister", onEntityUnregister)
-  RegisterScriptCallback("save_state", onSaveItemState)
-  RegisterScriptCallback("load_state", onLoadItemState)
 end

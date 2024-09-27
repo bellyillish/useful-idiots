@@ -1,4 +1,4 @@
-local TABLE = require "gamedata.scripts.illish.table"
+local TABLE = require "illish.table"
 
 
 local function mergeBounds(...)
@@ -79,8 +79,10 @@ function DXML.fixAspectRatio(XML, el)
 end
 
 
-function DXML.scaleElement(XML, el, scale)
-  scale = scale or math.min(1080 / device().height, 1)
+function DXML.scaleElement(XML, el, xscale, yscale)
+  xscale = (xscale or 1) * math.min(1080 / device().height, 1)
+  yscale = (yscale or 1) * math.min(1080 / device().height, 1)
+
   local attrs = XML:getElementAttr(el)
 
   if not (attrs.x or attrs.y or attrs.width or attrs.height) then
@@ -88,23 +90,23 @@ function DXML.scaleElement(XML, el, scale)
   end
 
   XML:setElementAttr(el, {
-    x      = attrs.x      and attrs.x * scale,
-    y      = attrs.y      and attrs.y * scale,
-    width  = attrs.width  and attrs.width  * scale,
-    height = attrs.height and attrs.height * scale,
+    x      = attrs.x      and attrs.x * xscale,
+    y      = attrs.y      and attrs.y * yscale,
+    width  = attrs.width  and attrs.width  * xscale,
+    height = attrs.height and attrs.height * yscale,
   })
 end
 
 
-function DXML.fixAndScaleAll(XML, el, scale)
+function DXML.fixAndScaleAll(XML, el, xscale, yscale)
   local attrs = XML:getElementAttr(el)
 
   DXML.iterateElements(XML, el, function(child)
-    DXML.fixAndScaleAll(XML, child, scale)
+    DXML.fixAndScaleAll(XML, child, xscale, yscale)
   end)
 
   DXML.fixAspectRatio(XML, el)
-  DXML.scaleElement(XML, el, scale)
+  DXML.scaleElement(XML, el, xscale, yscale)
 end
 
 
