@@ -2,127 +2,127 @@
 
 <string_table>
   <string id="st_idiots_tab_all">
-    <text>All</text>
+    <text>Все</text>
   </string>
 
   <string id="st_idiots_title_all">
-    <text>All Companions</text>
+    <text>Все компаньоны</text>
   </string>
 
   <string id="st_idiots_reset_all">
-    <text>Sync All</text>
+    <text>Синхронизировать всех</text>
   </string>
 
   <string id="st_idiots_reset">
-    <text>Re-Sync</text>
+    <text>Повторная синхронизация</text>
   </string>
 
   <string id="st_idiots_inventory">
-    <text>Inventory</text>
+    <text>Инвентарь</text>
   </string>
 
   <string id="st_idiots_clear_waypoints">
-    <text>Clear Waypoints</text>
+    <text>Очистить точки маршрута</text>
   </string>
 
   <string id="st_idiots_add_waypoint">
-    <text>Add Waypoint</text>
+    <text>Добавить точку маршрута</text>
   </string>
 
-  <!-- buttons -->
+  <!-- кнопки -->
   <string id="st_idiots_follow">
-    <text>Follow</text>
+    <text>Следовать</text>
   </string>
 
   <string id="st_idiots_wait">
-    <text>Wait</text>
+    <text>Ждать</text>
   </string>
 
   <string id="st_idiots_relax">
-    <text>Relax</text>
+    <text>Отдыхать</text>
   </string>
 
   <string id="st_idiots_patrol">
-    <text>Patrol</text>
+    <text>Патрулировать</text>
   </string>
 
   <string id="st_idiots_stand">
-    <text>Stand</text>
+    <text>Стоять</text>
   </string>
 
   <string id="st_idiots_sneak">
-    <text>Sneak</text>
+    <text>Красться</text>
   </string>
 
   <string id="st_idiots_prone">
-    <text>Prone</text>
+    <text>Лечь</text>
   </string>
 
   <string id="st_idiots_cover">
-    <text>Use Cover</text>
+    <text>Встать в укрытие</text>
   </string>
 
   <string id="st_idiots_far">
-    <text>Stay Far</text>
+    <text>Держаться на расстоянии</text>
   </string>
 
   <string id="st_idiots_hurry">
-    <text>Hurry Up</text>
+    <text>Быстрый бег</text>
   </string>
 
   <string id="st_idiots_combat_default">
-    <text>Default Combat</text>
+    <text>Обычный бой</text>
   </string>
 
   <string id="st_idiots_combat_cover">
-    <text>Fight in Cover</text>
+    <text>Бой из укрытия</text>
   </string>
 
   <string id="st_idiots_combat_monolith">
-    <text>Monolith Combat</text>
+    <text>Режим "Монолит"</text>
   </string>
 
   <string id="st_idiots_combat_camper">
-    <text>Camper Combat</text>
+    <text>Режим "Снайпер"</text>
   </string>
 
   <string id="st_idiots_attack">
-    <text>Attack</text>
+    <text>Атаковать всех</text>
   </string>
 
   <string id="st_idiots_defend">
-    <text>Defend Only</text>
+    <text>Только ответный огонь</text>
   </string>
 
   <string id="st_idiots_ignore">
-    <text>Ignore Combat</text>
+    <text>Игнорировать бой</text>
   </string>
 
   <string id="st_idiots_loot_items">
-    <text>Gather Items</text>
+    <text>Собирать предметы</text>
   </string>
 
   <string id="st_idiots_loot_artifacts">
-    <text>And Artifacts</text>
+    <text>И артефакты</text>
   </string>
 
   <string id="st_idiots_loot_corpses">
-    <text>Loot Corpses</text>
+    <text>Обыскивать трупы</text>
   </string>
 
   <string id="st_idiots_help_wounded">
-    <text>Help Wounded</text>
+    <text>Помогать раненым</text>
   </string>
 
   <string id="st_idiots_bunch">
-    <text>Bunch Formation</text>
+    <text>Двигаться вместе</text>
   </string>
 
   <string id="st_idiots_spread">
-    <text>Spread Formation</text>
+    <text>Двигаться врассыпную</text>
   </string>
 
   <string id="st_idiots_line">
-    <text>Line Formation</text>
+    <text>Двигаться колонной</text>
   </string>
 </string_table>
