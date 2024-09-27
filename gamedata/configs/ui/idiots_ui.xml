@@ -1,64 +1,72 @@
 <w>
   <container xalign="center" yalign="bottom" xoffset="0" yoffset="-12" font="arial_14" tabCount="10">
     <indexers size="15" font="small" />
-    <tabs xpad="0" ypad="0" wtab="30" htab="30" xgap="0" label="st_idiots_tab_all"/>
 
-    <titlebar height="20" xpad="16" ypad="16" xgap="8" font="arial_14">
+    <tabs xpad="0" ypad="0" wtab="30" htab="30" xgap="0" label="st_idiots_tab_all" />
+
+    <titlebar height="20" xpad="16" ypad="16" xgap="8">
       <icon width="17" height="17" />
       <title width="240" label="st_idiots_title_all" />
 
       <actions waction="88" haction="20" xgap="2">
-        <col><ADD_WAYPOINT /></col>
-        <col><CLEAR_WAYPOINTS /></col>
-        <col><INVENTORY /></col>
-        <col><RESET /></col>
+        <col>
+          <add_waypoint />
+        </col>
+        <col>
+          <clear_waypoints />
+        </col>
+        <col>
+          <inventory />
+        </col>
+        <col>
+          <reset />
+        </col>
       </actions>
     </titlebar>
 
     <actions iconSize="16" iconPad="8" toggleSize="12" togglePad="8" xpad="16" ypad="16" waction="112" haction="26" xgap="8" ygap="4">
-      <col>
-        <FOLLOW />
-        <WAIT />
-        <RELAX />
-        <PATROL />
+      <col group="movement">
+        <follow />
+        <wait />
+        <relax />
+        <patrol />
       </col>
 
-      <col>
-        <STAND />
-        <SNEAK />
-        <PRONE />
+      <col group="stance">
+        <stand />
+        <sneak />
+        <prone />
       </col>
 
-      <col toggle="1">
-        <COVER />
-        <FAR />
-        <HURRY />
+      <col group="distance" toggle="1">
+        <cover />
+        <far />
+        <hurry />
       </col>
 
-      <col>
-        <COMBAT_DEFAULT />
-        <COMBAT_COVER />
-        <COMBAT_MONOLITH />
-        <COMBAT_CAMPER />
+      <col group="combat">
+        <default />
+        <monolith />
+        <camper />
       </col>
 
-      <col>
-        <ATTACK />
-        <DEFEND />
-        <IGNORE />
+      <col group="readiness">
+        <attack />
+        <defend />
+        <ignore />
       </col>
 
-      <col toggle="1">
-        <LOOT_ITEMS />
-        <LOOT_ARTIFACTS />
-        <LOOT_CORPSES />
-        <HELP_WOUNDED />
+      <col group="jobs" toggle="1">
+        <loot_items />
+        <loot_artifacts />
+        <loot_corpses />
+        <help_wounded />
       </col>
 
-      <col>
-        <BUNCH />
-        <SPREAD />
-        <LINE />
+      <col group="formation">
+        <bunch />
+        <spread />
+        <line />
       </col>
     </actions>
   </container>

@@ -1,5 +1,4 @@
-local U  = z_idiots_utils
-local C  = z_idiots_companions
+local U = z_idiots_utils
 
 
 -- fix: states for prone

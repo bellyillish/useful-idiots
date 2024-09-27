@@ -1,0 +1,130 @@
+-- shortcut paths to lib
+package.path = package.path .. ".\\gamedata\\scripts\\?.lua;..\\gamedata\\scripts\\?.lua;"
+
+
+MDATA_VER = "0.1-beta.5"
+MDATA_KEY = "USEFUL_IDIOTS"
+
+-- companion state config
+ACTIONS = {
+  {
+    name = "movement",
+    cycle = true,
+    actions = {
+      {name = "follow", next = "wait", default = true},
+      {name = "wait",   next = "relax", info = "npcx_beh_wait", teleport = false},
+      {name = "relax",  next = "follow", info = "npcx_beh_substate_relax", teleport = false},
+      {name = "patrol", info = "npcx_beh_patrol_mode", teleport = false},
+    }
+  },
+  {
+    name = "stance",
+    cycle = true,
+    actions = {
+      {name = "stand", next = "sneak", default = true},
+      {name = "sneak", next = "prone", info = "npcx_beh_substate_stealth"},
+      {name = "prone", next = "stand", info = "npcx_beh_substate_prone"},
+    },
+  },
+  {
+    name = "distance",
+    toggle = true,
+    actions = {
+      {name = "cover", info = "npcx_beh_use_cover"},
+      {name = "far",   info = "npcx_beh_distance_far"},
+      {name = "hurry", info = "npcx_beh_hurry"},
+    },
+  },
+  {
+    name = "combat",
+    cycle = true,
+    actions = {
+      {name = "default",  next = "monolith", default = true},
+      {name = "monolith", next = "camper", info = "npcx_beh_combat_tactics_monolith"},
+      {name = "camper",   next = "default", info = "npcx_beh_combat_tactics_camper"},
+    }
+  },
+  {
+    name = "readiness",
+    cycle = true,
+    actions = {
+      {name = "attack", next = "defend", default = true},
+      {name = "defend", next = "ignore", info = "npcx_beh_ignore_actor_enemies"},
+      {name = "ignore", next = "attack", info = "npcx_beh_ignore_combat"},
+    },
+  },
+  {
+    name = "jobs",
+    toggle = true,
+    actions = {
+      {name = "loot_items",     info = "npcx_beh_gather_items"},
+      {name = "loot_artifacts", info = "npcx_beh_gather_artifacts"},
+      {name = "loot_corpses",   info = "npcx_beh_loot_corpses"},
+      {name = "help_wounded",   info = "npcx_beh_help_wounded"},
+    },
+  },
+  {
+    name = "formation",
+    cycle = true,
+    actions = {
+      {name = "bunch",  next = "spread", default = true},
+      {name = "spread", next = "line", info = "npcx_beh_formation_spread"},
+      {name = "line",   next = "bunch", info = "npcx_beh_formation_line"},
+    },
+  }
+}
+
+-- for consistency with Anomaly keybinds
+ACTION_DEFAULT_KEYBINDS = {
+  cycle_movement  = 80,
+  cycle_stance    = 75,
+  cycle_readiness = 79,
+  loot_corpses    = 76,
+}
+
+-- ACTIONS but keyed by group/action name
+ACTIONS_KEYED = {}
+
+for ig, group in ipairs(ACTIONS) do
+  ACTIONS_KEYED[group.name] = dup_table(group)
+  ACTIONS_KEYED[group.name].actions = {}
+  for ia, action in ipairs(group.actions) do
+    ACTIONS_KEYED[group.name].actions[action.name] = action
+  end
+end
+
+-- old mdata keys to purge
+MDATA_STALE_KEYS = {
+  "IDIOTS_STATES",
+  "ZCDS_SHARED_ITEMS",
+  "ZCDS_STATES",
+  "ZCDS_SHARING_NPCS",
+  "CDHTS_STATES",
+}
+
+
+function initialize(mdata)
+  mdata[MDATA_KEY] = mdata[MDATA_KEY] or {}
+
+  if mdata[MDATA_KEY].VER ~= MDATA_VER then
+    SendScriptCallback("idiots_on_version", mdata, MDATA_VER)
+  end
+
+  mdata[MDATA_KEY].VER = MDATA_VER
+end
+
+
+function purgeStaleKeys(mdata)
+  for i, k in ipairs(MDATA_STALE_KEYS) do
+    mdata[k] = nil
+  end
+end
+
+
+AddScriptCallback("idiots_on_version")
+
+
+function on_game_start()
+  RegisterScriptCallback("load_state", initialize)
+  RegisterScriptCallback("idiots_on_version", purgeStaleKeys)
+end
