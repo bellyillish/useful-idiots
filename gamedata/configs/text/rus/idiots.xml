@@ -49,13 +49,13 @@
   <string id="st_idiots_stance">
     <text>Положение</text>
   </string>
-  <string id="st_idiots_stance_stand">
+  <string id="st_idiots_stand">
     <text>Стоять</text>
   </string>
-  <string id="st_idiots_stance_sneak">
+  <string id="st_idiots_sneak">
     <text>Красться</text>
   </string>
-  <string id="st_idiots_stance_prone">
+  <string id="st_idiots_prone">
     <text>Лечь</text>
   </string>
 
@@ -63,14 +63,14 @@
   <string id="st_idiots_distance">
     <text>Дистанция</text>
   </string>
-  <string id="st_idiots_distance_cover">
+  <string id="st_idiots_cover">
     <text>Использовать укрытие</text>
   </string>
-  <string id="st_idiots_distance_far">
+  <string id="st_idiots_far">
     <text>Держаться на расстоянии</text>
   </string>
-  <string id="st_idiots_distance_hurry">
-    <text>Быстрый бег</text>
+  <string id="st_idiots_hurry">
+    <text>Спешить</text>
   </string>
 
   <!-- Бой -->
@@ -91,13 +91,13 @@
   <string id="st_idiots_readiness">
     <text>Поведение</text>
   </string>
-  <string id="st_idiots_readiness_attack">
+  <string id="st_idiots_attack">
     <text>Атаковать всех</text>
   </string>
-  <string id="st_idiots_readiness_defend">
+  <string id="st_idiots_defend">
     <text>Ответный огонь</text>
   </string>
-  <string id="st_idiots_readiness_ignore">
+  <string id="st_idiots_ignore">
     <text>Игнорировать бой</text>
   </string>
 
@@ -105,16 +105,16 @@
   <string id="st_idiots_jobs">
     <text>Задания</text>
   </string>
-  <string id="st_idiots_jobs_loot_items">
+  <string id="st_idiots_loot_items">
     <text>Собирать предметы</text>
   </string>
-  <string id="st_idiots_jobs_loot_artifacts">
+  <string id="st_idiots_loot_artifacts">
     <text>И артефакты</text>
   </string>
-  <string id="st_idiots_jobs_loot_corpses">
+  <string id="st_idiots_loot_corpses">
     <text>Обыскивать трупы</text>
   </string>
-  <string id="st_idiots_jobs_help_wounded">
+  <string id="st_idiots_help_wounded">
     <text>Помогать раненым</text>
   </string>
 
@@ -122,13 +122,13 @@
   <string id="st_idiots_formation">
     <text>Построение</text>
   </string>
-  <string id="st_idiots_formation_bunch">
+  <string id="st_idiots_bunch">
     <text>Двигаться вместе</text>
   </string>
-  <string id="st_idiots_formation_spread">
+  <string id="st_idiots_spread">
     <text>Двигаться врассыпную</text>
   </string>
-  <string id="st_idiots_formation_line">
+  <string id="st_idiots_line">
     <text>Двигаться колонной</text>
   </string>
 </string_table>
