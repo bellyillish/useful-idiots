@@ -2,133 +2,133 @@
 
 <string_table>
   <string id="st_idiots_tab_all">
-    <text>Все</text>
+    <text>Р’СЃРµ</text>
   </string>
   <string id="st_idiots_title_all">
-    <text>Все компаньоны</text>
+    <text>Р’СЃРµ РєРѕРјРїР°РЅСЊРѕРЅС‹</text>
   </string>
   <string id="st_idiots_point_move_message">
-    <text>Moving to Point</text>
+    <text>Р”РІРёР¶РµРЅРёРµ Рє С‚РѕС‡РєРµ</text>
   </string>
 
-  <!-- Titlebar Buttons -->
+  <!-- РљРЅРѕРїРєРё РЅР° Р·Р°РіРѕР»РѕРІРєРµ -->
   <string id="st_idiots_reset_all">
-    <text>Синхронизировать всех</text>
+    <text>РЎРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°С‚СЊ РІСЃРµС…</text>
   </string>
   <string id="st_idiots_reset">
-    <text>Повторная синхронизация</text>
+    <text>РџРѕРІС‚РѕСЂРЅР°СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ</text>
   </string>
   <string id="st_idiots_inventory">
-    <text>Инвентарь</text>
+    <text>РРЅРІРµРЅС‚Р°СЂСЊ</text>
   </string>
   <string id="st_idiots_clear_waypoints">
-    <text>Очистить точки маршрута</text>
+    <text>РћС‡РёСЃС‚РёС‚СЊ С‚РѕС‡РєРё РјР°СЂС€СЂСѓС‚Р°</text>
   </string>
   <string id="st_idiots_add_waypoint">
-    <text>Добавить точку маршрута</text>
+    <text>Р”РѕР±Р°РІРёС‚СЊ С‚РѕС‡РєСѓ РјР°СЂС€СЂСѓС‚Р°</text>
   </string>
 
-  <!-- Movement -->
+  <!-- Р”РІРёР¶РµРЅРёРµ -->
   <string id="st_idiots_movement">
-    <text>Movement</text>
+    <text>Р”РІРёР¶РµРЅРёРµ</text>
   </string>
-  <string id="st_idiots_follow">
-    <text>Следовать</text>
+  <string id="st_idiots_movement_follow">
+    <text>РЎР»РµРґРѕРІР°С‚СЊ</text>
   </string>
-  <string id="st_idiots_wait">
-    <text>Ждать</text>
+  <string id="st_idiots_movement_wait">
+    <text>Р–РґР°С‚СЊ</text>
   </string>
-  <string id="st_idiots_relax">
-    <text>Отдыхать</text>
+  <string id="st_idiots_movement_relax">
+    <text>РћС‚РґС‹С…Р°С‚СЊ</text>
   </string>
-  <string id="st_idiots_patrol">
-    <text>Патрулировать</text>
+  <string id="st_idiots_movement_patrol">
+    <text>РџР°С‚СЂСѓР»РёСЂРѕРІР°С‚СЊ</text>
   </string>
 
-  <!-- Stances -->
+  <!-- РџРѕР·РёС†РёРё -->
   <string id="st_idiots_stance">
-    <text>Stance</text>
+    <text>РџРѕР»РѕР¶РµРЅРёРµ</text>
   </string>
-  <string id="st_idiots_stand">
-    <text>Стоять</text>
+  <string id="st_idiots_stance_stand">
+    <text>РЎС‚РѕСЏС‚СЊ</text>
   </string>
-  <string id="st_idiots_sneak">
-    <text>Красться</text>
+  <string id="st_idiots_stance_sneak">
+    <text>РљСЂР°СЃС‚СЊСЃСЏ</text>
   </string>
-  <string id="st_idiots_prone">
-    <text>Лечь</text>
+  <string id="st_idiots_stance_prone">
+    <text>Р›РµС‡СЊ</text>
   </string>
 
-  <!-- Distance -->
+  <!-- Р”РёСЃС‚Р°РЅС†РёСЏ -->
   <string id="st_idiots_distance">
-    <text>Distance</text>
+    <text>Р”РёСЃС‚Р°РЅС†РёСЏ</text>
   </string>
-  <string id="st_idiots_cover">
-    <text>Встать в укрытие</text>
+  <string id="st_idiots_distance_cover">
+    <text>РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ СѓРєСЂС‹С‚РёРµ</text>
   </string>
-  <string id="st_idiots_far">
-    <text>Держаться на расстоянии</text>
+  <string id="st_idiots_distance_far">
+    <text>Р”РµСЂР¶Р°С‚СЊСЃСЏ РЅР° СЂР°СЃСЃС‚РѕСЏРЅРёРё</text>
   </string>
-  <string id="st_idiots_hurry">
-    <text>Быстрый бег</text>
+  <string id="st_idiots_distance_hurry">
+    <text>Р‘С‹СЃС‚СЂС‹Р№ Р±РµРі</text>
   </string>
 
-  <!-- Combat -->
+  <!-- Р‘РѕР№ -->
   <string id="st_idiots_combat">
-    <text>Combat</text>
+    <text>Р‘РѕР№</text>
   </string>
   <string id="st_idiots_combat_default">
-    <text>Обычный бой</text>
+    <text>РћР±С‹С‡РЅС‹Р№ Р±РѕР№</text>
   </string>
   <string id="st_idiots_combat_monolith">
-    <text>Режим "Монолит"</text>
+    <text>Р РµР¶РёРј "РњРѕРЅРѕР»РёС‚"</text>
   </string>
   <string id="st_idiots_combat_camper">
-    <text>Режим "Снайпер"</text>
+    <text>Р РµР¶РёРј "РЎРЅР°Р№РїРµСЂ"</text>
   </string>
 
-  <!-- Readiness -->
+  <!-- Р“РѕС‚РѕРІРЅРѕСЃС‚СЊ -->
   <string id="st_idiots_readiness">
-    <text>Readiness</text>
+    <text>Р РµР¶РёРј</text>
   </string>
-  <string id="st_idiots_attack">
-    <text>Атаковать всех</text>
+  <string id="st_idiots_readiness_attack">
+    <text>РђС‚Р°РєРѕРІР°С‚СЊ РІСЃРµС…</text>
   </string>
-  <string id="st_idiots_defend">
-    <text>Только ответный огонь</text>
+  <string id="st_idiots_readiness_defend">
+    <text>РћС‚РІРµС‚РЅС‹Р№ РѕРіРѕРЅСЊ</text>
   </string>
-  <string id="st_idiots_ignore">
-    <text>Игнорировать бой</text>
+  <string id="st_idiots_readiness_ignore">
+    <text>РРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ Р±РѕР№</text>
   </string>
 
-  <!-- Jobs -->
+  <!-- Р—Р°РґР°РЅРёСЏ -->
   <string id="st_idiots_jobs">
-    <text>Jobs</text>
+    <text>Р—Р°РґР°РЅРёСЏ</text>
   </string>
-  <string id="st_idiots_loot_items">
-    <text>Собирать предметы</text>
+  <string id="st_idiots_jobs_loot_items">
+    <text>РЎРѕР±РёСЂР°С‚СЊ РїСЂРµРґРјРµС‚С‹</text>
   </string>
-  <string id="st_idiots_loot_artifacts">
-    <text>И артефакты</text>
+  <string id="st_idiots_jobs_loot_artifacts">
+    <text>Р Р°СЂС‚РµС„Р°РєС‚С‹</text>
   </string>
-  <string id="st_idiots_loot_corpses">
-    <text>Обыскивать трупы</text>
+  <string id="st_idiots_jobs_loot_corpses">
+    <text>РћР±С‹СЃРєРёРІР°С‚СЊ С‚СЂСѓРїС‹</text>
   </string>
-  <string id="st_idiots_help_wounded">
-    <text>Помогать раненым</text>
+  <string id="st_idiots_jobs_help_wounded">
+    <text>РџРѕРјРѕРіР°С‚СЊ СЂР°РЅРµРЅС‹Рј</text>
   </string>
 
-  <!-- Formations -->
+  <!-- РџРѕСЃС‚СЂРѕРµРЅРёСЏ -->
   <string id="st_idiots_formation">
-    <text>Formation</text>
+    <text>РџРѕСЃС‚СЂРѕРµРЅРёРµ</text>
   </string>
-  <string id="st_idiots_bunch">
-    <text>Двигаться вместе</text>
+  <string id="st_idiots_formation_bunch">
+    <text>Р”РІРёРіР°С‚СЊСЃСЏ РІРјРµСЃС‚Рµ</text>
   </string>
-  <string id="st_idiots_spread">
-    <text>Двигаться врассыпную</text>
+  <string id="st_idiots_formation_spread">
+    <text>Р”РІРёРіР°С‚СЊСЃСЏ РІСЂР°СЃСЃС‹РїРЅСѓСЋ</text>
   </string>
-  <string id="st_idiots_line">
-    <text>Двигаться колонной</text>
+  <string id="st_idiots_formation_line">
+    <text>Р”РІРёРіР°С‚СЊСЃСЏ РєРѕР»РѕРЅРЅРѕР№</text>
   </string>
 </string_table>
