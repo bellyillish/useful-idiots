@@ -1,228 +1,228 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="windows-1251"?>
 
 <string_table>
-  <!-- РјРµРЅСЋ -->
+  <!-- menu -->
   <string id="ui_mcm_menu_idiots">
-    <text>РџРѕР»РµР·РЅС‹Рµ РРґРёРѕС‚С‹</text>
+    <text>Полезные идиоты</text>
   </string>
   <string id="ui_mcm_menu_options">
-    <text>РќР°СЃС‚СЂРѕР№РєРё</text>
+    <text>Настройки</text>
   </string>
   <string id="ui_mcm_menu_keybinds">
-    <text>Р“РѕСЂСЏС‡РёРµ РєР»Р°РІРёС€Рё</text>
+    <text>Горячие клавиши</text>
   </string>
   <string id="ui_mcm_menu_point">
-    <text>РўРѕС‡РєРё</text>
+    <text>Точки</text>
   </string>
   <string id="ui_mcm_menu_movement">
-    <text>Р”РІРёР¶РµРЅРёРµ</text>
+    <text>Движение</text>
   </string>
   <string id="ui_mcm_menu_stance">
-    <text>РџРѕР»РѕР¶РµРЅРёРµ</text>
+    <text>Положение</text>
   </string>
   <string id="ui_mcm_menu_distance">
-    <text>Р”РёСЃС‚Р°РЅС†РёСЏ</text>
+    <text>Дистанция</text>
   </string>
   <string id="ui_mcm_menu_combat">
-    <text>Р‘РѕР№</text>
+    <text>Бой</text>
   </string>
   <string id="ui_mcm_menu_readiness">
-    <text>РџРѕРІРµРґРµРЅРёРµ</text>
+    <text>Поведение</text>
   </string>
   <string id="ui_mcm_menu_jobs">
-    <text>Р—Р°РґР°С‡Рё</text>
+    <text>Задачи</text>
   </string>
   <string id="ui_mcm_menu_formation">
-    <text>РџРѕСЃС‚СЂРѕРµРЅРёРµ</text>
+    <text>Построение</text>
   </string>
 
-  <!-- РћР±С‰РёРµ РЅР°СЃС‚СЂРѕР№РєРё -->
+  <!-- General Options -->
   <string id="ui_mcm_idiots_title_options">
-    <text>РќР°СЃС‚СЂРѕР№РєРё РїРѕР»РµР·РЅС‹С… РёРґРёРѕС‚РѕРІ</text>
+    <text>Настройки мода</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_options_general">
-    <text>РћР±С‰РёРµ РЅР°СЃС‚СЂРѕР№РєРё</text>
+    <text>Общие настройки</text>
   </string>
   <string id="ui_mcm_idiots_options_indexers">
-    <text>РџРѕРєР°Р·С‹РІР°С‚СЊ РёРЅРґРёРєР°С‚РѕСЂС‹ РЅР°Рґ СЃРїСѓС‚РЅРёРєР°РјРё</text>
+    <text>Показывать индикаторы над спутниками</text>
   </string>
   <string id="ui_mcm_idiots_options_indexers_desc">
-    <text>Р’РєР»СЋС‡Р°РµС‚/РІС‹РєР»СЋС‡Р°РµС‚ РЅРѕРјРµСЂР° РІРєР»Р°РґРѕРє, РєРѕС‚РѕСЂС‹Рµ РїРѕСЏРІР»СЏСЋС‚СЃСЏ РЅР°Рґ СЃРїСѓС‚РЅРёРєР°РјРё РїСЂРё РѕС‚РєСЂС‹С‚РѕРј РёРЅС‚РµСЂС„РµР№СЃРµ.</text>
+    <text>Включает\выключает номера над спутниками когда открыт интерфейс.</text>
   </string>
 
-  <!-- РќР°СЃС‚СЂРѕР№РєРё Р—Р°РґР°С‡ -->
+  <!-- Jobs Options -->
   <string id="ui_mcm_idiots_subtitle_options_jobs">
-    <text>РќР°СЃС‚СЂРѕР№РєРё СЃР±РѕСЂР° Рё РѕР±С‹СЃРєР°</text>
+    <text>Сбор и обыск</text>
   </string>
   <string id="ui_mcm_idiots_options_jobs">
-    <text>Р’РєР»СЋС‡РёС‚СЊ РєРѕРјР°РЅРґС‹ РЅР° СЃР±РѕСЂ Рё РѕР±С‹СЃРє</text>
+    <text>Включить команды для сбора и обыска</text>
   </string>
   <string id="ui_mcm_idiots_options_jobs_desc">
-    <text>Р’РєР»СЋС‡Р°РµС‚/РІС‹РєР»СЋС‡Р°РµС‚ РєРѕРјР°РЅРґС‹ РЅР° СЃР±РѕСЂ РїСЂРµРґРјРµС‚РѕРІ, РѕР±С‹СЃРє С‚СЂСѓРїРѕРІ Рё РїРѕРјРѕС‰СЊ СЂР°РЅРµРЅС‹Рј. Р•СЃР»Рё РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚Рµ, РѕС‚РєР»СЋС‡РёС‚Рµ РґР»СЏ РѕСЃРІРѕР±РѕР¶РґРµРЅРёСЏ РјРµСЃС‚Р° РІ РёРЅС‚РµСЂС„РµР№СЃРµ.</text>
+    <text>Полностью включает\выключает интерфейс для задачи. Удобно, если не собираетесь ничего переключать.</text>
   </string>
   <string id="ui_mcm_idiots_options_jobs_note">
-    <text>Р—РђРњР•РўРљРђ: Р”Р»СЏ РєРѕСЂСЂРµРєС‚РЅРѕР№ СЂР°Р±РѕС‚С‹ СЃР±РѕСЂР° РІ GAMMA, "311 NPC Stop Looting Dead Bodies" РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕС‚РєР»СЋС‡РµРЅ.</text>
+    <text>Примечание: Для работы задачи в Гамме выключите мод "311 NPC Stop Looting Dead Bodies".</text>
   </string>
   <string id="ui_mcm_idiots_options_npcLooting">
-    <text>РўРѕР»СЊРєРѕ СЃРїСѓС‚РЅРёРєРё РјРѕРіСѓС‚ СЃРѕР±РёСЂР°С‚СЊ Рё РѕР±С‹СЃРєРёРІР°С‚СЊ</text>
+    <text>Только спутники могут собирать и обыскивать</text>
   </string>
   <string id="ui_mcm_idiots_options_npcLooting_desc">
-    <text>Р’РєР»СЋС‡Р°РµС‚/РІС‹РєР»СЋС‡Р°РµС‚ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РґР»СЏ NPC (РЅРµ СЃРїСѓС‚РЅРёРєРѕРІ) СЃРѕР±РёСЂР°С‚СЊ Рё Р»СѓС‚Р°С‚СЊ. Р”Р»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ С‚РµРєСѓС‰РµРіРѕ РїРѕРІРµРґРµРЅРёСЏ, РІРєР»СЋС‡РёС‚Рµ РґР»СЏ GAMMA Рё РІС‹РєР»СЋС‡РёС‚Рµ РґР»СЏ Anomaly.</text>
+    <text>Включает\выключает возможность не-спутникам собирать и обыскивать. По-умолчанию выключено для Аномали и включено для Гаммы.</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts">
-    <text>Р’РєР»СЋС‡РёС‚СЊ РєРѕРјР°РЅРґСѓ РЅР° СЃР±РѕСЂ Р°СЂС‚РµС„Р°РєС‚РѕРІ</text>
+    <text>Включить возможность управлять сбором артефактов</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts_desc">
-    <text>Р’РєР»СЋС‡Р°РµС‚/РІС‹РєР»СЋС‡Р°РµС‚ РєРѕРјР°РЅРґСѓ РІ РёРЅС‚РµСЂС„РµР№СЃРµ, РєРѕС‚РѕСЂР°СЏ РїСЂРёРєР°Р·С‹РІР°РµС‚ СЃРїСѓС‚РЅРёРєР°Рј СЃРѕР±РёСЂР°С‚СЊ Р°СЂС‚РµС„Р°РєС‚С‹. Р—РђРњР•РўРљРђ: Р’РєР»СЋС‡РµРЅРёРµ СЌС‚РѕР№ РѕРїС†РёРё СЏРІР»СЏРµС‚СЃСЏ С‡РёС‚РµСЂСЃС‚РІРѕРј, РµСЃР»Рё С‚РѕР»СЊРєРѕ РІС‹ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚Рµ РјРѕРґ, РїРѕР·РІРѕР»СЏСЋС‰РёР№ NPC РїРѕР»СѓС‡Р°С‚СЊ СѓСЂРѕРЅ РёР»Рё СѓРјРёСЂР°С‚СЊ РІ Р°РЅРѕРјР°Р»РёСЏС….</text>
+    <text>Включает\выключает возможность спутников собирать артефакты. Примечание: Вообще это нечестно если у вас не стоит мод который включает спутникам урон от аномалий.</text>
   </string>
 
-  <!-- РќР°СЃС‚СЂРѕР№РєРё РРЅС‚РµСЂС„РµР№СЃР° -->
+  <!-- UI Options -->
   <string id="ui_mcm_idiots_subtitle_options_ui">
-    <text>РќР°СЃС‚СЂРѕР№РєРё РёРЅС‚РµСЂС„РµР№СЃР°</text>
+    <text>Настройки интерфейса</text>
   </string>
   <string id="ui_mcm_idiots_options_scaleX">
-    <text>РњР°СЃС€С‚Р°Р± X</text>
+    <text>Масштаб по X</text>
   </string>
   <string id="ui_mcm_idiots_options_scaleY">
-    <text>РњР°СЃС€С‚Р°Р± Y</text>
+    <text>Масштаб по Y</text>
   </string>
   <string id="ui_mcm_idiots_options_offsetX">
-    <text>РЎРјРµС‰РµРЅРёРµ РїРѕ X РѕС‚ С†РµРЅС‚СЂР°</text>
+    <text>Положение по X относительно центра</text>
   </string>
   <string id="ui_mcm_idiots_options_offsetY">
-    <text>РЎРјРµС‰РµРЅРёРµ РїРѕ Y РѕС‚ РЅРёР·Р°</text>
+    <text>Положение по X относительно самого низа</text>
   </string>
   <string id="ui_mcm_idiots_options_font">
-    <text>Р Р°Р·РјРµСЂ С€СЂРёС„С‚Р°</text>
+    <text>Размер шрифта</text>
   </string>
 
-  <!-- РќР°СЃС‚СЂРѕР№РєРё РљР»Р°РІРёС€ -->
+  <!-- Keybinds -->
   <string id="ui_mcm_idiots_title_keybinds">
-    <text>РќР°СЃС‚СЂРѕР№РєРё РєР»Р°РІРёС€</text>
+    <text>Горячие клавиши</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_move">
-    <text>РџРµСЂРµРјРµС‰РµРЅРёРµ Рє С‚РѕС‡РєРµ</text>
+    <text>Двигаться к точке</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_key">
-    <text>РљР»Р°РІРёС€Р°</text>
+    <text>Клавиша</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_mod">
-    <text>РњРѕРґРёС„РёРєР°С‚РѕСЂ</text>
+    <text>Клавиша-модификатор</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_mode">
-    <text>РўРёРї РЅР°Р¶Р°С‚РёСЏ</text>
+    <text>Тип нажатия</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_toggle">
-    <text>Р’РєР»СЋС‡РёС‚СЊ РїСЂРё РЅР°Р¶Р°С‚РёРё</text>
+    <text>Работать по нажатию</text>
   </string>
 
-  <!-- РљР»Р°РІРёС€Рё Р”РІРёР¶РµРЅРёСЏ -->
+  <!-- Movement Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_movement">
-    <text>РџРµСЂРµРєР»СЋС‡РёС‚СЊ РІРёРґ РґРІРёР¶РµРЅРёСЏ</text>
+    <text>Переключить движение</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_follow">
-    <text>РЎР»РµРґРѕРІР°С‚СЊ</text>
+    <text>Следовать</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_wait">
-    <text>Р–РґР°С‚СЊ</text>
+    <text>Ждать</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_relax">
-    <text>РћС‚РґС‹С…Р°С‚СЊ</text>
+    <text>Отдыхать</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_patrol">
-    <text>РџР°С‚СЂСѓР»РёСЂРѕРІР°С‚СЊ</text>
+    <text>Патрулировать</text>
   </string>
 
-  <!-- РљР»Р°РІРёС€Рё РџРѕР·РёС†РёРё -->
+  <!-- Stance Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_stance">
-    <text>РџРµСЂРµРєР»СЋС‡РёС‚СЊ РїРѕР·РёС†РёСЋ</text>
+    <text>Переключить положение</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_stand">
-    <text>РЎС‚РѕСЏС‚СЊ</text>
+    <text>Стоять</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_sneak">
-    <text>РљСЂР°СЃС‚СЊСЃСЏ</text>
+    <text>Красться</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_prone">
-    <text>Р›РµР¶Р°С‚СЊ</text>
+    <text>Лежать</text>
   </string>
 
-  <!-- РљР»Р°РІРёС€Рё Р”РёСЃС‚Р°РЅС†РёРё -->
+  <!-- Distance Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_distance">
-    <text>РџРµСЂРµРєР»СЋС‡РёС‚СЊ РґРёСЃС‚Р°РЅС†РёРё</text>
+    <text>Переключить дистанцию</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_cover">
-    <text>РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ СѓРєСЂС‹С‚РёРµ</text>
+    <text>Использовать укрытие</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_far">
-    <text>Р”РµСЂР¶Р°С‚СЊСЃСЏ РЅР° СЂР°СЃСЃС‚РѕСЏРЅРёРё</text>
+    <text>Держаться вдали</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_hurry">
-    <text>РЎРїРµС€РёС‚СЊ</text>
+    <text>Спешить</text>
   </string>
 
-  <!-- РљР»Р°РІРёС€Рё Р‘РѕСЏ -->
+  <!-- Combat Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_combat">
-    <text>РџРµСЂРµРєР»СЋС‡РёС‚СЊ СЂРµР¶РёРј Р±РѕСЏ</text>
+    <text>Переключить бой</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_default">
-    <text>РћР±С‹С‡РЅС‹Р№ Р±РѕР№</text>
+    <text>Обычный бой</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_monolith">
-    <text>Р РµР¶РёРј "РњРѕРЅРѕР»РёС‚"</text>
+    <text>Режим "Монолит"</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_camper">
-    <text>Р РµР¶РёРј "РЎРЅР°Р№РїРµСЂ"</text>
+    <text>Режим "Снайпер"</text>
   </string>
 
-  <!-- РљР»Р°РІРёС€Рё Р“РѕС‚РѕРІРЅРѕСЃС‚Рё -->
+  <!-- Readiness Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_readiness">
-    <text>РџРµСЂРµРєР»СЋС‡РёС‚СЊ РїРѕРІРµРґРµРЅРёРµ</text>
+    <text>Переключить поведение</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_attack">
-    <text>РђС‚Р°РєРѕРІР°С‚СЊ РІСЃРµ</text>
+    <text>Атаковать всех</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_defend">
-    <text>РћС‚РІРµС‚РЅС‹Р№ РѕРіРѕРЅСЊ</text>
+    <text>Ответный огонь</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_ignore">
-    <text>РРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ Р±РѕР№</text>
+    <text>Игнорировать бой</text>
   </string>
 
-  <!-- РљР»Р°РІРёС€Рё Р—Р°РґР°С‡ -->
+  <!-- Jobs Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_jobs">
-    <text>РџРµСЂРµРєР»СЋС‡РёС‚СЊ Р·Р°РґР°РЅРёСЏ</text>
+    <text>Переключить задачи</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_loot_items">
-    <text>РЎРѕР±РёСЂР°С‚СЊ РІРµС‰Рё</text>
+    <text>Собирать предметы</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_loot_artifacts">
-    <text>Р Р°СЂС‚РµС„Р°РєС‚С‹</text>
+    <text>И артефакты</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_loot_corpses">
-    <text>РћР±С‹СЃРєРёРІР°С‚СЊ С‚СЂСѓРїС‹</text>
+    <text>Обыскивать трупы</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_help_wounded">
-    <text>РџРѕРјРѕРіР°С‚СЊ СЂР°РЅРµРЅС‹Рј</text>
+    <text>Помогать раненым</text>
   </string>
 
-  <!-- РљР»Р°РІРёС€Рё Р¤РѕСЂРјР°С†РёРё -->
+  <!-- Formation Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_formation">
-    <text>РџРµСЂРµРєР»СЋС‡РёС‚СЊ РїРѕСЃС‚СЂРѕРµРЅРёРµ</text>
+    <text>Переключить построение</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_bunch">
-    <text>Р’РјРµСЃС‚Рµ</text>
+    <text>Вместе</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_spread">
-    <text>Р’СЂР°СЃСЃС‹РїРЅСѓСЋ</text>
+    <text>Врассыпную</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_line">
-    <text>РљРѕР»РѕРЅРЅРѕР№</text>
+    <text>Колонна</text>
   </string>
 
-  <!-- РЎРїРёСЃРѕРє РѕРїС†РёР№ -->
+  <!-- List Options -->
   <string id="ui_mcm_lst_mod_none">
-    <text>РќРµ РІС‹Р±СЂР°РЅРѕ</text>
+    <text>Не выбрано</text>
   </string>
   <string id="ui_mcm_lst_mod_shift">
     <text>SHIFT</text>
@@ -234,39 +234,39 @@
     <text>ALT</text>
   </string>
   <string id="ui_mcm_lst_mode_press">
-    <text>РћРґРЅРѕ РЅР°Р¶Р°С‚РёРµ</text>
+    <text>Одно нажатие</text>
   </string>
   <string id="ui_mcm_lst_mode_dtap">
-    <text>Р”РІР° РЅР°Р¶Р°С‚РёСЏ</text>
+    <text>Двойное нажатие</text>
   </string>
   <string id="ui_mcm_lst_mode_hold">
-    <text>Р”РµСЂР¶Р°С‚СЊ</text>
+    <text>Держать</text>
   </string>
   <string id="ui_mcm_lst_font_small">
-    <text>РњР°Р»РµРЅСЊРєРёР№</text>
+    <text>Маленький</text>
   </string>
   <string id="ui_mcm_lst_font_medium">
-    <text>РЎСЂРµРґРЅРёР№</text>
+    <text>Средний</text>
   </string>
   <string id="ui_mcm_lst_font_large">
-    <text>Р‘РѕР»СЊС€РѕР№</text>
+    <text>Большой</text>
   </string>
   <string id="ui_mcm_lst_font_xlarge">
-    <text>РћРіСЂРѕРјРЅС‹Р№</text>
+    <text>Огромный</text>
   </string>
   <string id="ui_mcm_lst_top">
-    <text>Р’РµСЂС…</text>
+    <text>Верх</text>
   </string>
   <string id="ui_mcm_lst_center">
-    <text>Р¦РµРЅС‚СЂ</text>
+    <text>Центр</text>
   </string>
   <string id="ui_mcm_lst_bottom">
-    <text>РќРёР·</text>
+    <text>Низ</text>
   </string>
   <string id="ui_mcm_lst_left">
-    <text>Р›РµРІРѕ</text>
+    <text>Лево</text>
   </string>
   <string id="ui_mcm_lst_right">
-    <text>РџСЂР°РІРѕ</text>
+    <text>Право</text>
   </string>
 </string_table>
