@@ -195,9 +195,10 @@ end
 
 
 function saveCompanionStates(mdata)
+  CONFIG.initStorage(mdata)
   local data = mdata[CONFIG.MDATA_KEY]
 
-  data.globalState     = GLOBAL_STATE
+  data.globalState = GLOBAL_STATE
   data.companionStates = {}
 
   for i, npc in ipairs(U.getCompanions()) do
@@ -206,8 +207,8 @@ function saveCompanionStates(mdata)
 end
 
 
-function loadCompanionStates()
-  local mdata = alife_storage_manager.get_state()
+function loadCompanionStates(mdata)
+  CONFIG.initStorage(mdata)
   local data  = mdata[CONFIG.MDATA_KEY]
 
   if data.globalState then
@@ -222,7 +223,7 @@ function loadCompanionStates()
 end
 
 
-function migrateCompanionStates(mdata)
+function purgeCompanionStates(mdata)
   GLOBAL_STATE = dup_table(DEFAULT_STATE)
 
   for i, npc in ipairs(U.getCompanions()) do
@@ -233,9 +234,9 @@ end
 
 
 function on_game_start()
-  RegisterScriptCallback("idiots_on_version", migrateCompanionStates)
-  RegisterScriptCallback("actor_on_first_update", loadCompanionStates)
+  RegisterScriptCallback("load_state", loadCompanionStates)
   RegisterScriptCallback("save_state", saveCompanionStates)
+  RegisterScriptCallback("idiots_on_version", purgeCompanionStates)
 end
 
 

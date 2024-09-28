@@ -103,7 +103,7 @@ MDATA_STALE_KEYS = {
 }
 
 
-function initState(mdata)
+function initStorage(mdata)
   mdata[MDATA_KEY] = mdata[MDATA_KEY] or {}
 
   if mdata[MDATA_KEY].VER ~= MDATA_VER then
@@ -111,7 +111,6 @@ function initState(mdata)
   end
 
   mdata[MDATA_KEY].VER = MDATA_VER
-  SendScriptCallback("idiots_on_init", mdata)
 end
 
 
@@ -122,11 +121,9 @@ function purgeStaleKeys(mdata)
 end
 
 
-AddScriptCallback("idiots_on_version")
-AddScriptCallback("idiots_on_init")
-
-
 function on_game_start()
-  RegisterScriptCallback("load_state", initState)
   RegisterScriptCallback("idiots_on_version", purgeStaleKeys)
 end
+
+
+AddScriptCallback("idiots_on_version")

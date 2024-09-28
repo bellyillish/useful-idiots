@@ -657,6 +657,10 @@ local particle = particles_object("_samples_particles_\\flash_light")
 
 
 function onKeybindEvent(event, dik)
+  if #U.getCompanions() == 0 then
+    return
+  end
+
   if checkKeybind(event, dik, "point", "move") then
     local pos = vec(level.get_target_pos())
     pos.y = pos.y - 0.5

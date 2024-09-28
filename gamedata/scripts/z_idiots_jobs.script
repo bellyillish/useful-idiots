@@ -193,6 +193,7 @@ end
 
 -- store tracked items in game save
 function onSaveItemState(mdata)
+  CONFIG.initStorage(mdata)
   local data = mdata[CONFIG.MDATA_KEY]
 
   data.sharedItems = LOOT_SHARED_ITEMS
@@ -202,6 +203,7 @@ end
 
 -- load tracked items from game save
 function onLoadItemState(mdata)
+  CONFIG.initStorage(mdata)
   local data = mdata[CONFIG.MDATA_KEY]
 
   if data.sharedItems then
@@ -219,7 +221,6 @@ function migrateJobStates(mdata)
   if mdata.IDIOTS_SHARED_ITEMS then
     data.sharedItems = mdata.IDIOTS_SHARED_ITEMS
   end
-
   if mdata.IDIOTS_SHARING_NPCS then
     data.sharingNPCs = mdata.IDIOTS_SHARING_NPCS
   end
@@ -230,9 +231,9 @@ end
 
 
 function on_game_start()
-  RegisterScriptCallback("idiots_on_version", migrateJobStates)
-  RegisterScriptCallback("idiots_on_init", onLoadItemState)
+  RegisterScriptCallback("load_state", onLoadItemState)
   RegisterScriptCallback("save_state", onSaveItemState)
+  RegisterScriptCallback("idiots_on_version", migrateJobStates)
   RegisterScriptCallback("npc_on_item_take", onTakeItem)
   RegisterScriptCallback("server_entity_on_unregister", onEntityUnregister)
 end
