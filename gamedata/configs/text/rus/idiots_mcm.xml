@@ -1,272 +1,219 @@
-<?xml version="1.0" encoding="windows-1251"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <string_table>
-  <!-- menu -->
+  <!-- меню -->
   <string id="ui_mcm_menu_idiots">
-    <text>Useful Idiots</text>
+    <text>Полезные Идиоты</text>
   </string>
   <string id="ui_mcm_menu_options">
-    <text>Options</text>
+    <text>Настройки</text>
   </string>
   <string id="ui_mcm_menu_keybinds">
-    <text>Keybinds</text>
+    <text>Горячие клавиши</text>
   </string>
   <string id="ui_mcm_menu_point">
-    <text>Points</text>
+    <text>Точки</text>
   </string>
   <string id="ui_mcm_menu_movement">
-    <text>Movement</text>
+    <text>Движение</text>
   </string>
   <string id="ui_mcm_menu_stance">
-    <text>Stance</text>
+    <text>Положение</text>
   </string>
   <string id="ui_mcm_menu_distance">
-    <text>Distance</text>
+    <text>Дистанция</text>
   </string>
   <string id="ui_mcm_menu_combat">
-    <text>Combat</text>
+    <text>Бой</text>
   </string>
   <string id="ui_mcm_menu_readiness">
-    <text>Readiness</text>
+    <text>Поведение</text>
   </string>
   <string id="ui_mcm_menu_jobs">
-    <text>Jobs</text>
+    <text>Задачи</text>
   </string>
   <string id="ui_mcm_menu_formation">
-    <text>Formation</text>
+    <text>Построение</text>
   </string>
 
-  <!-- General Options -->
+  <!-- Общие настройки -->
   <string id="ui_mcm_idiots_title_options">
-    <text>Options for Useful Idiots</text>
+    <text>Настройки полезных идиотов</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_options_general">
-    <text>General Options</text>
+    <text>Общие настройки</text>
   </string>
   <string id="ui_mcm_idiots_options_indexers">
-    <text>Show Indicators Above Companions</text>
+    <text>Показывать индикаторы над спутниками</text>
   </string>
   <string id="ui_mcm_idiots_options_indexers_desc">
-    <text>Enables/disables the tab number indicators that appear above companions when the UI is open.</text>
+    <text>Включает/выключает номера вкладок, которые появляются над спутниками при открытом интерфейсе.</text>
   </string>
 
-  <!-- Jobs Options -->
+  <!-- Настройки Задач -->
   <string id="ui_mcm_idiots_subtitle_options_jobs">
-    <text>Looting and Gathering Options</text>
+    <text>Настройки сбора и обыска</text>
   </string>
   <string id="ui_mcm_idiots_options_jobs">
-    <text>Enable Commands to Loot and Gather Items</text>
+    <text>Включить команды на сбор и обыск</text>
   </string>
   <string id="ui_mcm_idiots_options_jobs_desc">
-    <text>Enables/disables the Collect Items, Loot Corpses, and Help Wounded options. If you don't plan to use them, untick this to reclaim some UI space.</text>
+    <text>Включает/выключает команды на сбор предметов, обыск трупов и помощь раненым. Если не используете, отключите для освобождения места в интерфейсе.</text>
   </string>
   <string id="ui_mcm_idiots_options_jobs_note">
-    <text>NOTE: For looting and gathering to work properly in GAMMA, "311 NPC Stop Looting Dead Bodies" must be disabled.</text>
+    <text>ЗАМЕТКА: Для корректной работы сбора в GAMMA, "311 NPC Stop Looting Dead Bodies" должен быть отключен.</text>
   </string>
   <string id="ui_mcm_idiots_options_npcLooting">
-    <text>Only Companions Can Loot and Gather Items</text>
+    <text>Только спутники могут собирать и обыскивать</text>
   </string>
   <string id="ui_mcm_idiots_options_npcLooting_desc">
-    <text>Enables/disables the ability for non-companion NPCs to loot and gather items. To preserve existing behavior, this would be ticked for GAMMA and unticked for Anomaly.</text>
+    <text>Включает/выключает возможность для NPC (не спутников) собирать и лутать. Для сохранения текущего поведения, включите для GAMMA и выключите для Anomaly.</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts">
-    <text>Enable Command to Gather Artifacts</text>
+    <text>Включить команду на сбор артефактов</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts_desc">
-    <text>Enables/disables a command in the UI that instructs companions to collect artifacts. NOTE: Enabling this is basically cheating unless you're using a mod that allows NPCs to get hurt or die in anomlies.</text>
+    <text>Включает/выключает команду в интерфейсе, которая приказывает спутникам собирать артефакты. ЗАМЕТКА: Включение этой опции является читерством, если только вы не используете мод, позволяющий NPC получать урон или умирать в аномалиях.</text>
   </string>
 
-  <!-- UI Options -->
+  <!-- Настройки Интерфейса -->
   <string id="ui_mcm_idiots_subtitle_options_ui">
-    <text>UI Options</text>
+    <text>Настройки интерфейса</text>
   </string>
   <string id="ui_mcm_idiots_options_scaleX">
-    <text>X Scale</text>
+    <text>Масштаб X</text>
   </string>
   <string id="ui_mcm_idiots_options_scaleY">
-    <text>Y Scale</text>
+    <text>Масштаб Y</text>
   </string>
   <string id="ui_mcm_idiots_options_offsetX">
-    <text>X Offset From Center</text>
+    <text>Смещение по X от центра</text>
   </string>
   <string id="ui_mcm_idiots_options_offsetY">
-    <text>Y Offset From Bottom</text>
+    <text>Смещение по Y от низа</text>
   </string>
   <string id="ui_mcm_idiots_options_font">
-    <text>Font Size</text>
+    <text>Размер шрифта</text>
   </string>
 
-  <!-- Keybinds -->
+  <!-- Настройки Клавиш -->
   <string id="ui_mcm_idiots_title_keybinds">
-    <text>Keybinds for Useful Idiots</text>
+    <text>Настройки клавиш</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_move">
-    <text>Move to Point</text>
+    <text>Перемещение к точке</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_key">
-    <text>Key</text>
+    <text>Клавиша</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_mod">
-    <text>Modifier Key</text>
+    <text>Модификатор</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_mode">
-    <text>Press Type</text>
+    <text>Тип нажатия</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_toggle">
-    <text>Toggle on Press</text>
+    <text>Включить при нажатии</text>
   </string>
 
-  <!-- Movement Keys -->
+  <!-- Клавиши Движения -->
   <string id="ui_mcm_idiots_subtitle_cycle_movement">
-    <text>Cycle Movement</text>
+    <text>Переключить вид движения</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_follow">
-    <text>���������</text>
+    <text>Следовать</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_wait">
-    <text>�����</text>
+    <text>Ждать</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_relax">
-    <text>��������</text>
+    <text>Отдыхать</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_patrol">
-    <text>�������������</text>
+    <text>Патрулировать</text>
   </string>
 
-  <!-- Stance Keys -->
+  <!-- Клавиши Позиции -->
   <string id="ui_mcm_idiots_subtitle_cycle_stance">
-    <text>Cycle Stance</text>
+    <text>Переключить позицию</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_stand">
-    <text>������</text>
+    <text>Стоять</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_sneak">
-    <text>��������</text>
+    <text>Красться</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_prone">
-    <text>����</text>
+    <text>Лежать</text>
   </string>
 
-  <!-- Distance Keys -->
+  <!-- Клавиши Дистанции -->
   <string id="ui_mcm_idiots_subtitle_cycle_distance">
-    <text>Cycle Distance</text>
+    <text>Переключить дистанции</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_cover">
-    <text>������ � �������</text>
+    <text>Использовать укрытие</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_far">
-    <text>��������� �� ����������</text>
+    <text>Держаться на расстоянии</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_hurry">
-    <text>������� ���</text>
+    <text>Спешить</text>
   </string>
 
-  <!-- Combat Keys -->
+  <!-- Клавиши Боя -->
   <string id="ui_mcm_idiots_subtitle_cycle_combat">
-    <text>Cycle Combat</text>
+    <text>Переключить режим боя</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_default">
-    <text>������� ���</text>
+    <text>Обычный бой</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_monolith">
-    <text>����� "�������"</text>
+    <text>Режим "Монолит"</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_camper">
-    <text>����� "�������"</text>
+    <text>Режим "Снайпер"</text>
   </string>
 
-  <!-- Readiness Keys -->
+  <!-- Клавиши Готовности -->
   <string id="ui_mcm_idiots_subtitle_cycle_readiness">
-    <text>Cycle Readiness</text>
+    <text>Переключить поведение</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_attack">
-    <text>��������� ����</text>
+    <text>Атаковать все</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_defend">
-    <text>������ �������� �����</text>
+    <text>Ответный огонь</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_ignore">
-    <text>������������ ���</text>
+    <text>Игнорировать бой</text>
   </string>
 
-  <!-- Jobs Keys -->
+  <!-- Клавиши Задач -->
   <string id="ui_mcm_idiots_subtitle_cycle_jobs">
-    <text>Cycle Jobs</text>
+    <text>Переключить задания</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_loot_items">
-    <text>�������� ��������</text>
+  <string id="ui_mcm_idiots_subtitle_pickup">
+    <text>Собирать</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_loot_artifacts">
-    <text>� ���������</text>
+  <string id="ui_mcm_idiots_subtitle_loot">
+    <text>Обыскивать</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_loot_corpses">
-    <text>���������� �����</text>
-  </string>
-  <string id="ui_mcm_idiots_subtitle_help_wounded">
-    <text>�������� �������</text>
+  <string id="ui_mcm_idiots_subtitle_medkit">
+    <text>Помогать</text>
   </string>
 
-  <!-- Formation Keys -->
+  <!-- Клавиши Формации -->
   <string id="ui_mcm_idiots_subtitle_cycle_formation">
-    <text>Cycle Formation</text>
+    <text>Переключить построение</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_bunch">
-    <text>��������� ������</text>
-  </string>
-  <string id="ui_mcm_idiots_subtitle_spread">
-    <text>��������� ����������</text>
+  <string id="ui_mcm_idiots_subtitle_wedge">
+    <text>Вместе</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_line">
-    <text>��������� ��������</text>
+    <text>Врассыпную</text>
   </string>
-
-  <!-- List Options -->
-  <string id="ui_mcm_lst_mod_none">
-    <text>None</text>
-  </string>
-  <string id="ui_mcm_lst_mod_shift">
-    <text>SHIFT</text>
-  </string>
-  <string id="ui_mcm_lst_mod_ctrl">
-    <text>CTRL</text>
-  </string>
-  <string id="ui_mcm_lst_mod_alt">
-    <text>ALT</text>
-  </string>
-  <string id="ui_mcm_lst_mode_press">
-    <text>Single Tap</text>
-  </string>
-  <string id="ui_mcm_lst_mode_dtap">
-    <text>Double Tap</text>
-  </string>
-  <string id="ui_mcm_lst_mode_hold">
-    <text>Hold</text>
-  </string>
-  <string id="ui_mcm_lst_font_small">
-    <text>Small</text>
-  </string>
-  <string id="ui_mcm_lst_font_medium">
-    <text>Medium</text>
-  </string>
-  <string id="ui_mcm_lst_font_large">
-    <text>Large</text>
-  </string>
-  <string id="ui_mcm_lst_font_xlarge">
-    <text>Extra Large</text>
-  </string>
-  <string id="ui_mcm_lst_top">
-    <text>Top</text>
-  </string>
-  <string id="ui_mcm_lst_center">
-    <text>Center</text>
-  </string>
-  <string id="ui_mcm_lst_bottom">
-    <text>Bottom</text>
-  </string>
-  <string id="ui_mcm_lst_left">
-    <text>Left</text>
-  </string>
-  <string id="ui_mcm_lst_right">
-    <text>Right</text>
+  <string id="ui_mcm_idiots_subtitle_square">
+    <text>Колонной</text>
   </string>
 </string_table>
