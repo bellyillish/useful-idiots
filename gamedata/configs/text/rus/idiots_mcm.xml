@@ -193,27 +193,80 @@
   <string id="ui_mcm_idiots_subtitle_cycle_jobs">
     <text>Переключить задания</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_pickup">
-    <text>Собирать</text>
+  <string id="ui_mcm_idiots_subtitle_loot_items">
+    <text>Собирать вещи</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_loot">
-    <text>Обыскивать</text>
+  <string id="ui_mcm_idiots_subtitle_loot_artifacts">
+    <text>И артефакты</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_medkit">
-    <text>Помогать</text>
+  <string id="ui_mcm_idiots_subtitle_loot_corpses">
+    <text>Обыскивать трупы</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_help_wounded">
+    <text>Помогать раненым</text>
   </string>
 
   <!-- Клавиши Формации -->
   <string id="ui_mcm_idiots_subtitle_cycle_formation">
     <text>Переключить построение</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_wedge">
+  <string id="ui_mcm_idiots_subtitle_bunch">
     <text>Вместе</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_line">
+  <string id="ui_mcm_idiots_subtitle_spread">
     <text>Врассыпную</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_square">
+  <string id="ui_mcm_idiots_subtitle_line">
     <text>Колонной</text>
+  </string>
+
+  <!-- Список опций -->
+  <string id="ui_mcm_lst_mod_none">
+    <text>Не выбрано</text>
+  </string>
+  <string id="ui_mcm_lst_mod_shift">
+    <text>SHIFT</text>
+  </string>
+  <string id="ui_mcm_lst_mod_ctrl">
+    <text>CTRL</text>
+  </string>
+  <string id="ui_mcm_lst_mod_alt">
+    <text>ALT</text>
+  </string>
+  <string id="ui_mcm_lst_mode_press">
+    <text>Одно нажатие</text>
+  </string>
+  <string id="ui_mcm_lst_mode_dtap">
+    <text>Два нажатия</text>
+  </string>
+  <string id="ui_mcm_lst_mode_hold">
+    <text>Держать</text>
+  </string>
+  <string id="ui_mcm_lst_font_small">
+    <text>Маленький</text>
+  </string>
+  <string id="ui_mcm_lst_font_medium">
+    <text>Средний</text>
+  </string>
+  <string id="ui_mcm_lst_font_large">
+    <text>Большой</text>
+  </string>
+  <string id="ui_mcm_lst_font_xlarge">
+    <text>Огромный</text>
+  </string>
+  <string id="ui_mcm_lst_top">
+    <text>Верх</text>
+  </string>
+  <string id="ui_mcm_lst_center">
+    <text>Центр</text>
+  </string>
+  <string id="ui_mcm_lst_bottom">
+    <text>Низ</text>
+  </string>
+  <string id="ui_mcm_lst_left">
+    <text>Лево</text>
+  </string>
+  <string id="ui_mcm_lst_right">
+    <text>Право</text>
   </string>
 </string_table>
