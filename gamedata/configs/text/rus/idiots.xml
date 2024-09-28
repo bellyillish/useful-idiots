@@ -5,7 +5,7 @@
     <text>Все</text>
   </string>
   <string id="st_idiots_title_all">
-    <text>Все компаньоны</text>
+    <text>Все спутники</text>
   </string>
   <string id="st_idiots_point_move_message">
     <text>Движение к точке</text>
@@ -89,7 +89,7 @@
 
   <!-- Готовность -->
   <string id="st_idiots_readiness">
-    <text>Режим</text>
+    <text>Поведение</text>
   </string>
   <string id="st_idiots_readiness_attack">
     <text>Атаковать всех</text>
