@@ -230,6 +230,7 @@ function purgeCompanionStates(mdata)
     setStates(npc, GLOBAL_STATE)
     npc:disable_info_portion("npcx_beh_combat_tactics_monolith")
     npc:disable_info_portion("npcx_beh_combat_tactics_camper")
+    npc:disable_info_portion("npcx_beh_combat_tactics_zombied")
     save_var(npc, "fight_from_point", nil)
   end
 end

@@ -60,6 +60,12 @@
   <string id="ui_mcm_idiots_options_oldCombat_desc">
     <text>Enables/disables commands to put companions into "Camper" and "Monolith" combat schemes. These schemes came with Anomaly but were disabled. Note that they can be buggy and are thus unsupported. You can assign keybinds to them but they can't be activated by the "Cycle Combat" keybind.</text>
   </string>
+  <string id="ui_mcm_idiots_options_zombied">
+    <text>Enable "Zombied" combat command.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_zombied_desc">
+    <text>Enables/disables command to put companions into "Zombied" combat, the scheme Anomaly gives to zombied stalkers. This is untested and unsupported. You can assign a keybind to this but it can't be activated by the "Cycle Combat" keybind.</text>
+  </string>
 
   <!-- Jobs Options -->
   <string id="ui_mcm_idiots_subtitle_options_jobs">
@@ -190,6 +196,9 @@
   </string>
   <string id="ui_mcm_idiots_subtitle_camper">
     <text>Camper</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_zombied">
+    <text>Zombied</text>
   </string>
 
   <!-- Readiness Keys -->

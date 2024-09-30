@@ -457,6 +457,13 @@ function applyOptions(XML, config)
     end
   end
 
+  if not config.zombied then
+    local zombied = XML:queryOne("zombied")
+    if zombied then
+      XML:removeElement(zombied)
+    end
+  end
+
   if not config.jobs then
     local jobs = XML:queryOne("col[group=jobs]")
     if jobs then
@@ -493,6 +500,7 @@ function onReadHUDXML(name, XML)
 
   local config = {
     oldCombat = ui_mcm.get("idiots/options/oldCombat"),
+    zombied   = ui_mcm.get("idiots/options/zombied"),
     jobs      = ui_mcm.get("idiots/options/jobs"),
     artifacts = ui_mcm.get("idiots/options/artifacts"),
     font      = ui_mcm.get("idiots/options/font"),

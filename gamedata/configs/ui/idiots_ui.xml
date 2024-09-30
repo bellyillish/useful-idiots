@@ -50,6 +50,7 @@
         <defensive />
         <monolith />
         <camper />
+        <zombied />
       </col>
 
       <col group="readiness">

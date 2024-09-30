@@ -92,6 +92,9 @@
   <string id="st_idiots_combat_camper">
     <text>Camper Combat</text>
   </string>
+  <string id="st_idiots_combat_zombied">
+    <text>Zombied Combat</text>
+  </string>
 
   <!-- Readiness -->
   <string id="st_idiots_readiness">

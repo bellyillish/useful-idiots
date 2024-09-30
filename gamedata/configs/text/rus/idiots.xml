@@ -5,10 +5,10 @@
     <text>Все</text>
   </string>
   <string id="st_idiots_title_all">
-    <text>Все компаньоны</text>
+    <text>Все спутники</text>
   </string>
   <string id="st_idiots_point_move_message">
-    <text>Moving to Point</text>
+    <text>Двигаться к точке</text>
   </string>
 
   <!-- Titlebar Buttons -->
@@ -16,32 +16,32 @@
     <text>Синхронизировать всех</text>
   </string>
   <string id="st_idiots_reset">
-    <text>Повторная синхронизация</text>
+    <text>Синхронизировать повторно</text>
   </string>
   <string id="st_idiots_inventory">
     <text>Инвентарь</text>
   </string>
   <string id="st_idiots_clear_waypoints">
-    <text>Очистить точки маршрута</text>
+    <text>Очистить точки</text>
   </string>
   <string id="st_idiots_add_waypoint">
-    <text>Добавить точку маршрута</text>
+    <text>Добавить точку</text>
   </string>
 
   <!-- Movement -->
   <string id="st_idiots_movement">
     <text>Движение</text>
   </string>
-  <string id="st_idiots_follow">
+  <string id="st_idiots_movement_follow">
     <text>Следовать</text>
   </string>
-  <string id="st_idiots_wait">
+  <string id="st_idiots_movement_wait">
     <text>Ждать</text>
   </string>
-  <string id="st_idiots_relax">
+  <string id="st_idiots_movement_relax">
     <text>Отдыхать</text>
   </string>
-  <string id="st_idiots_patrol">
+  <string id="st_idiots_movement_patrol">
     <text>Патрулировать</text>
   </string>
 
@@ -49,28 +49,28 @@
   <string id="st_idiots_stance">
     <text>Положение</text>
   </string>
-  <string id="st_idiots_stand">
+  <string id="st_idiots_stance_stand">
     <text>Стоять</text>
   </string>
-  <string id="st_idiots_sneak">
+  <string id="st_idiots_stance_sneak">
     <text>Красться</text>
   </string>
-  <string id="st_idiots_prone">
-    <text>Лечь</text>
+  <string id="st_idiots_stance_prone">
+    <text>Лежать</text>
   </string>
 
   <!-- Distance -->
   <string id="st_idiots_distance">
     <text>Дистанция</text>
   </string>
-  <string id="st_idiots_cover">
-    <text>Встать в укрытие</text>
+  <string id="st_idiots_distance_cover">
+    <text>Использовать укрытие</text>
   </string>
-  <string id="st_idiots_far">
-    <text>Держаться на расстоянии</text>
+  <string id="st_idiots_distance_far">
+    <text>Держаться вдали</text>
   </string>
-  <string id="st_idiots_hurry">
-    <text>Быстрый бег</text>
+  <string id="st_idiots_distance_hurry">
+    <text>Спешить</text>
   </string>
 
   <!-- Combat -->
@@ -81,10 +81,10 @@
     <text>Обычный бой</text>
   </string>
   <string id="st_idiots_combat_offensive">
-    <text>Режим "Offensive"</text>
+    <text>Offensive Combat</text>
   </string>
   <string id="st_idiots_combat_defensive">
-    <text>Режим "Defensive"</text>
+    <text>Defensive Combat</text>
   </string>
   <string id="st_idiots_combat_monolith">
     <text>Режим "Монолит"</text>
@@ -92,18 +92,21 @@
   <string id="st_idiots_combat_camper">
     <text>Режим "Снайпер"</text>
   </string>
+  <string id="st_idiots_combat_zombied">
+    <text>Zombied Combat</text>
+  </string>
 
   <!-- Readiness -->
   <string id="st_idiots_readiness">
     <text>Поведение</text>
   </string>
-  <string id="st_idiots_attack">
+  <string id="st_idiots_readiness_attack">
     <text>Атаковать всех</text>
   </string>
-  <string id="st_idiots_defend">
-    <text>Только ответный огонь</text>
+  <string id="st_idiots_readiness_defend">
+    <text>Ответный огонь</text>
   </string>
-  <string id="st_idiots_ignore">
+  <string id="st_idiots_readiness_ignore">
     <text>Игнорировать бой</text>
   </string>
 
@@ -111,16 +114,16 @@
   <string id="st_idiots_jobs">
     <text>Задачи</text>
   </string>
-  <string id="st_idiots_loot_items">
+  <string id="st_idiots_jobs_loot_items">
     <text>Собирать предметы</text>
   </string>
-  <string id="st_idiots_loot_artifacts">
+  <string id="st_idiots_jobs_loot_artifacts">
     <text>И артефакты</text>
   </string>
-  <string id="st_idiots_loot_corpses">
+  <string id="st_idiots_jobs_loot_corpses">
     <text>Обыскивать трупы</text>
   </string>
-  <string id="st_idiots_help_wounded">
+  <string id="st_idiots_jobs_help_wounded">
     <text>Помогать раненым</text>
   </string>
 
@@ -128,13 +131,13 @@
   <string id="st_idiots_formation">
     <text>Построение</text>
   </string>
-  <string id="st_idiots_bunch">
-    <text>Двигаться вместе</text>
+  <string id="st_idiots_formation_bunch">
+    <text>Вместе</text>
   </string>
-  <string id="st_idiots_spread">
-    <text>Двигаться врассыпную</text>
+  <string id="st_idiots_formation_spread">
+    <text>Врассыпную</text>
   </string>
-  <string id="st_idiots_line">
-    <text>Двигаться колонной</text>
+  <string id="st_idiots_formation_line">
+    <text>Колонна</text>
   </string>
 </string_table>

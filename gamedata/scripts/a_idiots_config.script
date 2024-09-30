@@ -2,7 +2,7 @@
 package.path = package.path .. ".\\gamedata\\scripts\\?.lua;..\\gamedata\\scripts\\?.lua;"
 
 
-MDATA_VER = "0.1-beta.7"
+MDATA_VER = "0.1-beta.8"
 MDATA_KEY = "USEFUL_IDIOTS"
 
 -- companion state config
@@ -44,6 +44,7 @@ ACTIONS = {
       {name = "defensive", next = "default",   info = "npcx_beh_combat_tactics_defensive"},
       {name = "monolith",  info = "npcx_beh_combat_tactics_monolith"},
       {name = "camper",    info = "npcx_beh_combat_tactics_camper"},
+      {name = "zombied",   info = "npcx_beh_combat_tactics_zombied"},
     }
   },
   {

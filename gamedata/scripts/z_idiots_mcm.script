@@ -17,6 +17,7 @@ function getGeneralOptions()
       MCM.getLine(),
       MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_combat"}),
       MCM.getCheckboxField({id = "oldCombat"}),
+      MCM.getCheckboxField({id = "zombied"}),
       MCM.getLine(),
       MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_jobs"}),
       MCM.getCheckboxField({id = "jobs", def = true}),

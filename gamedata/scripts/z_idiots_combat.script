@@ -321,3 +321,17 @@ function xr_combat.add_to_binder(npc, ini, scheme, section, storage, temp)
 		DEFENSIVE.add_to_binder(npc, ini, storage, manager, temp)
   end
 end
+
+
+-- let companions enter "zombied" combat (for the lulz)
+local __zombied_evaluate = xr_combat_zombied.evaluator_combat_zombied.evaluate
+
+function xr_combat_zombied.evaluator_combat_zombied:evaluate()
+  local npc = self.object
+
+  if U.isCompanion(npc) and C.getState(npc, "combat", "zombied") then
+    return true
+  end
+
+  return __zombied_evaluate(self)
+end
