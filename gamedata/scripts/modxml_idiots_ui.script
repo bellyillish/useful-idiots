@@ -445,6 +445,18 @@ end
 
 
 function applyOptions(XML, config)
+  if not config.oldCombat then
+    local monolith = XML:queryOne("monolith")
+    local camper   = XML:queryOne("camper")
+
+    if monolith then
+      XML:removeElement(monolith)
+    end
+    if camper then
+      XML:removeElement(camper)
+    end
+  end
+
   if not config.jobs then
     local jobs = XML:queryOne("col[group=jobs]")
     if jobs then
@@ -480,13 +492,14 @@ function onReadHUDXML(name, XML)
   end
 
   local config = {
-    jobs       = ui_mcm.get("idiots/options/jobs"),
-    artifacts  = ui_mcm.get("idiots/options/artifacts"),
-    font       = ui_mcm.get("idiots/options/font"),
-    scaleX     = ui_mcm.get("idiots/options/scaleX"),
-    scaleY     = ui_mcm.get("idiots/options/scaleY"),
-    offsetX    = ui_mcm.get("idiots/options/offsetX"),
-    offsetY    = ui_mcm.get("idiots/options/offsetY"),
+    oldCombat = ui_mcm.get("idiots/options/oldCombat"),
+    jobs      = ui_mcm.get("idiots/options/jobs"),
+    artifacts = ui_mcm.get("idiots/options/artifacts"),
+    font      = ui_mcm.get("idiots/options/font"),
+    scaleX    = ui_mcm.get("idiots/options/scaleX"),
+    scaleY    = ui_mcm.get("idiots/options/scaleY"),
+    offsetX   = ui_mcm.get("idiots/options/offsetX"),
+    offsetY   = ui_mcm.get("idiots/options/offsetY"),
   }
 
   DXML.extendXMLObject(XML)

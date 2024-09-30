@@ -5,22 +5,26 @@ local C      = z_idiots_companions
 local Combat = z_idiots_combat
 
 
+EVAL_DEFENSIVE   = stalker_ids.property_script  + 3150
+ACTION_DEFENSIVE = xr_actions_id.chugai_actions + 150
+
+
 -- health range to trigger "EVADE"
 EVADE_HEALTH = {0.3, 0.6}
 
 
--- combat camper action
-class "action_combat_camper" (action_base)
+-- "defensive" combat action
+class "action_combat_defensive" (action_base)
 
-action_combat_camper.hit_callback = Combat.hit_callback
+action_combat_defensive.hit_callback = Combat.hit_callback
 
 
-function action_combat_camper:__init(name, storage) super(nil, name)
+function action_combat_defensive:__init(name, storage) super(nil, name)
   self.st = storage
 end
 
 
-function action_combat_camper:initialize()
+function action_combat_defensive:initialize()
   action_base.initialize(self)
 
   local npc = self.object
@@ -40,10 +44,12 @@ function action_combat_camper:initialize()
   st.reached      = false
   st.enemySeen    = false
   st.enemyPredict = false
+
+  U.updateEnemy(npc, st, true)
 end
 
 
-function action_combat_camper:updateStorage()
+function action_combat_defensive:updateStorage()
   local npc = self.object
   local st  = self.st
 
@@ -91,7 +97,7 @@ function action_combat_camper:updateStorage()
 end
 
 
-function action_combat_camper:execute()
+function action_combat_defensive:execute()
   action_base.execute(self)
   self:updateStorage()
 
@@ -100,10 +106,12 @@ function action_combat_camper:execute()
   else
     self:fight()
   end
+
+  printf("TESTING DEFENSIVE COMBAT")
 end
 
 
-function action_combat_camper:fight()
+function action_combat_defensive:fight()
   local npc = self.object
   local st  = self.st
 
@@ -137,7 +145,7 @@ function action_combat_camper:fight()
 end
 
 
-function action_combat_camper:evade()
+function action_combat_defensive:evade()
   local npc = self.object
   local st  = self.st
 
@@ -180,24 +188,24 @@ function add_to_binder(npc, ini, storage, planner, temp)
     return
   end
 
-  planner:add_evaluator(Combat.EVAL_CAMPER,
-    Combat.evaluator_combat_type("combat_camper", storage, "camper")
+  planner:add_evaluator(EVAL_DEFENSIVE,
+    Combat.evaluator_combat_type("combat_defensive", storage, "defensive")
   )
 
-  local action = action_combat_camper("combat_camper", storage)
+  local action = action_combat_defensive("combat_defensive", storage)
 
   if action then
     action:add_precondition(WP(Combat.EVAL_LOGIC, true))
     action:add_precondition(WP(Combat.EVAL_ENEMY, true))
-    action:add_precondition(WP(Combat.EVAL_CAMPER, true))
+    action:add_precondition(WP(EVAL_DEFENSIVE, true))
     action:add_precondition(WP(Combat.EVAL_FACER, false))
     action:add_precondition(WP(Combat.EVAL_FACER_STEAL_UP, false))
 
     action:add_effect(WP(Combat.EVAL_LOGIC, false))
     action:add_effect(WP(Combat.EVAL_ENEMY, false))
-    action:add_effect(WP(Combat.EVAL_CAMPER, false))
+    action:add_effect(WP(EVAL_DEFENSIVE, false))
 
-    planner:add_action(Combat.ACTION_CAMPER, action)
+    planner:add_action(ACTION_DEFENSIVE, action)
     xr_logic.subscribe_action_for_events(npc, storage, action)
   end
 end

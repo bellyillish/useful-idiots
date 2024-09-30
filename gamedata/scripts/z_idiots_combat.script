@@ -1,19 +1,14 @@
-local U = z_idiots_utils
-local C = z_idiots_companions
-
-
-EVAL_FACER          = xrs_facer.evid_facer
-EVAL_FACER_STEAL_UP = xrs_facer.evid_steal_up_facer
-EVAL_ENEMY          = stalker_ids.property_enemy
-EVAL_LOGIC          = xr_evaluators_id.state_mgr + 4
-EVAL_CAMPER         = xr_evaluators_id.combat_camper_base
-EVAL_MONOLITH       = xr_evaluators_id.combat_monolith_base
-ACTION_CAMPER       = xr_actions_id.combat_camper_base
-ACTION_MONOLITH     = xr_actions_id.combat_monolith_base
-
-
+local U                 = z_idiots_utils
+local C                 = z_idiots_companions
+local OFFENSIVE         = z_idiots_combat_offensive
+local DEFENSIVE         = z_idiots_combat_defensive
 local __combat_evaluate = xr_combat.evaluator_check_combat.evaluate
 local __is_enemy        = xr_combat_ignore.is_enemy
+local __add_to_binder   = xr_combat.add_to_binder
+EVAL_FACER              = xrs_facer.evid_facer
+EVAL_FACER_STEAL_UP     = xrs_facer.evid_steal_up_facer
+EVAL_ENEMY              = stalker_ids.property_enemy
+EVAL_LOGIC              = xr_evaluators_id.state_mgr + 4
 
 
 -- utils: combat --
@@ -69,7 +64,7 @@ COMBAT_ANIMATIONS = {
 }
 
 
-function U.updateEnemy(npc, st)
+function U.updateEnemy(npc, st, forcePos)
   local enemy = npc:best_enemy()
 
   st.enemyID      = nil
@@ -85,7 +80,7 @@ function U.updateEnemy(npc, st)
     return
   end
 
-  st.enemySeen    = npc:see(enemy)
+  st.enemySeen    = npc:see(enemy) or forcePos
   st.enemyPredict = st.seeTime and time_global() <= st.seeTime
 
   local newPos = nil
@@ -243,7 +238,8 @@ end
 
 
 -- fix: update combat type before evaluating
--- prevents NPCs from getting permanently stuck in scripted combat
+-- makes condlists work with combat types
+-- which prevents NPCs from getting stuck in scripted combat
 function xr_combat.evaluator_check_combat:evaluate()
   xr_combat.set_combat_type(self.object, db.actor, self.st)
   return __combat_evaluate(self)
@@ -305,4 +301,23 @@ function xr_combat_ignore.is_enemy(npc, enemy, no_memory)
   UnregisterScriptCallback("on_enemy_eval", disableCompanionInfo)
 
   return isEnemy
+end
+
+
+function xr_combat.add_to_binder(npc, ini, scheme, section, storage, temp)
+  __add_to_binder(npc, ini, scheme, section, storage, temp)
+
+  if not U.isCompanion(npc) then
+    return
+  end
+
+  local manager = npc:motivation_action_manager()
+  if not manager then
+    return
+  end
+
+  if temp.section then
+		OFFENSIVE.add_to_binder(npc, ini, storage, manager, temp)
+		DEFENSIVE.add_to_binder(npc, ini, storage, manager, temp)
+  end
 end

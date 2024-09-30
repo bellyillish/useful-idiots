@@ -80,8 +80,8 @@ end
 function xr_corpse_detection.add_to_binder(npc, ...)
   __corpse_add_to_binder(npc, ...)
 
-  local npcLooting = ui_mcm.get("idiots/options/npcLooting")
-  if npcLooting then
+  local noNpcLooting = ui_mcm.get("idiots/options/noNpcLooting")
+  if not noNpcLooting then
     return
   end
 
@@ -119,8 +119,8 @@ end
 function xr_gather_items.add_to_binder(npc, ...)
   __gather_add_to_binder(npc, ...)
 
-  local npcLooting = ui_mcm.get("idiots/options/npcLooting")
-  if npcLooting then
+  local noNpcLooting = ui_mcm.get("idiots/options/noNpcLooting")
+  if not noNpcLooting then
     return
   end
 

@@ -48,9 +48,7 @@ Overhauls the companion system for Anomaly/GAMMA. It includes a new UI, fixes se
 #### 1. Default Combat
 The original, engine-based combat system that companions used before.
 
-#### 3. Monolith Combat
-This existed in the code but was disabled. And for good reason as it was rudimentary and very buggy. I've completely rewritten this scheme but tried to keep the spirit of what the original author intended:
-
+#### 3. Offensive Combat
   1. When far from the enemy, the companion will move to a spot (random but roughly half way) between them and the enemy. They will use cover if possible.
   2. At medium distance, they will move directly to a spot that's at close range to the enemy (random but roughly 20m). Again they will use cover if possible.
   3. At close range they will keep moving around the enemy using any close cover.
@@ -59,14 +57,12 @@ This existed in the code but was disabled. And for good reason as it was rudimen
   6. When reloading they will duck or move behind close cover.
   7. They will crouch behind low cover and stand behind high cover when engaging.
 
-#### 4. Camper Combat
-Like Monolith Combat, this also existed but was disabled. I also rewrote this trying to keep the spirit of the original:
-
+#### 4. Defensive Combat
   1. If not "prone", companions will look for cover near their initial position.
   2. If significantly injured, they will retreat to a safe place and recover. They will keep moving if pursued.
   3. Every so often they will move to a new position but will always be tethered to within ~8m of their initial position.
 
-**Note:** for Monolith and Camper Combat, companions "share" enemy positions with each other. If a companion loses sight of an enemy while fighting, as long as any other companion (or the player) sees that enemy they will be aware of the enemy's current position.
+**Note:** for Offensive and Defensive Combat, companions "share" enemy positions with each other. If a companion loses sight of an enemy while fighting, as long as any other companion (or the player) sees that enemy they will be aware of the enemy's current position.
 
 ### Choose Between 3 Combat Readiness Modes:
 ---
@@ -97,7 +93,7 @@ Also, this mod enables the features below for companions only and disables them 
 - Fixes various issues with "prone" animations.
 - Fixes issue with companions stopping at their last patrol waypoint.
 - Fixes many (but not all or even most) issues with companions getting stuck behind obstacles/objects while moving to a destination.
-- Fixes a bug causing companions to get stuck in scripted combat permanently and become unresponsive.
+- Fixes a potential bug causing npcs to get stuck in a scripted combat scheme and ignore their condlist.
 - Fixes a bug causing companions and enemies to ignore eachother when the companion is sneaking and they are within 30m of each other.
 - Fixes various issues/inconsistencies with companion state setters in `axr_companions` and `dialogs_axr_companion`. It does so by using its own code lib to manage companion states.
 - Fixes various issues with incorrect/bad values in various ltx files in both Anomaly and GAMMA.

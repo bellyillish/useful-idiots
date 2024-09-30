@@ -50,6 +50,17 @@
     <text>Enables/disables the tab number indicators that appear above companions when the UI is open.</text>
   </string>
 
+  <!-- Combat Options -->
+  <string id="ui_mcm_idiots_subtitle_options_combat">
+    <text>Combat Options</text>
+  </string>
+  <string id="ui_mcm_idiots_options_oldCombat">
+    <text>Enable "Camper" and "Monolith" combat commands.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_oldCombat_desc">
+    <text>Enables/disables commands to put companions into "Camper" and "Monolith" combat schemes. These schemes came with Anomaly but were disabled. Note that they can be buggy and are thus unsupported. You can assign keybinds to them but they can't be activated by the "Cycle Combat" keybind.</text>
+  </string>
+
   <!-- Jobs Options -->
   <string id="ui_mcm_idiots_subtitle_options_jobs">
     <text>Looting and Gathering Options</text>
@@ -63,10 +74,10 @@
   <string id="ui_mcm_idiots_options_jobs_note">
     <text>NOTE: For looting and gathering to work properly in GAMMA, "311 NPC Stop Looting Dead Bodies" must be disabled.</text>
   </string>
-  <string id="ui_mcm_idiots_options_npcLooting">
+  <string id="ui_mcm_idiots_options_noNpcLooting">
     <text>Only Companions Can Loot and Gather Items</text>
   </string>
-  <string id="ui_mcm_idiots_options_npcLooting_desc">
+  <string id="ui_mcm_idiots_options_noNpcLooting_desc">
     <text>Enables/disables the ability for non-companion NPCs to loot and gather items. To preserve existing behavior, this would be ticked for GAMMA and unticked for Anomaly.</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts">
@@ -167,6 +178,12 @@
   </string>
   <string id="ui_mcm_idiots_subtitle_default">
     <text>Обычный бой</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_offensive">
+    <text>Режим "Offensive"</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_defensive">
+    <text>Режим "Defensive"</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_monolith">
     <text>Режим "Монолит"</text>

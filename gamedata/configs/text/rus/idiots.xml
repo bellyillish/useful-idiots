@@ -30,7 +30,7 @@
 
   <!-- Movement -->
   <string id="st_idiots_movement">
-    <text>Movement</text>
+    <text>Движение</text>
   </string>
   <string id="st_idiots_follow">
     <text>Следовать</text>
@@ -47,7 +47,7 @@
 
   <!-- Stances -->
   <string id="st_idiots_stance">
-    <text>Stance</text>
+    <text>Положение</text>
   </string>
   <string id="st_idiots_stand">
     <text>Стоять</text>
@@ -61,7 +61,7 @@
 
   <!-- Distance -->
   <string id="st_idiots_distance">
-    <text>Distance</text>
+    <text>Дистанция</text>
   </string>
   <string id="st_idiots_cover">
     <text>Встать в укрытие</text>
@@ -75,10 +75,16 @@
 
   <!-- Combat -->
   <string id="st_idiots_combat">
-    <text>Combat</text>
+    <text>Бой</text>
   </string>
   <string id="st_idiots_combat_default">
     <text>Обычный бой</text>
+  </string>
+  <string id="st_idiots_combat_offensive">
+    <text>Режим "Offensive"</text>
+  </string>
+  <string id="st_idiots_combat_defensive">
+    <text>Режим "Defensive"</text>
   </string>
   <string id="st_idiots_combat_monolith">
     <text>Режим "Монолит"</text>
@@ -89,7 +95,7 @@
 
   <!-- Readiness -->
   <string id="st_idiots_readiness">
-    <text>Readiness</text>
+    <text>Поведение</text>
   </string>
   <string id="st_idiots_attack">
     <text>Атаковать всех</text>
@@ -103,7 +109,7 @@
 
   <!-- Jobs -->
   <string id="st_idiots_jobs">
-    <text>Jobs</text>
+    <text>Задачи</text>
   </string>
   <string id="st_idiots_loot_items">
     <text>Собирать предметы</text>
@@ -120,7 +126,7 @@
 
   <!-- Formations -->
   <string id="st_idiots_formation">
-    <text>Formation</text>
+    <text>Построение</text>
   </string>
   <string id="st_idiots_bunch">
     <text>Двигаться вместе</text>

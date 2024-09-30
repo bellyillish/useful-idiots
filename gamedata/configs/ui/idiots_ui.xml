@@ -46,6 +46,8 @@
 
       <col group="combat">
         <default />
+        <offensive />
+        <defensive />
         <monolith />
         <camper />
       </col>

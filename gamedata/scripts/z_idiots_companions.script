@@ -228,6 +228,8 @@ function purgeCompanionStates(mdata)
 
   for i, npc in ipairs(U.getCompanions()) do
     setStates(npc, GLOBAL_STATE)
+    npc:disable_info_portion("npcx_beh_combat_tactics_monolith")
+    npc:disable_info_portion("npcx_beh_combat_tactics_camper")
     save_var(npc, "fight_from_point", nil)
   end
 end

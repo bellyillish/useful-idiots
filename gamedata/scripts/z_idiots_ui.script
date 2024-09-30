@@ -688,7 +688,7 @@ function onKeybindEvent(event, dik)
           return
         end
 
-        if group == "combat" and action == "camper" then
+        if group == "combat" and action == "defensive" then
           UnregisterScriptCallback("idiots_on_state", fn)
           db.storage[id].combat.moveToPoint = nil
         end
@@ -704,7 +704,7 @@ function onKeybindEvent(event, dik)
     end
 
     C.setState(nil, "movement", "wait", true)
-    C.setState(nil, "combat", "camper", true)
+    C.setState(nil, "combat", "defensive", true)
 
     actor_menu.set_msg(1, "st_idiots_point_move_message", 8)
 

@@ -80,6 +80,12 @@
   <string id="st_idiots_combat_default">
     <text>Default Combat</text>
   </string>
+  <string id="st_idiots_combat_offensive">
+    <text>Offensive Combat</text>
+  </string>
+  <string id="st_idiots_combat_defensive">
+    <text>Defensive Combat</text>
+  </string>
   <string id="st_idiots_combat_monolith">
     <text>Monolith Combat</text>
   </string>
