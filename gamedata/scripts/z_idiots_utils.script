@@ -1,4 +1,5 @@
-local C = z_idiots_companions
+local C     = z_idiots_companions
+local TABLE = require "illish.table"
 
 
 INVALID_LVID = 4294967295
@@ -21,61 +22,6 @@ function throttle(fn, ms1, ms2)
     end
 
     return result
-  end
-end
-
-
-function merge(...)
-  local args   = {...}
-  local result = {}
-
-  for _, arg in ipairs(args) do
-    for key, value in pairs(arg) do
-      result[key] = value
-    end
-  end
-
-  return result
-end
-
-
-function imerge(...)
-  local args   = {...}
-  local result = {}
-
-  for _, arg in ipairs(args) do
-    for _, value in ipairs(arg) do
-      result[#result + 1] = value
-    end
-  end
-
-  return result
-end
-
-
-function ipairscb(tbl, callback)
-  local results
-
-  for index, value in ipairs(tbl) do
-    local rvalue = callback(value, index, tbl)
-
-    if rvalue then
-      if not results then
-        results = {}
-      end
-      table.insert(results, rvalue)
-    end
-  end
-
-  return results
-end
-
-
-function keyof(obj, value)
-  for k, v in pairs(obj) do
-    if v == value or type(value) == "function" and value(v) then
-      return k
-    end
   end
 end
 
@@ -145,10 +91,41 @@ function vectorAverage(vectors)
 end
 
 
+function vectorRandomize(pos, radius)
+  if radius == 0 then
+    return pos
+  end
+  return vec(pos):add(
+    randomRotate():mul(random(0, radius or 1, 1))
+  )
+end
+
+
 function randomRotate(vector, range)
   return vector_rotate_y(vector or vec(1, 0, 0), randomRange(range or 180))
 end
 
+
+function getRayDistance(pos, dir, range, flags, cap)
+  local ray = ray_pick()
+
+  ray:set_position(pos)
+  ray:set_direction(dir)
+  ray:set_range(range)
+  ray:set_flags(flags or 15)
+  ray:query()
+
+  local dist = ray:get_distance()
+
+  if cap ~= false and dist == 0 then
+    dist = range
+  end
+
+  return dist
+end
+
+
+--  --
 
 function isValidLVID(npc, vid)
   return npc and vid
@@ -158,50 +135,15 @@ end
 
 
 function isUnclaimedLVID(npc, vid)
+  local minDist = 0.4
+
   if not isValidLVID(npc, vid) then
-    return false
-  end
-
-  return USED_LVIDS[vid] == nil or USED_LVIDS[vid] == npc:id()
-end
-
-
-function isFreeLVID(npc, vid, minDist)
-  minDist = minDist or 0.8
-
-  if not isUnclaimedLVID(npc, vid) then
-    return false
-  end
-
-  local pos = lvpos(vid)
-  local crowded = false
-
-  level.iterate_nearest(pos, 1, function(obj)
-    if not obj:is_stalker() or obj:id() == npc:id() or crowded then
-      return
-    end
-
-    local objPos  = obj:position()
-    local usedVid = keyof(USED_LVIDS, obj:id())
-
-    if usedVid and usedVid ~= vid then
-      objPos = lvpos(usedVid)
-    end
-
-    local dist = objPos:distance_to(pos)
-
-    if dist < minDist then
-      crowded = true
-    end
-  end)
-
-  if crowded then
     return false
   end
 
   for v, n in pairs(USED_LVIDS) do
     if n ~= npc:id() then
-      if lvpos(v):distance_to(pos) < minDist then
+      if v == vid or lvpos(v):distance_to(lvpos(vid)) < minDist then
         return false
       end
     end
@@ -211,28 +153,50 @@ function isFreeLVID(npc, vid, minDist)
 end
 
 
-function claimLVID(npc, vid)
-  if type(npc) == "number" then
-    npc = getNPC(npc)
+function isUnoccupiedLVID(npc, vid,  minSpace)
+  minSpace = minSpace or 0.8
+
+  if not isUnclaimedLVID(npc, vid) then
+    return false
   end
 
-  unclaimLVID(npc)
+  local pos = lvpos(vid)
+  local occupied = false
 
+  level.iterate_nearest(pos, minSpace + 0.1, function(obj)
+    if not obj:is_stalker() or obj:id() == npc:id() or occupied then
+      return
+    end
+
+    local objPos  = obj:position()
+    local usedVid = TABLE.keyof(USED_LVIDS, obj:id())
+
+    if usedVid and usedVid ~= vid then
+      objPos = lvpos(usedVid)
+    end
+
+    local dist = objPos:distance_to(pos)
+
+    if dist < minSpace then
+      occupied = true
+    end
+  end)
+
+  return not occupied
+end
+
+
+function claimLVID(npc, vid)
   if not (npc and vid) then
-    abort("ERROR: invalid args passed to claimLVID")
-    callstack()
     return
   end
 
+  unclaimLVID(npc)
   USED_LVIDS[vid] = npc:id()
 end
 
 
 function unclaimLVID(npc, vid)
-  if type(npc) == "number" then
-    npc = getNPC(npc)
-  end
-
   if not npc then
     return
   end
@@ -251,29 +215,18 @@ end
 
 
 function setDestination(npc, vid)
-  if type(npc) == "number" then
-    npc = getNPC(npc)
-  end
-
   if not npc then
-    abort("ERROR: invalid args passed to setDestination")
-    callstack()
     return
   end
 
   clearDestination(npc)
   npc:set_dest_level_vertex_id(vid)
+  claimLVID(npc, vid)
 end
 
 
 function clearDestination(npc)
-  if type(npc) == "number" then
-    npc = getNPC(npc)
-  end
-
   if not npc then
-    abort("ERROR: invalid arg passed to clearDestination")
-    callstack()
     return
   end
 
@@ -281,80 +234,41 @@ function clearDestination(npc)
   npc:set_desired_position()
   npc:set_path_type(game_object.level_path)
   npc:set_detail_path_type(move.line)
+  unclaimLVID(npc)
 end
 
 
-function vertexBetween(v1, v2, mag)
-  mag = mag or v1:distance_to(v2)
-  return level.vertex_in_direction(lvid(v1), vdir(v1, v2), mag)
-end
+--  --
 
+function bestOpenLVID(npc, pos, validator, minSpace)
+  -- BETA disable
+  if ui_mcm.get("idiots/beta/legacyPathing") then
+    return defaultLVID(npc, npc:position(), pos, validator)
+  end
+  --
 
-function insideLVID(npc, pos, validator)
-  if not (npc and pos and type(validator) == "function") then
+  minSpace = minSpace or 1
+
+  if not (npc and pos and validator) then
     return INVALID_LVID
   end
 
-  local apos = db.actor:position()
-  local dist = math.floor(apos:distance_to(pos))
+  local directions  = 8
+  local maxDistance = 8
 
-  while dist >= 0 do
-    local vid = vertexBetween(apos, pos, dist)
-    if validator(npc, vid) then
-      return vid
-    end
+  local baseAngle = 360 / directions
+  local baseDir   = vdir(npc:position(), pos)
 
-    dist = dist - 1
-  end
+  for dist = 0, maxDistance, minSpace do
+    for index = 0, directions - 1 do
+      for _, flip in ipairs({-1, 1}) do
+        local dir = vector_rotate_y(baseDir, baseAngle * index * flip)
+        local vid = lvid(vectorOffset(pos, dir, dist))
 
-  local vid = vertexBetween(npc:position(), pos)
-  if validator(npc, vid) then
-    return vid
-  end
-
-  return npc:level_vertex_id()
-end
-
-
-function insideValidLVID(npc, pos)
-  return insideLVID(npc, pos, isValidLVID)
-end
-
-
-function insideUnclaimedLVID(npc, pos)
-  return insideLVID(npc, pos, isUnclaimedLVID)
-end
-
-
-function insideFreeLVID(npc, pos)
-  return insideLVID(npc, pos, isFreeLVID)
-end
-
-
-function closestLVID(npc, pos, validator)
-  if not (npc and pos and type(validator) == "function") then
-    return INVALID_LVID
-  end
-
-  local vid = lvid(pos)
-
-  if validator(npc, vid) then
-    return vid
-  end
-
-  vid = vertexBetween(npc:position(), pos)
-
-  if not isValidLVID(npc, vid) then
-    vid = npc:level_vertex_id()
-  end
-
-  local dist = math.floor(lvpos(vid):distance_to(pos))
-  local dir  = vdir(pos, lvpos(vid))
-
-  for mag = 0, dist do
-    vid = lvid(vectorOffset(pos, dir, mag))
-    if isFreeLVID(npc, vid) then
-      return vid
+        if validator(npc, vid, minSpace) then
+          return vid
+        end
+      end
     end
   end
 
@@ -362,18 +276,124 @@ function closestLVID(npc, pos, validator)
 end
 
 
-function closestValidLVID(npc, pos)
-  return closestLVID(npc, pos, isValidLVID)
+function bestOpenValidLVID(npc, pos)
+  return bestOpenLVID(npc, pos, isValidLVID)
 end
 
 
-function closestUnclaimedLVID(npc, pos)
-  return closestLVID(npc, pos, isUnclaimedLVID)
+function bestOpenUnclaimedLVID(npc, pos)
+  return bestOpenLVID(npc, pos, isUnclaimedLVID)
 end
 
 
-function closestFreeLVID(npc, pos)
-  return closestLVID(npc, pos, isFreeLVID)
+function bestOpenUnoccupiedLVID(npc, pos, minSpace)
+  return bestOpenLVID(npc, pos, isUnoccupiedLVID, minSpace)
+end
+
+
+function bestEnclosedLVID(npc, pos, validator, minSpace)
+  -- BETA disable
+  if ui_mcm.get("idiots/beta/legacyPathing") then
+    return defaultLVID(npc, db.actor:position(), pos, validator)
+  end
+  --
+
+  minSpace = minSpace or 1
+
+  if not (npc and pos and validator) then
+    return INVALID_LVID
+  end
+
+  local rayHeight = 1.9
+
+  local basePos  = vec(db.actor:position()):add(0, rayHeight, 0)
+  local baseDist = basePos:distance_to_xz(pos)
+
+  local baseDir = vdir(basePos, pos)
+  baseDir.y = 0
+
+  local rayDist = getRayDistance(basePos, baseDir, baseDist)
+  local dist = rayDist
+
+  while dist > 0 do
+    local vid = lvid(vectorOffset(basePos, baseDir, dist))
+
+    if validator(npc, vid, minSpace) then
+      return vid
+    end
+
+    dist = dist - minSpace
+  end
+
+  return INVALID_LVID
+end
+
+
+function bestEnclosedValidLVID(npc, pos)
+  return bestEnclosedLVID(npc, pos, isValidLVID)
+end
+
+
+function bestEnclosedUnclaimedLVID(npc, pos)
+  return bestEnclosedLVID(npc, pos, isUnclaimedLVID)
+end
+
+
+function bestEnclosedUnoccupiedLVID(npc, pos, minSpace)
+  return bestEnclosedLVID(npc, pos, isUnoccupiedLVID, minSpace)
+end
+
+
+function defaultLVID(npc, basePos, pos, validator, minDist)
+  minDist = minDist or 1
+
+  if not (npc and basePos and pos and validator) then
+    return INVALID_LVID
+  end
+
+  local baseDist = basePos:distance_to_xz(pos)
+  local dist     = baseDist
+
+  while dist > 0 do
+    local vid = level.vertex_in_direction(lvid(basePos), vdir(basePos, pos), dist)
+    if validator(npc, vid, minDist) then
+      return vid
+    end
+
+    dist = dist - minDist
+  end
+
+  return INVALID_LVID
+end
+
+
+function defaultOpenValidLVID(npc, pos)
+  return defaultLVID(npc, npc:position(), pos, isValidLVID)
+end
+
+
+function defaultOpenUnclaimedLVID(npc, pos)
+  return defaultLVID(npc, npc:position(), pos, isUnclaimedLVID)
+end
+
+
+function defaultOpenUnoccupiedLVID(npc, pos, minSpace)
+  return defaultLVID(npc, npc:position(), pos, isUnoccupiedLVID, minSpace)
+end
+
+
+function defaultEnclosedValidLVID(npc, pos)
+  return defaultLVID(npc, db.actor:position(), pos, isValidLVID)
+end
+
+
+function defaultEnclosedUnclaimedLVID(npc, pos)
+  return defaultLVID(npc, db.actor:position(), pos, isUnclaimedLVID)
+end
+
+
+function defaultEnclosedUnoccupiedLVID(npc, pos, minSpace)
+  return defaultLVID(npc, db.actor:position(), pos, isUnoccupiedLVID, minSpace)
 end
 
 
@@ -437,6 +457,33 @@ function getCompanions()
 end
 
 
+function getCompanionsInTheWay()
+  local pathWidth = 1.2
+  local maxDist   = 12
+
+  local companions = {}
+
+  for i, npc in ipairs(getCompanions()) do
+    local dist     = distance_between(db.actor, npc)
+    local minAngle = math.abs(math.deg(math.tan(pathWidth / 2 / dist)))
+    local dir      = vdir(db.actor:position(), npc:position())
+    local angle1   = math.deg(db.actor:direction():getH())
+    local angle2   = math.deg(dir:getH())
+    local angle    = math.abs(angle2 - angle1)
+
+    if dist <= maxDist and angle < minAngle then
+      companions[#companions + 1] = npc
+    end
+  end
+
+  table.sort(companions, function(a, b)
+    return distance_between(a, db.actor) > distance_between(b, db.actor)
+  end)
+
+  return companions
+end
+
+
 function getFollowers()
   local following = {}
 
@@ -450,35 +497,48 @@ function getFollowers()
 end
 
 
-function getTargetCompanion()
-  local target = level.get_target_obj()
-  local dist   = 8
+function getTargetCompanion(maxDist)
+  local npc = level.get_target_obj()
 
-  return isCompanion(target)
-    and distance_between(target, db.actor) <= dist
-    and target or nil
+  if not isCompanion(npc) then
+    return
+  end
+
+  if maxDist and distance_between(db.actor, npc) > maxDist then
+    return
+  end
+
+  return npc
 end
 
 
-function indexOfCompanion(id)
-  if type(id.id) == "function" then
-    id = id:id()
+function indexOfCompanion(npc)
+  if type(npc) == "number" then
+    npc = getNPC(npc)
   end
-
-  return keyof(getCompanions(), function(npc)
-    return npc:id() == id
-  end)
+  if not npc then
+    return
+  end
+  for i, companion in ipairs(getCompanions()) do
+    if companion:id() == npc:id() then
+      return i
+    end
+  end
 end
 
 
-function indexOfFollower(id)
-  if type(id.id) == "function" then
-    id = id:id()
+function indexOfFollower(npc)
+  if type(npc) == "number" then
+    npc = getNPC(npc)
   end
-
-  return keyof(getFollowers(), function(npc)
-    return npc:id() == id
-  end)
+  if not npc then
+    return
+  end
+  for i, follower in ipairs(getFollowers()) do
+    if follower:id() == npc:id() then
+      return i
+    end
+  end
 end
 
 
@@ -519,7 +579,7 @@ function setInfoPortion(npc, info, enabled)
 end
 
 
--- utils: cover --
+--  --
 
 function evaluateCover(npc, enemyPos)
   if not npc then
@@ -538,6 +598,7 @@ function evaluateCover(npc, enemyPos)
     high = {vec(pos), vec(enemyPos), 1.60},
   }
 
+  enemyPos.y = enemyPos.y + positions.high[3]
   local covers = {}
 
   for k, v in pairs(positions) do
@@ -564,28 +625,78 @@ function evaluateCover(npc, enemyPos)
 end
 
 
+function evaluateSurroundings(pos, ops)
+  -- BETA disable
+  if ui_mcm.get("idiots/beta/noSpatial") then
+    return {type = "enclosed", average = 0}
+  end
+  --
+
+  ops = TABLE.merge({
+    height     = 1.9,
+    flags      = 15,
+    maxDist    = 16,
+    rayCount   = 16,
+    openRange  = 9.8,
+    closeRange = 3.2,
+  }, ops)
+
+  local rayPos = vec(pos):add(0, ops.height, 0)
+  local angle  = 360 / ops.rayCount
+  local dir    = vec(1, 0, 0)
+
+  local distances = {}
+
+  for index = 1, ops.rayCount do
+    local rayDir = vector_rotate_y(vec(dir), -angle * (index - 1))
+    local dist   = round(getRayDistance(rayPos, rayDir, ops.maxDist, ops.flags), 1)
+
+    distances[index] = dist
+  end
+
+  table.sort(distances)
+  local cullCount = round(ops.rayCount / 10)
+
+  for i = 1, cullCount do
+    table.remove(distances, 1)
+    table.remove(distances, #distances)
+  end
+
+  local avg = TABLE.average(distances)
+
+  local type = avg >= ops.openRange
+    and "open"
+    or  avg >= ops.closeRange
+    and "enclosed"
+    or  "cramped"
+
+  return {type = type, average = avg}
+end
+
+
 function findSafeCover(npc, ops)
-  ops = merge({
+  ops = TABLE.merge({
     position = npc:position(),
     radius   = 32,
     minDist  = 1,
+    minSpace = 1,
   }, ops)
 
   local cover = npc:safe_cover(ops.position, ops.radius, ops.minDist)
 
   if cover then
-    return closestFreeLVID(npc, cover:position())
+    return bestOpenUnoccupiedLVID(npc, cover:position(), ops.minSpace)
   end
 
   return INVALID_LVID
 end
 
 
-function findBestCover(npc, enemyPos)
+function findBestCover(npc, enemyPos, minSpace)
   local cover = npc:find_best_cover(enemyPos or db.actor:position())
 
   if cover then
-    return closestFreeLVID(npc, cover:position())
+    return bestOpenUnoccupiedLVID(npc, cover:position(), minSpace or 1)
   end
 
   return INVALID_LVID
@@ -593,12 +704,13 @@ end
 
 
 function findCover(npc, ops)
-  ops = merge({
+  ops = TABLE.merge({
     position  = npc:position(),
     enemyPos  = db.actor:position(),
     maxRadius = 32,
     radius    = 8,
     distance  = 0,
+    minSpace  = 1,
   }, ops)
 
   local dir = vdir(ops.position, ops.enemyPos):invert()
@@ -610,7 +722,7 @@ function findCover(npc, ops)
     local cover = npc:best_cover(pos, ops.enemyPos, radius, 1, 128)
 
     if cover then
-      return closestFreeLVID(npc, cover:position())
+      return bestOpenUnoccupiedLVID(npc, cover:position(), ops.minSpace)
     end
 
     if radius >= ops.maxRadius then
@@ -624,18 +736,94 @@ function findCover(npc, ops)
 end
 
 
--- xr_conditions --
+function moveToPoint(npc, pos, radius, minSpace)
+  if type(npc) == "number" then
+    npc = getCompanion(npc)
+  end
 
-function xr_conditions.actor_crouch()
-  return IsMoveState("mcCrouch")
+  minSpace = minSpace or 2
+  radius   = radius   or 2
+
+  local randPos = vectorRandomize(pos, radius)
+  local vid     = bestEnclosedUnoccupiedLVID(npc, randPos, minSpace)
+
+  if not isValidLVID(npc, vid) then
+    return
+  end
+
+  local st = db.storage[npc:id()]
+
+  if st.enemy then
+    st.combat.movePoint = vid
+  else
+    st.beh.movePoint  = vid
+    st.beh.rally_lvid = vid
+  end
+
+  claimLVID(npc, vid)
 end
 
 
-function xr_conditions.actor_prone()
-  return IsMoveState("mcCrouch") and IsMoveState("mcAccel")
-end
+function moveOutOfTheWay(npc, ops)
+  ops = TABLE.merge({
+    moveState  = "sprint",
+    range      = 180,
+    attempts   = 8,
+    minDist    = 1.2,
+    strafeDist = 2.4,
+    backDist   = 8,
+  }, ops)
 
+  local baseDir = vdir(db.actor:position(), npc:position())
+  local flip    = random(0, 1) * 2 - 1
+  local angles  = {}
 
-function xr_conditions.following_actor(actor, npc)
-  return isFollowing(npc)
+  local bestVid
+  local bestDist = 0
+
+  for i = 0, ops.attempts do
+    angles[#angles + 1] = (i * (ops.range / ops.attempts) - ops.range / 2) * flip
+  end
+
+  table.sort(angles, function(a, b)
+    return math.abs(a) > math.abs(b)
+  end)
+
+  for i, angle in ipairs(angles) do
+    local idealDist = math.abs(angle) > 30
+      and ops.strafeDist
+      or  ops.backDist
+
+    local dir    = vector_rotate_y(baseDir, angle)
+    local rawpos = vectorOffset(npc:position(), dir, idealDist)
+    local vid    = defaultOpenValidLVID(npc, rawpos)
+    local dist   = npc:position():distance_to(lvpos(vid))
+
+    if isValidLVID(npc, vid) then
+      if dist > bestDist then
+        bestVid  = vid
+        bestDist = dist
+      end
+
+      if dist >= ops.minDist then
+        break
+      end
+    end
+  end
+
+  if not bestVid then
+    return
+  end
+
+  local st = db.storage[npc:id()]
+
+  if st.enemy then
+    st.combat.movePoint = bestVid
+  else
+    st.beh.moveState  = ops.moveState
+    st.beh.movePoint  = bestVid
+    st.beh.rally_lvid = bestVid
+  end
+
+  claimLVID(npc, bestVid)
 end

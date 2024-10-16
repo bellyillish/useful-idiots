@@ -83,4 +83,29 @@ function TABLE.reverse(tbl)
 end
 
 
+function TABLE.shuffle(tbl)
+  local shuffled = dup_table(tbl)
+
+  for index = #shuffled, 2, -1 do
+    local rand = math.random(index)
+    shuffled[index], shuffled[rand] = shuffled[rand], shuffled[index]
+  end
+
+  return shuffled
+end
+
+
+function TABLE.average(tbl)
+  local sum   = 0
+  local count = 0
+
+  for k, value in pairs(tbl) do
+    sum = sum + value
+    count = count + 1
+  end
+
+  return sum / count
+end
+
+
 return TABLE

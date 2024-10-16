@@ -52,7 +52,7 @@ COMBAT_ANIMATIONS = {
       snipe  = "prone_sniper_fire",
       fire   = "prone_fire",
       reload = "prone_fire",
-      hold   = "prone_idle",
+      hold   = "prone",
     },
     move = {
       snipe  = "sneak_fire",
@@ -80,12 +80,12 @@ function U.updateEnemy(npc, st, forcePos)
     return
   end
 
-  st.enemySeen    = npc:see(enemy) or forcePos
+  st.enemySeen    = npc:see(enemy)
   st.enemyPredict = st.seeTime and time_global() <= st.seeTime
 
   local newPos = nil
 
-  if st.enemySeen then
+  if st.enemySeen or forcePos then
     U.resetEnemyTimers(st)
     newPos = enemy:position()
 
@@ -116,6 +116,10 @@ end
 
 
 function U.getCombatMoveState(npc, st)
+  if st.moveState then
+    return st.moveState
+  end
+
   local cover = st.coverFn(npc, st.enemyPos)
   local keys  = {"stand", "idle", "hold"}
 
@@ -205,6 +209,18 @@ function U.squadSeesEnemy(npc, enemy)
 end
 
 
+function U.checkForGrenade(npc, radius)
+  local liveGrenade = false
+  radius = radius or 10
+
+  level.iterate_nearest(npc:position(), radius, function(thing)
+    if IsGrenade(thing) and thing:name() == thing:section() then
+      liveGrenade = true
+    end
+  end)
+end
+
+
 -- shared scripted combat evaluator
 class "evaluator_combat_type" (property_evaluator)
 
@@ -216,7 +232,18 @@ end
 
 
 function evaluator_combat_type:evaluate()
-  return db.storage[self.object:id()].script_combat_type == self.type
+  local npc  = self.object
+
+  --[[]
+  local bd   = npc:best_danger()
+  local flag = db.storage[npc:id()].danger_flag
+
+  if bd and bd:type() == danger_object.grenade and flag then
+    return false
+  end
+  --]]
+
+  return db.storage[npc:id()].script_combat_type == self.type
 end
 
 
@@ -327,9 +354,10 @@ end
 local __zombied_evaluate = xr_combat_zombied.evaluator_combat_zombied.evaluate
 
 function xr_combat_zombied.evaluator_combat_zombied:evaluate()
-  local npc = self.object
+  local npc     = self.object
+  local enabled = ui_mcm.get("idiots/options/zombied")
 
-  if U.isCompanion(npc) and C.getState(npc, "combat", "zombied") then
+  if enabled and U.isCompanion(npc) and C.getState(npc, "combat", "zombied") then
     return true
   end
 

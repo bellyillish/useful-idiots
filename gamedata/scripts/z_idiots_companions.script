@@ -1,5 +1,6 @@
 local CONFIG = a_idiots_config
 local U      = z_idiots_utils
+local TABLE  = require "illish.table"
 
 
 DEFAULT_STATE = {}
@@ -209,10 +210,10 @@ end
 
 function loadCompanionStates(mdata)
   CONFIG.initStorage(mdata)
-  local data  = mdata[CONFIG.MDATA_KEY]
+  local data = mdata[CONFIG.MDATA_KEY]
 
   if data.globalState then
-    GLOBAL_STATE = data.globalState
+    GLOBAL_STATE = TABLE.merge(GLOBAL_STATE, data.globalState)
   end
 
   if data.companionStates then
@@ -223,7 +224,7 @@ function loadCompanionStates(mdata)
 end
 
 
-function purgeCompanionStates(mdata)
+function purgeCompanionStates()
   GLOBAL_STATE = dup_table(DEFAULT_STATE)
 
   for i, npc in ipairs(U.getCompanions()) do
@@ -236,10 +237,45 @@ function purgeCompanionStates(mdata)
 end
 
 
+function cleanupCompanionStates(changes)
+  local cleanupFns = {
+    ["idiots/options/oldCombat"] = function(npc)
+      local active = getActiveState(npc, "combat")
+      if active == "monolith" or active == "camper" then
+        setState(npc, "combat", "default", true)
+      end
+    end,
+    ["idiots/options/zombied"] = function(npc)
+      if getState(npc, "combat", "zombied") then
+        setState(npc, "combat", "default", true)
+      end
+    end,
+    ["idiots/options/jobs"] = function(npc)
+      setState(npc, "jobs", "loot_items", false)
+      setState(npc, "jobs", "loot_artifacts", false)
+      setState(npc, "jobs", "loot_corpses", false)
+      setState(npc, "jobs", "help_wounded", false)
+    end,
+    ["idiots/options/artifacts"] = function(npc)
+      setState(npc, "jobs", "loot_artifacts", false)
+    end,
+  }
+
+  for i, npc in ipairs(U.getCompanions()) do
+    for key, fn in pairs(cleanupFns) do
+      if changes[key] and not ui_mcm.get(key) then
+        fn(npc)
+      end
+    end
+  end
+end
+
+
 function on_game_start()
   RegisterScriptCallback("load_state", loadCompanionStates)
   RegisterScriptCallback("save_state", saveCompanionStates)
   RegisterScriptCallback("idiots_on_version", purgeCompanionStates)
+  RegisterScriptCallback("mcm_option_change", cleanupCompanionStates)
 end
 
 

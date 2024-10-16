@@ -19,6 +19,9 @@
           <inventory />
         </col>
         <col>
+          <unstick />
+        </col>
+        <col>
           <reset />
         </col>
       </actions>
@@ -28,8 +31,16 @@
       <col group="movement">
         <follow />
         <wait />
+        <cover />
         <relax />
         <patrol />
+      </col>
+
+      <col group="formation">
+        <bunch />
+        <spread />
+        <line />
+        <covered />
       </col>
 
       <col group="stance">
@@ -38,10 +49,24 @@
         <prone />
       </col>
 
-      <col group="distance" toggle="1">
-        <cover />
+      <col group="distance">
+        <normal />
+        <near />
         <far />
-        <hurry />
+      </col>
+
+      <col group="jobs" toggle="1">
+        <hurry group="speed" />
+        <loot_items ygap="8" />
+        <loot_artifacts />
+        <loot_corpses />
+        <help_wounded />
+      </col>
+
+      <col group="readiness">
+        <attack />
+        <defend />
+        <ignore />
       </col>
 
       <col group="combat">
@@ -51,25 +76,6 @@
         <monolith />
         <camper />
         <zombied />
-      </col>
-
-      <col group="readiness">
-        <attack />
-        <defend />
-        <ignore />
-      </col>
-
-      <col group="jobs" toggle="1">
-        <loot_items />
-        <loot_artifacts />
-        <loot_corpses />
-        <help_wounded />
-      </col>
-
-      <col group="formation">
-        <bunch />
-        <spread />
-        <line />
       </col>
     </actions>
   </container>

@@ -1,100 +1,145 @@
-local WP = world_property
-local U  = z_idiots_utils
-local C  = z_idiots_companions
+local WP    = world_property
+local U     = z_idiots_utils
+local C     = z_idiots_companions
+local TABLE = require "illish.table"
 
 
-local __set_dt    = axr_beh.action_beh.set_desired_target
-local __beh_move  = axr_beh.action_beh.beh_move
-local __beh_wait  = axr_beh.action_beh.beh_wait
-local __beh_cover = axr_beh.action_beh.beh_cover
+local __custom_data = axr_beh.init_custom_data
+local __set_target  = axr_beh.action_beh.set_desired_target
+local __beh_move    = axr_beh.action_beh.beh_move
+local __beh_wait    = axr_beh.action_beh.beh_wait
+local __beh_cover   = axr_beh.action_beh.beh_cover
 
 
 -- utils: formations --
 
-function U.getGroupFormation(npc, ops)
-  local index = U.indexOfFollower(npc)
-
-  if not index then
-    return
-  end
-
-  ops = U.merge({
-    position   = db.actor:position(),
-    angle      = 30,
-    radius     = 8,
-    flatness   = 0,
-    offset     = 0,
-    varyAngle  = 0,
-    varyRadius = 0,
-  }, ops)
-
+function U.getBunchFormation(npc, st, pathfinder)
   local followers = U.getFollowers()
-  local avgPos    = U.getAvgPosition(followers)
-  local avgDir    = vdir(ops.position, avgPos)
-  local offsetPos = U.vectorOffset(ops.position, avgDir, ops.offset)
 
-  local arc1 = #followers > 1
-    and ops.angle * (#followers - 1)
-    or  ops.angle
+  local formation = U.getFormation(npc, {
+    spacing    = math.max(2, 4.4 - 0.2 * #followers),
+    columns    = math.max(2, U.round(math.sqrt(#followers))),
+    distance   = st.desired_distance,
+    pathfinder = pathfinder,
+    noise      = 0.6
+  })
 
-  local arc2 = math.deg(
-    math.acos(ops.flatness / ops.radius) * 2
-  )
-
-  local bestArc = math.min(arc1, arc2)
-  local arcEach = #followers > 1
-    and bestArc / (#followers - 1)
-    or  bestArc
-
-  local radius = ops.radius + U.randomRange(ops.varyRadius, 2)
-  local angle  = arcEach / 2 + arcEach * math.floor((index - 1) / 2)
-
-  if index % 2 == 1 then
-    angle = -angle
-  end
-
-  local dir = vector_rotate_y(avgDir, angle)
-  local pos = U.vectorOffset(offsetPos, dir, radius)
-
-  return {
-    vid       = U.insideUnclaimedLVID(npc, pos),
-    offsetPos = offsetPos,
-    avgPos    = avgPos,
-    avgDir    = avgDir,
-    rawPos    = pos,
-  }
+  return formation and U.isValidLVID(npc, formation.vid)
+    and formation.vid
+    or  U.INVALID_LVID
 end
 
 
-function U.getLineFormation(npc, ops)
+function U.getLineFormation(npc, st, pathfinder)
+  local followers = U.getFollowers()
+
+  local formation = U.getFormation(npc, {
+    spacing    = math.max(1.8, 3.8 - 0.2 * #followers),
+    distance   = st.desired_distance,
+    pathfinder = pathfinder,
+    noise      = {0, 0.4},
+  })
+
+  return formation and U.isValidLVID(npc, formation.vid)
+    and formation.vid
+    or  U.INVALID_LVID
+end
+
+
+function U.getSpreadFormation(npc, st, pathfinder)
+  local followers = U.getFollowers()
+
+  local formation = U.getFormation(npc, {
+    spacing    = math.max(2, 7 - 0.5 * #followers),
+    distance   = st.desired_distance,
+    pathfinder = pathfinder,
+    columns    = #followers,
+    noise      = {0.4, 0},
+  })
+
+  return formation and U.isValidLVID(npc, formation.vid)
+    and formation.vid
+    or  U.INVALID_LVID
+end
+
+
+function U.getCoverFormation(npc, st, pathfinder)
+  local followers = U.getFollowers()
+
+  local formation = U.getFormation(npc, {
+    spacing    = math.max(3.2, 9.2 - 0.6 * #followers),
+    distance   = st.desired_distance,
+    pathfinder = pathfinder,
+    columns    = #followers,
+  })
+
+  if not formation then
+    return U.INVALID_LVID
+  end
+
+  local vid = U.findCover(npc, {
+    enemyPos  = U.vectorOffset(db.actor:position(), formation.avgDir:invert(), 32),
+    position  = formation.rawPos,
+    radius    = 2,
+  })
+
+  return U.isValidLVID(npc, vid)
+    and vid
+    or  formation.vid
+end
+
+
+function U.getFormation(npc, ops)
   local index = U.indexOfFollower(npc)
+
   if not index then
     return
   end
 
-  ops = U.merge({
-    position    = db.actor:position(),
-    offset      = 2,
-    spacing     = 2,
-    varyAngle   = 0,
-    varySpacing = 0,
+  index = index - 1
+
+  ops = TABLE.merge({
+    pathfinder = U.bestEnclosedUnclaimedLVID,
+    position   = db.actor:position(),
+    distance   = 4,
+    columns    = 1,
+    spacing    = 1,
+    noise      = 0,
   }, ops)
+
+  local spacing = type(ops.spacing) == "table"
+    and ops.spacing
+    or  {ops.spacing, ops.spacing}
+
+  local noise = type(ops.noise) == "table"
+    and ops.noise
+    or  {ops.noise, ops.noise}
 
   local followers = U.getFollowers()
   local avgPos    = U.getAvgPosition(followers)
   local avgDir    = vdir(ops.position, avgPos)
-  local offsetPos = U.vectorOffset(ops.position, avgDir, ops.offset)
+  local crossDir  = vector_rotate_y(avgDir, 90)
+  local columns   = math.min(ops.columns, #followers)
 
-  local dist = ops.spacing * index + U.randomRange(ops.varySpacing, 1)
-  local dir  = U.randomRotate(avgDir, ops.varyAngle)
-  local pos  = U.vectorOffset(offsetPos, dir, dist)
+  local offset = ops.distance + spacing[1] * math.floor(index / columns)
+        offset = offset + U.randomRange(noise[1], 1)
+
+  local crossOffset = spacing[2] * math.ceil(index % columns / 2)
+        crossOffset = crossOffset * (index % 2 == 1 and -1 or 1)
+        crossOffset = crossOffset + U.randomRange(noise[2], 1)
+
+  if columns % 2 == 0 then
+    crossOffset = crossOffset + spacing[2] / 2
+  end
+
+  local rawPos = U.vectorOffset(ops.position, avgDir, offset)
+        rawPos = U.vectorOffset(rawPos, crossDir, crossOffset)
 
   return {
-    vid       = U.insideUnclaimedLVID(npc, pos),
-    offsetPos = offsetPos,
-    avgPos    = avgPos,
-    avgDir    = avgDir,
-    rawPos    = pos,
+    vid    = ops.pathfinder(npc, rawPos),
+    rawPos = rawPos,
+    avgPos = avgPos,
+    avgDir = avgDir,
   }
 end
 
@@ -125,8 +170,9 @@ function U.getNearbyCampfires(pos, radius)
 end
 
 
-function U.findCampfireRelaxSpot(npc, pos)
-  local campfires = U.getNearbyCampfires(pos, 32)
+function U.findCampfireRelaxSpot(npc, pos, dist)
+  dist = dist or 32
+  local campfires = U.getNearbyCampfires(pos, dist)
 
   for _, campfire in ipairs(campfires) do
     local distance  = 1.8
@@ -141,7 +187,7 @@ function U.findCampfireRelaxSpot(npc, pos)
       local dir     = vdir(spotPos, firePos)
       local vid     = lvid(spotPos)
 
-      if U.isFreeLVID(npc, vid) then
+      if U.isUnoccupiedLVID(npc, vid) then
         return {
           campfire = campfire,
           firePos  = firePos,
@@ -157,13 +203,15 @@ function U.findCampfireRelaxSpot(npc, pos)
 end
 
 
-function U.findRandomRelaxSpot(npc, pos)
+function U.findRandomRelaxSpot(npc, pos, dist)
+  dist = dist or 16
   local enemyPos = U.vectorOffset(pos, U.randomRotate(), 32)
 
   local vid = U.findCover(npc, {
     enemyPos = enemyPos,
+    radius   = dist,
     position = pos,
-    radius   = 24,
+    minSpace = 3.2,
   })
 
   local dir = U.isValidLVID(npc, vid)
@@ -178,44 +226,43 @@ function U.findRandomRelaxSpot(npc, pos)
 end
 
 
-
 -- utils: animation utils --
 
 ANIMATION_CHOICES = {
   guard = {
-    guard                           = {8, 0},
+    guard                           = {6, 0},
     guard_na                        = {4, 0},
-    binocular                       = {3, 10000},
-    guard_chasovoy                  = {2, 20000},
-    wait                            = {1, 30000},
-    wait_na                         = {1, 30000},
-    smoking_stand                   = {6, 30000},
-    fold_arms                       = {3, 60000},
-    ward                            = {2, 60000},
+    guard_chasovoy                  = {2, 30000},
+    binocular                       = {2, 30000},
+    ward                            = {1, 60000},
     animpoint_stay_ohrana           = {1, 60000},
+    smoking_stand                   = {3, 60000},
+    wait                            = {2, 120000},
+    wait_na                         = {2, 120000},
+    fold_arms                       = {1, 120000},
   },
   hide = {
     hide                            = {6, 0},
-    hide_na                         = {3, 0},
-    sit_ass_weapon                  = {1, 60000},
+    hide_na                         = {4, 0},
+    sit_ass_weapon                  = {1, 120000},
   },
   sit_ass = {
-    animpoint_sit_ass               = {8, 0},
-    animpoint_sit_ass_use_pda       = {2, 5000},
-    animpoint_sit_ass_smoking_sit   = {2, 5000},
-    animpoint_sit_ass_drink_vodka   = {2, 5000},
-    animpoint_sit_ass_eat_bread     = {1, 15000},
-    animpoint_sit_ass_eat_kolbasa   = {1, 15000},
-    animpoint_sit_ass_drink_energy  = {1, 15000},
-    animpoint_sit_ass_sleep         = {1, 60000},
+    animpoint_sit_ass               = {4, 0},
+    animpoint_sit_ass_use_pda       = {2, 0},
+    animpoint_sit_ass_smoking_sit   = {2, 0},
+    animpoint_sit_ass_drink_vodka   = {2, 30000},
+    animpoint_sit_ass_eat_bread     = {1, 30000},
+    animpoint_sit_ass_eat_kolbasa   = {1, 30000},
+    animpoint_sit_ass_drink_energy  = {1, 30000},
+    animpoint_sit_ass_sleep         = {2, 120000},
   },
   sit_knee = {
-    animpoint_sit_ass               = {6, 0},
-    animpoint_sit_knee_drink_vodka  = {2, 5000},
-    animpoint_sit_knee_eat_bread    = {1, 15000},
-    animpoint_sit_knee_eat_kolbasa  = {1, 15000},
-    animpoint_sit_knee_drink_energy = {1, 15000},
-    animpoint_sit_knee_sleep        = {1, 60000},
+    animpoint_sit_ass               = {4, 0},
+    animpoint_sit_knee_drink_vodka  = {2, 30000},
+    animpoint_sit_knee_eat_bread    = {1, 30000},
+    animpoint_sit_knee_eat_kolbasa  = {1, 30000},
+    animpoint_sit_knee_drink_energy = {1, 30000},
+    animpoint_sit_knee_sleep        = {2, 120000},
   },
 }
 
@@ -228,9 +275,9 @@ function U.chooseAnimation(state, st)
     return state
   end
 
-  for anim, options in pairs(anims) do
-    local chances   = options[1] or 1
-    local onlyAfter = options[2] or 0
+  for anim, ops in pairs(anims) do
+    local chances   = ops[1] or 1
+    local onlyAfter = ops[2] or 0
 
     if not (st and st.timeInState) or st.timeInState + onlyAfter <= time_global() then
       for i = 1, chances do
@@ -244,12 +291,15 @@ end
 
 
 function U.getBehMoveState(npc, st)
-  local dt = st.desired_target
-  local anim
+  local dt   = st.desired_target
+  local anim = st.moveState
 
   if dt.reached then
     anim = st.wait_animation
-  else
+    st.moveState = nil
+  end
+
+  if not anim then
     local dist = npc:position():distance_to(dt.position)
 
     local walkDist = tonumber(
@@ -273,7 +323,6 @@ function U.getBehMoveState(npc, st)
   if anim ~= st.lastState then
     st.lastState   = anim
     st.timeInState = nil
-    st.lookFn      = nil
     st.animFn      = nil
   end
 
@@ -282,7 +331,7 @@ function U.getBehMoveState(npc, st)
   end
 
   if not st.animFn then
-    st.animFn = U.throttle(U.chooseAnimation, 5000, 15000)
+    st.animFn = U.throttle(U.chooseAnimation, 15000, 45000)
   end
 
   return st.animFn(anim, st)
@@ -291,16 +340,6 @@ end
 
 function U.getBehLookState(npc, st)
   local dt = st.desired_target
-
-  if not st.lookFn then
-    st.lookFn = U.throttle(U.randomRotate, 5000, 30000)
-  end
-
-  local fov = C.getState(npc, "movement", "relax")
-    and 0
-    or  C.getState(npc, "stance", "prone")
-    and 30
-    or  60
 
   if dt.look_object then
     return {look_object = dt.look_object}
@@ -311,7 +350,7 @@ function U.getBehLookState(npc, st)
   end
 
   if dt.look_dir then
-    return {look_dir = st.lookFn(dt.look_dir, fov)}
+    return {look_dir = dt.look_dir}
   end
 
   return nil
@@ -378,22 +417,62 @@ end
 function U.clearWaypoints(npc)
   if type(npc) == "number" then
     npc = U.getCompanion(npc)
-    if not npc then
-      return
-    end
   end
 
-  for _, action in ipairs({"follow", "wait", "relax"}) do
-    if C.GLOBAL_STATE[action] then
-      C.setState(npc, "movement", action, true)
-      break
-    end
+  if not npc then
+    return
   end
+
+  printf("TESTING %s, %s, %s", C.getState(npc, "movement", "patrol"), C.getActiveState(npc, "movement"), C.getActiveState(nil, "movement"))
+
+  if C.getState(npc, "movement", "patrol") then
+    C.setState(npc, "movement", C.getActiveState(nil, "movement"), true)
+  end
+
+  printf("TESTING %s, %s, %s", C.getState(npc, "movement", "patrol"), C.getActiveState(npc, "movement"), C.getActiveState(nil, "movement"))
+  -- for _, action in ipairs({"follow", "wait", "relax"}) do
+    -- if C.GLOBAL_STATE[action] then
+      -- C.setState(npc, "movement", action, true)
+      -- break
+    -- end
+  -- end
 
   for index in ipairs(U.getAllWaypoints(npc)) do
     se_save_var(npc:id(), npc:name(), "pathpoint" ..index, nil)
   end
 end
+
+
+U.SELECTED_IDS = {}
+
+
+function U.selectCompanion(npc)
+  if U.SELECTED_IDS[npc:id()] then
+    U.SELECTED_IDS[npc:id()] = nil
+    return false
+  end
+
+  U.SELECTED_IDS[npc:id()] = true
+  return true
+end
+
+
+function U.deselectCompanions()
+  if #table.keys(U.SELECTED_IDS) == 0 then
+    return false
+  end
+
+  U.SELECTED_IDS = {}
+  return true
+end
+
+
+local evaluateSurroundings = U.throttle(U.evaluateSurroundings, 25)
+
+
+local throttleActorPosition = U.throttle(function()
+  return db.actor:position()
+end, 100)
 
 
 -- custom targets --
@@ -405,21 +484,25 @@ function U.setTargetLookAround(npc, st)
     st.savedTarget.direction,
     st.savedTarget.reached
 
-  if st.moveToPoint then
+  if st.movePoint then
     vid = nil
   end
 
   if not vid then
-    vid = st.moveToPoint and lvid(st.moveToPoint) or npc:level_vertex_id()
-    pos = lvpos(vid)
-    dir = vdir(pos, db.actor:position())
+    if st.movePoint then
+      vid = st.movePoint
+    else
+      vid = npc:level_vertex_id()
+    end
+
+    st.movePoint = nil
   end
 
+  pos     = lvpos(vid)
+  dir     = vdir(pos, db.actor:position())
   reached = vid == npc:level_vertex_id()
-  st.moveToPoint = nil
 
   U.setDestination(npc, vid)
-  U.claimLVID(npc, vid)
 
   st.desired_target = {
     look_dir        = reached and dir or nil,
@@ -434,39 +517,54 @@ end
 
 
 function U.setTargetCoverSpot(npc, st)
-  local vid, pos, dir, reached =
+  local vid, pos, dir, reached, expires =
     st.savedTarget.level_vertex_id,
     st.savedTarget.position,
     st.savedTarget.direction,
-    st.savedTarget.reached
+    st.savedTarget.reached,
+    st.savedTarget.expires
 
-  if st.moveToPoint then
+  local movePoint, keepType = st.movePoint, st.keepType
+
+  if expires and expires < time_global() then
+    vid = nil
+  end
+
+  if movePoint then
     vid = nil
   end
 
   if not vid then
+    st.movePoint = nil
+    expires      = nil
+
+    local distance = movePoint and 0
+      or keepType == "near" and 2
+      or keepType == "far" and 8
+      or 4
+
     vid = U.findCover(npc, {
-      position = st.moveToPoint,
-      distance = st.moveToPoint and nil or 8,
+      position = movePoint and lvpos(movePoint),
+      distance = distance,
+      radius   = 8,
     })
 
     if not U.isValidLVID(npc, vid) then
-      vid = npc:level_vertex_id()
+      vid     = npc:level_vertex_id()
+      expires = 1000 + time_global()
     end
-
-    pos = lvpos(vid)
-    dir = vdir(pos, db.actor:position())
   end
 
-  reached = npc:level_vertex_id() == vid
-  st.moveToPoint = nil
+  pos     = lvpos(vid)
+  dir     = vdir(pos, db.actor:position())
+  reached = vid == npc:level_vertex_id()
 
   U.setDestination(npc, vid)
-  U.claimLVID(npc, vid)
 
   st.desired_target = {
     look_dir        = reached and dir or nil,
     reached         = reached,
+    expires         = expires,
     level_vertex_id = vid,
     position        = pos,
     direction       = dir,
@@ -477,108 +575,107 @@ end
 
 
 function U.setTargetFollowActor(npc, st)
-  local target   = st.target
-  local form     = C.getActiveState(nil, "formation")
-  local keepDist = st.desired_distance
-  local useCover = target:match("cover")
+  local actorPos     = throttleActorPosition()
+  local formation    = C.getActiveState(npc, "formation")
+  local surroundings = evaluateSurroundings(actorPos)
+  local followCount  = #U.getFollowers()
 
-  local vid, pos, dir, reached, actorPos =
+  local vid, pos, dir, reached =
     st.savedTarget.level_vertex_id,
     st.savedTarget.position,
     st.savedTarget.direction,
-    st.savedTarget.reached,
-    st.savedTarget.actorPos
+    st.savedTarget.reached
 
-  local actorMoved = not actorPos
-    or db.actor:position():distance_to(actorPos) > 4
+  local lastVid, expires, savedActorPos, lastFormation, lastFollowCount =
+    st.savedTarget.level_vertex_id,
+    st.savedTarget.expires,
+    st.savedTarget.actorPos,
+    st.savedTarget.formation,
+    st.savedTarget.followCount
 
-  if form ~= st.lastForm or keepDist ~= st.lastDist then
+  local keepDist, lastKeepType, lastTarget, movePoint, keepType, target =
+    st.desired_distance,
+    st.lastKeepType,
+    st.lastTarget,
+    st.movePoint,
+    st.keepType,
+    st.target
+
+  if
+    pos and savedActorPos
+    and pos:distance_to(actorPos) > pos:distance_to(savedActorPos)
+    and actorPos:distance_to(savedActorPos) > 1
+  then
     vid = nil
   end
 
-  local oldVid
-  if (not useCover or reached) and actorMoved then
-    oldVid = vid
-    vid    = nil
+  if formation ~= lastFormation or keepType ~= lastKeepType then
+    vid = nil
+  end
+
+  if followCount ~= lastFollowCount then
+    vid = nil
+  end
+
+  if expires and expires < time_global() then
+    vid = nil
+  end
+
+  if movePoint then
+    vid = nil
   end
 
   if not vid then
-    local formation
+    savedActorPos = actorPos
+    st.movePoint = nil
+    expires      = nil
 
-    if form == "spread" then
-      formation = U.getGroupFormation(npc, {
-        offset   = keepDist - 12,
-        angle    = 20,
-        radius   = 12,
-        flatness = 8,
-      })
+    local pathfinder = keepType == "near" and surroundings.type == "cramped"
+      and U.defaultEnclosedUnclaimedLVID
+      or  U.bestEnclosedUnclaimedLVID
 
-    elseif form == "bunch" then
-      formation = U.getGroupFormation(npc, {
-        offset     = keepDist + 2,
-        angle      = 45,
-        radius     = 3,
-        flatness   = -3,
-        varyRadius = 2,
-      })
+    if movePoint then
+      vid = movePoint
 
-    elseif form == "line" then
-      formation = U.getLineFormation(npc, {
-        offset  = keepDist - 2,
-        spacing = 2,
-      })
-    end
+    elseif surroundings.type == "cramped" and keepType ~= "near" then
+      vid     = lastVid
+      expires = 1000 + time_global()
 
-    if not formation then
-      return false
-    end
+    elseif formation == "line" then
+      vid = U.getLineFormation(npc, st, pathfinder)
 
-    vid = U.isValidLVID(npc, formation.vid)
-      and formation.vid
-      or  npc:level_vertex_id()
+    elseif formation == "bunch" then
+      vid = U.getBunchFormation(npc, st, pathfinder)
 
-    if useCover then
-      local enemyDir = vec(formation.avgDir):invert()
-      local enemyPos = U.vectorOffset(db.actor:position(), enemyDir, 32)
+    elseif formation == "spread" then
+      vid = U.getSpreadFormation(npc, st, pathfinder)
 
-      vid = U.findCover(npc, {
-        position = lvpos(vid),
-        enemyPos = enemyPos,
-        radius   = 4,
-      })
-    end
-
-    if oldVid then
-      local oldDist = db.actor:position():distance_to(lvpos(oldVid))
-      local newDist = db.actor:position():distance_to(lvpos(vid))
-      if newDist > oldDist then
-        vid = nil
-      end
+    elseif formation == "covered" then
+      vid = U.getCoverFormation(npc, st, pathfinder)
     end
 
     if not U.isValidLVID(npc, vid) then
-      vid = npc:level_vertex_id()
+      vid     = npc:level_vertex_id()
+      expires = 1000 + time_global()
     end
-
-    pos      = lvpos(vid)
-    actorPos = db.actor:position()
-    dir      = vdir(pos, actorPos)
   end
 
-  U.setDestination(npc, vid)
-  U.claimLVID(npc, vid)
+  pos     = lvpos(vid)
+  dir     = vdir(pos, actorPos)
+  reached = vid == npc:level_vertex_id()
 
-  reached     = npc:level_vertex_id() == vid
-  st.lastDist = keepDist
-  st.lastForm = form
+  U.setDestination(npc, vid)
 
   st.desired_target = {
-    reached         = reached,
     look_dir        = reached and dir or nil,
-    actorPos        = actorPos,
-    level_vertex_id = vid,
-    position        = pos,
+    actorPos        = savedActorPos,
+    followCount     = followCount,
+    formation       = formation,
+    expires         = expires,
+    reached         = reached,
     direction       = dir,
+    position        = pos,
+    level_vertex_id = vid,
   }
 
   return true
@@ -586,38 +683,60 @@ end
 
 
 function U.setTargetRelaxSpot(npc, st)
-  local vid, dir, pos, reached =
+  local vid, dir, pos, reached, expires =
     st.savedTarget.level_vertex_id,
     st.savedTarget.direction,
     st.savedTarget.position,
-    st.savedTarget.reached
+    st.savedTarget.reached,
+    st.savedTarget.expires
+
+  local movePoint, keepType = st.movePoint, st.keepType
+
+  if expires and expires < time_global() then
+    vid = nil
+  end
+
+  if st.movePoint then
+    vid = nil
+  end
 
   if not vid then
-    local spot = U.findCampfireRelaxSpot(npc, db.actor:position())
+    st.movePoint = nil
+    expires      = nil
+
+    local startPos = movePoint
+      and lvpos(movePoint)
+      or  db.actor:position()
+
+    local spot = U.findCampfireRelaxSpot(npc, startPos)
 
     if not spot then
-      spot = U.findRandomRelaxSpot(npc, db.actor:position())
+      local dist = keepType == "near" and 8
+        or keepType == "far" and 24
+        or 16
+
+        spot = U.findRandomRelaxSpot(npc, startPos, dist)
     end
 
     if U.isValidLVID(npc, spot.vid) then
       vid = spot.vid
       dir = spot.dir
     else
-      vid = npc:level_vertex_id()
-      dir = nil
+      vid     = npc:level_vertex_id()
+      expires = 1000 + time_global()
+      dir     = nil
     end
-
-    pos = lvpos(vid)
   end
 
-  U.setDestination(npc, vid)
-  U.claimLVID(npc, vid)
+  pos = lvpos(vid)
+  reached = vid == npc:level_vertex_id()
 
-  reached = npc:level_vertex_id() == vid
+  U.setDestination(npc, vid)
 
   st.desired_target = {
     look_dir        = reached and dir or nil,
     reached         = reached,
+    expires         = expires,
     level_vertex_id = vid,
     direction       = dir,
     position        = pos,
@@ -636,28 +755,38 @@ CUSTOM_TARGETS = {
 }
 
 
+function axr_beh.init_custom_data(npc, ini, section, st, scheme)
+  __custom_data(npc, ini, section, st, scheme)
+  st.normal_desired_dist = ini:r_string_to_condlist(section, "normal_desired_dist", "4")
+end
+
+
 -- patch: add custom targets to axr_beh.script
 -- the original function will initialize all the internals but won't match
 -- any known targets, at which point the custom targets take over
 function axr_beh.action_beh:set_desired_target()
-  local npc = self.object
-  local st  = self.st
+  local npc   = self.object
+  local st    = self.st
 
   local target = xr_logic.pick_section_from_condlist(db.actor, npc, st.goto_target)
 
-  if st.desired_target and st.target == target then
+  if st.target == target and st.desired_target then
     st.savedTarget = dup_table(st.desired_target)
   else
     st.savedTarget = {}
   end
 
-  local success = __set_dt(self)
+  st.lastTarget   = st.target
+  st.lastKeepType = st.keepType
+
+  local success = __set_target(self)
   local customTargetFn = CUSTOM_TARGETS[target]
 
   if success or not (U.isCompanion(npc) and customTargetFn) then
     return success
   end
 
+  st.keepType = xr_logic.pick_section_from_condlist(db.actor, npc, st.keep_distance)
   return customTargetFn(self.object, self.st)
 end
 
@@ -667,7 +796,7 @@ function axr_beh.action_beh:beh_move()
   local npc = self.object
   local st  = self.st
 
-  if not U.isCompanion(npc) then
+  if not (U.isCompanion(npc) and CUSTOM_TARGETS[st.target]) then
     return __beh_move(self)
   end
 
@@ -686,26 +815,64 @@ end
 -- they all do the same thing as beh_move(), but they're called separately
 -- to not confuse anything relying on self.st.behavior
 function axr_beh.action_beh:beh_wait()
-  if not U.isCompanion(self.object) then
+  local npc = self.object
+  local st  = self.st
+
+  if not (U.isCompanion(npc) and CUSTOM_TARGETS[st.target]) then
     return __beh_wait(self)
   end
+
   self:beh_move()
 end
 
 
 -- patch
 function axr_beh.action_beh:beh_cover()
-  if not U.isCompanion(self.object) then
+  local npc = self.object
+  local st  = self.st
+
+  if not (U.isCompanion(npc) and CUSTOM_TARGETS[st.target]) then
     return __beh_cover(self)
   end
+
   self:beh_move()
 end
 
 
 -- patch:
 function axr_beh.action_beh:beh_relax()
-  if not U.isCompanion(self.object) then
+  local npc = self.object
+  local st  = self.st
+
+  if not (U.isCompanion(npc) and CUSTOM_TARGETS[st.target]) then
     return __beh_wait(self)
   end
+
   self:beh_move()
+end
+
+
+-- xr_conditions --
+
+function xr_conditions.follow_crouch(actor, npc)
+  if not ui_mcm.get("idiots/options/autoSneak") then
+    return false
+  end
+  return IsMoveState("mcCrouch") and U.isFollowing(npc)
+end
+
+
+function xr_conditions.follow_prone(actor, npc)
+  if not ui_mcm.get("idiots/options/autoProne") then
+    return false
+  end
+  return IsMoveState("mcCrouch") and IsMoveState("mcAccel") and U.isFollowing(npc)
+end
+
+
+function xr_conditions.follow_sprint(actor, npc)
+  if not ui_mcm.get("idiots/options/autoSprint") then
+    return false
+  end
+  return IsMoveState("mcSprint") and U.isFollowing(npc)
 end

@@ -8,6 +8,9 @@
   <string id="ui_mcm_menu_options">
     <text>Настройки</text>
   </string>
+  <string id="ui_mcm_menu_beta">
+    <text>Beta</text>
+  </string>
   <string id="ui_mcm_menu_keybinds">
     <text>Горячие клавиши</text>
   </string>
@@ -49,22 +52,46 @@
   <string id="ui_mcm_idiots_options_indexers_desc">
     <text>Включает\выключает номера над спутниками когда открыт интерфейс.</text>
   </string>
+  <string id="ui_mcm_idiots_options_autoSneak">
+    <text>Enable Auto-Sneak</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoSneak_desc">
+    <text>Disable to prevent companions from automatically sneaking when you sneak.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoProne">
+    <text>Enable Auto-Prone</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoProne_desc">
+    <text>Disable to prevent companions from automatically going prone when you go prone.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoSprint">
+    <text>Enable Auto-Sprint</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoSprint_desc">
+    <text>Disable to prevent companions from automatically sprinting when you sprint.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_unstick">
+    <text>Show Unstick Button</text>
+  </string>
+  <string id="ui_mcm_idiots_options_unstick_desc">
+    <text>Include a button in the UI to manually teleport stuck companions in place.</text>
+  </string>
 
   <!-- Combat Options -->
   <string id="ui_mcm_idiots_subtitle_options_combat">
-    <text>Combat Options</text>
+    <text>Настройки боя</text>
   </string>
   <string id="ui_mcm_idiots_options_oldCombat">
-    <text>Enable "Camper" and "Monolith" combat commands.</text>
+    <text>Включить режимы боя "Снайпер" и "Монолит".</text>
   </string>
   <string id="ui_mcm_idiots_options_oldCombat_desc">
-    <text>Enables/disables commands to put companions into "Camper" and "Monolith" combat schemes. These schemes came with Anomaly but were disabled. Note that they can be buggy and are thus unsupported. You can assign keybinds to them but they can't be activated by the "Cycle Combat" keybind.</text>
+    <text>Включает/выключает команды, позволяющие перевести компаньонов в боевые паттерны «Снайпер» и «Монолит». Они появились в Anomaly, но были отключены. Обратите внимание, что они могут быть багнутыми и поэтому не поддерживаются. Вы можете назначить им бинды клавиш, но они не могут быть активированы клавишей «Циклический бой».</text>
   </string>
   <string id="ui_mcm_idiots_options_zombied">
-    <text>Enable "Zombied" combat command.</text>
+    <text>Включить режим боя "Зомби".</text>
   </string>
   <string id="ui_mcm_idiots_options_zombied_desc">
-    <text>Enables/disables command to put companions into "Zombied" combat, the scheme Anomaly gives to zombied stalkers. This is untested and unsupported. You can assign a keybind to this but it can't be activated by the "Cycle Combat" keybind.</text>
+    <text>Включает/выключает команду, позволяющую перевести компаньонов в боевой паттерн "Зомби", который прописан в Anomaly зомбированным. Он не тестировался и не поддерживается. Вы можете назначить ему бинд, но они не могут быть активированы клавишей «Циклический бой».</text>
   </string>
 
   <!-- Jobs Options -->
@@ -80,10 +107,10 @@
   <string id="ui_mcm_idiots_options_jobs_note">
     <text>Примечание: Для работы задачи в Гамме выключите мод "311 NPC Stop Looting Dead Bodies".</text>
   </string>
-  <string id="ui_mcm_idiots_options_npcLooting">
+  <string id="ui_mcm_idiots_options_noNpcLooting">
     <text>Только спутники могут собирать и обыскивать</text>
   </string>
-  <string id="ui_mcm_idiots_options_npcLooting_desc">
+  <string id="ui_mcm_idiots_options_noNpcLooting_desc">
     <text>Включает\выключает возможность не-спутникам собирать и обыскивать. По-умолчанию выключено для Аномали и включено для Гаммы.</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts">
@@ -113,12 +140,56 @@
     <text>Размер шрифта</text>
   </string>
 
+  <!-- Beta Options -->
+  <string id="ui_mcm_idiots_title_beta">
+    <text>Beta Options for Useful Idiots</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_note">
+    <text>You can disable any of the features below if they introduce game-breaking issues. Drop me a note if you do run into any such issues.</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_noSpatial">
+    <text>Disable Spatial Awareness Pathfinding</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_noSpatial_desc">
+    <text>Experimental feature that changes how companions follow you depending on whether you are in an open, enlcosed, or cramped space.</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_legacyPathing">
+    <text>Disable Improved Pathfinding</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_legacyPathing_desc">
+    <text>Experimental feature that tries to improve companion pathfinding, especially indoors and when in enclosed areas.</text>
+  </string>
+
   <!-- Keybinds -->
   <string id="ui_mcm_idiots_title_keybinds">
     <text>Горячие клавиши</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_move">
     <text>Двигаться к точке</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_away">
+    <text>Move Out of the Way</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_select">
+    <text>Select Companion</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_deselect">
+    <text>Clear All Selected Companions</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_addWaypoint">
+    <text>Add Waypoint</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_clearWaypoints">
+    <text>Clear All Waypoints</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_inventory">
+    <text>Open Inventory</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_inventory_note">
+    <text>NOTE: The SHIFT modifier doesn't work for this keybind in GAMMA (unless you've disabled GAMMA UI).</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_reset">
+    <text>Re-Sync State</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_key">
     <text>Клавиша</text>
@@ -143,11 +214,19 @@
   <string id="ui_mcm_idiots_subtitle_wait">
     <text>Ждать</text>
   </string>
+  <string id="ui_mcm_idiots_subtitle_cover">
+    <text>Использовать укрытие</text>
+  </string>
   <string id="ui_mcm_idiots_subtitle_relax">
     <text>Отдыхать</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_patrol">
     <text>Патрулировать</text>
+  </string>
+
+  <!-- Speed Keys -->
+  <string id="ui_mcm_idiots_subtitle_hurry">
+    <text>Спешить</text>
   </string>
 
   <!-- Stance Keys -->
@@ -168,14 +247,14 @@
   <string id="ui_mcm_idiots_subtitle_cycle_distance">
     <text>Переключить дистанцию</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_cover">
-    <text>Использовать укрытие</text>
+  <string id="ui_mcm_idiots_subtitle_near">
+    <text>Near</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_normal">
+    <text>Normal</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_far">
     <text>Держаться вдали</text>
-  </string>
-  <string id="ui_mcm_idiots_subtitle_hurry">
-    <text>Спешить</text>
   </string>
 
   <!-- Combat Keys -->
@@ -198,7 +277,7 @@
     <text>Режим "Снайпер"</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_zombied">
-    <text>Режим "Zombied"</text>
+    <text>Режим "Зомби"</text>
   </string>
 
   <!-- Readiness Keys -->
@@ -244,6 +323,9 @@
   </string>
   <string id="ui_mcm_idiots_subtitle_line">
     <text>Колонна</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_covered">
+    <text>Covered</text>
   </string>
 
   <!-- List Options -->

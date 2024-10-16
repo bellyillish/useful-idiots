@@ -5,10 +5,42 @@
     <text>Все</text>
   </string>
   <string id="st_idiots_title_all">
-    <text>Все спутники</text>
+    <text>Все компаньоны</text>
   </string>
-  <string id="st_idiots_point_move_message">
+
+  <!-- Messages -->
+  <string id="st_idiots_move_point_message">
     <text>Двигаться к точке</text>
+  </string>
+  <string id="st_idiots_move_all_point_message">
+    <text>Moving all companions to point.</text>
+  </string>
+  <string id="st_idiots_move_away_message">
+    <text>Moving %s companion(s) out of the way.</text>
+  </string>
+  <string id="st_idiots_add_waypoint_message">
+    <text>Waypoint added.</text>
+  </string>
+  <string id="st_idiots_waypoint_error">
+    <text>You must select exactly 1 companion to add or remove waypoints.</text>
+  </string>
+  <string id="st_idiots_clear_waypoints_message">
+    <text>All waypoints cleared.</text>
+  </string>
+  <string id="st_idiots_resync_message">
+    <text>Synced %s companion(s) with global state.</text>
+  </string>
+  <string id="st_idiots_resync_all_message">
+    <text>Synced all companions with global state.</text>
+  </string>
+  <string id="st_idiots_select_message">
+    <text>Selected companion #%s. %s companion(s) selected.</text>
+  </string>
+  <string id="st_idiots_deselect_message">
+    <text>Deselected companion #%s. %s companion(s) selected.</text>
+  </string>
+  <string id="st_idiots_deselect_all_message">
+    <text>All companions deselected.</text>
   </string>
 
   <!-- Titlebar Buttons -->
@@ -22,7 +54,7 @@
     <text>Инвентарь</text>
   </string>
   <string id="st_idiots_clear_waypoints">
-    <text>Очистить точки</text>
+    <text>Убрать точки</text>
   </string>
   <string id="st_idiots_add_waypoint">
     <text>Добавить точку</text>
@@ -33,10 +65,13 @@
     <text>Движение</text>
   </string>
   <string id="st_idiots_movement_follow">
-    <text>Следовать</text>
+    <text>Следовать зв мной</text>
   </string>
   <string id="st_idiots_movement_wait">
     <text>Ждать</text>
+  </string>
+  <string id="st_idiots_movement_cover">
+    <text>Использовать укрытие</text>
   </string>
   <string id="st_idiots_movement_relax">
     <text>Отдыхать</text>
@@ -45,32 +80,37 @@
     <text>Патрулировать</text>
   </string>
 
+  <!-- Speeds -->
+  <string id="st_idiots_speed_hurry">
+    <text>Спешить</text>
+  </string>
+
   <!-- Stances -->
   <string id="st_idiots_stance">
     <text>Положение</text>
   </string>
   <string id="st_idiots_stance_stand">
-    <text>Стоять</text>
+    <text>Встать</text>
   </string>
   <string id="st_idiots_stance_sneak">
-    <text>Красться</text>
+    <text>Присесть</text>
   </string>
   <string id="st_idiots_stance_prone">
-    <text>Лежать</text>
+    <text>Лечь</text>
   </string>
 
   <!-- Distance -->
   <string id="st_idiots_distance">
     <text>Дистанция</text>
   </string>
-  <string id="st_idiots_distance_cover">
-    <text>Использовать укрытие</text>
+  <string id="st_idiots_distance_near">
+    <text>Stay Near</text>
+  </string>
+  <string id="st_idiots_distance_normal">
+    <text>Normal</text>
   </string>
   <string id="st_idiots_distance_far">
-    <text>Держаться вдали</text>
-  </string>
-  <string id="st_idiots_distance_hurry">
-    <text>Спешить</text>
+    <text>Держаться вдалеке</text>
   </string>
 
   <!-- Combat -->
@@ -81,10 +121,10 @@
     <text>Обычный бой</text>
   </string>
   <string id="st_idiots_combat_offensive">
-    <text>Offensive Combat</text>
+    <text>Активный бой</text>
   </string>
   <string id="st_idiots_combat_defensive">
-    <text>Defensive Combat</text>
+    <text>Оборонительный бой</text>
   </string>
   <string id="st_idiots_combat_monolith">
     <text>Режим "Монолит"</text>
@@ -93,7 +133,7 @@
     <text>Режим "Снайпер"</text>
   </string>
   <string id="st_idiots_combat_zombied">
-    <text>Zombied Combat</text>
+    <text>Режим "Зомби"</text>
   </string>
 
   <!-- Readiness -->
@@ -139,5 +179,8 @@
   </string>
   <string id="st_idiots_formation_line">
     <text>Колонна</text>
+  </string>
+  <string id="st_idiots_formation_covered">
+    <text>Covered Formation</text>
   </string>
 </string_table>

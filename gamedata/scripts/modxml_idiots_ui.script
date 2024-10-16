@@ -445,6 +445,13 @@ end
 
 
 function applyOptions(XML, config)
+  if not config.unstick then
+    local unstick = XML:queryOne("unstick")
+    if unstick then
+      XML:removeElement(unstick)
+    end
+  end
+
   if not config.oldCombat then
     local monolith = XML:queryOne("monolith")
     local camper   = XML:queryOne("camper")
@@ -499,6 +506,7 @@ function onReadHUDXML(name, XML)
   end
 
   local config = {
+    unstick   = ui_mcm.get("idiots/options/unstick"),
     oldCombat = ui_mcm.get("idiots/options/oldCombat"),
     zombied   = ui_mcm.get("idiots/options/zombied"),
     jobs      = ui_mcm.get("idiots/options/jobs"),

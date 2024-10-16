@@ -53,12 +53,6 @@ function action_combat_defensive:updateStorage()
   local npc = self.object
   local st  = self.st
 
-  if st.moveToPoint then
-    st.startPos    = st.moveToPoint
-    st.moveToPoint = nil
-    st.expires     = 0
-  end
-
   U.updateEnemy(npc, st)
 
   st.prevStatus = st.status
@@ -91,9 +85,19 @@ function action_combat_defensive:updateStorage()
     end
   end
 
+  if st.movePoint then
+    st.startPos  = lvpos(st.movePoint)
+    st.movePoint = nil
+    st.vid       = nil
+  end
+
   st.reached = st.vid
     and st.vid == npc:level_vertex_id()
     or  false
+
+  if st.reached then
+    st.moveState = nil
+  end
 end
 
 
@@ -106,8 +110,6 @@ function action_combat_defensive:execute()
   else
     self:fight()
   end
-
-  printf("TESTING DEFENSIVE COMBAT")
 end
 
 
@@ -119,6 +121,8 @@ function action_combat_defensive:fight()
     local vid
 
     if not C.getState(npc, "stance", "prone") then
+      local startPos = st.movePoint or st.startPos
+
       vid = U.findCover(npc, {
         enemyPos  = st.enemyPos,
         position  = st.startPos,
@@ -136,7 +140,6 @@ function action_combat_defensive:fight()
   end
 
   U.setDestination(npc, st.vid)
-  U.claimLVID(npc, st.vid)
 
   local move = U.getCombatMoveState(npc, st)
   local look = U.getCombatLookState(npc, st)
@@ -167,7 +170,6 @@ function action_combat_defensive:evade()
   end
 
   U.setDestination(npc, st.vid)
-  U.claimLVID(npc, st.vid)
 
   local move = U.getCombatMoveState(npc, st)
   local look = U.getCombatLookState(npc, st)
@@ -200,6 +202,8 @@ function add_to_binder(npc, ini, storage, planner, temp)
     action:add_precondition(WP(EVAL_DEFENSIVE, true))
     action:add_precondition(WP(Combat.EVAL_FACER, false))
     action:add_precondition(WP(Combat.EVAL_FACER_STEAL_UP, false))
+
+    -- action:add_precondition(WP(stalker_ids.property_danger, false))
 
     action:add_effect(WP(Combat.EVAL_LOGIC, false))
     action:add_effect(WP(Combat.EVAL_ENEMY, false))

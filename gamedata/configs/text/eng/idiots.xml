@@ -7,8 +7,40 @@
   <string id="st_idiots_title_all">
     <text>All Companions</text>
   </string>
-  <string id="st_idiots_point_move_message">
-    <text>Moving to Point</text>
+
+  <!-- Messages -->
+  <string id="st_idiots_move_point_message">
+    <text>Moving %s companion(s) to point.</text>
+  </string>
+  <string id="st_idiots_move_all_point_message">
+    <text>Moving all companions to point.</text>
+  </string>
+  <string id="st_idiots_move_away_message">
+    <text>Moving %s companion(s) out of the way.</text>
+  </string>
+  <string id="st_idiots_add_waypoint_message">
+    <text>Waypoint added.</text>
+  </string>
+  <string id="st_idiots_waypoint_error">
+    <text>You must select exactly 1 companion to add or remove waypoints.</text>
+  </string>
+  <string id="st_idiots_clear_waypoints_message">
+    <text>All waypoints cleared.</text>
+  </string>
+  <string id="st_idiots_resync_message">
+    <text>Synced %s companion(s) with global state.</text>
+  </string>
+  <string id="st_idiots_resync_all_message">
+    <text>Synced all companions with global state.</text>
+  </string>
+  <string id="st_idiots_select_message">
+    <text>Selected companion #%s. %s companion(s) selected.</text>
+  </string>
+  <string id="st_idiots_deselect_message">
+    <text>Deselected companion #%s. %s companion(s) selected.</text>
+  </string>
+  <string id="st_idiots_deselect_all_message">
+    <text>All companions deselected.</text>
   </string>
 
   <!-- Titlebar Buttons -->
@@ -17,6 +49,9 @@
   </string>
   <string id="st_idiots_reset">
     <text>Re-Sync</text>
+  </string>
+  <string id="st_idiots_unstick">
+    <text>Unstick</text>
   </string>
   <string id="st_idiots_inventory">
     <text>Inventory</text>
@@ -38,11 +73,19 @@
   <string id="st_idiots_movement_wait">
     <text>Wait</text>
   </string>
+  <string id="st_idiots_movement_cover">
+    <text>Find Cover</text>
+  </string>
   <string id="st_idiots_movement_relax">
     <text>Relax</text>
   </string>
   <string id="st_idiots_movement_patrol">
     <text>Patrol</text>
+  </string>
+
+  <!-- Speeds -->
+  <string id="st_idiots_speed_hurry">
+    <text>Hurry Up</text>
   </string>
 
   <!-- Stances -->
@@ -63,14 +106,14 @@
   <string id="st_idiots_distance">
     <text>Distance</text>
   </string>
-  <string id="st_idiots_distance_cover">
-    <text>Use Cover</text>
+  <string id="st_idiots_distance_near">
+    <text>Stay Near</text>
+  </string>
+  <string id="st_idiots_distance_normal">
+    <text>Normal</text>
   </string>
   <string id="st_idiots_distance_far">
     <text>Stay Far</text>
-  </string>
-  <string id="st_idiots_distance_hurry">
-    <text>Hurry Up</text>
   </string>
 
   <!-- Combat -->
@@ -139,5 +182,8 @@
   </string>
   <string id="st_idiots_formation_line">
     <text>Line Formation</text>
+  </string>
+  <string id="st_idiots_formation_covered">
+    <text>Covered Formation</text>
   </string>
 </string_table>

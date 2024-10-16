@@ -101,9 +101,17 @@ function action_combat_offensive:updateStorage()
     st.expires = nil
   end
 
+  if st.movePoint then
+    st.vid = nil
+  end
+
   st.reached = st.vid
     and st.vid == npc:level_vertex_id()
     or  false
+
+  if st.reached then
+    st.moveState = nil
+  end
 
   if st.reached and st.expires == nil then
     st.expires = time_global() + U.random(HOLD_TIME[1], HOLD_TIME[2])
@@ -136,8 +144,6 @@ function action_combat_offensive:execute()
   elseif st.status == "FIGHT_MID" then
     self:fight_mid()
   end
-
-  printf("TESTING OFFENSIVE COMBAT")
 end
 
 
@@ -147,7 +153,10 @@ function action_combat_offensive:fight_far()
 
   if not st.vid then
     local lerp = U.random(0.32, 0.56, 2)
-    local pos  = vector():lerp(npc:position(), st.enemyPos, lerp)
+
+    local pos = st.movePoint
+      and lvpos(st.movePoint)
+      or  vector():lerp(npc:position(), st.enemyPos, lerp)
 
     local vid = U.findCover(npc, {
       enemyPos = st.enemyPos,
@@ -164,7 +173,6 @@ function action_combat_offensive:fight_far()
   end
 
   U.setDestination(npc, st.vid)
-  U.claimLVID(npc, st.vid)
 
   local move = U.getCombatMoveState(npc, st)
   local look = U.getCombatLookState(npc, st)
@@ -179,7 +187,10 @@ function action_combat_offensive:fight_mid()
 
   if not st.vid then
     local dir = vdir(st.enemyPos, npc:position())
-    local pos = U.vectorOffset(st.enemyPos, dir, NEAR_RANGE[1])
+
+    local pos = st.movePoint
+      and lvpos(st.movePoint)
+      or  U.vectorOffset(st.enemyPos, dir, NEAR_RANGE[1])
 
     local vid = U.findCover(npc, {
       enemyPos = st.enemyPos,
@@ -196,7 +207,6 @@ function action_combat_offensive:fight_mid()
   end
 
   U.setDestination(npc, st.vid)
-  U.claimLVID(npc, st.vid)
 
   local move = U.getCombatMoveState(npc, st)
   local look = U.getCombatLookState(npc, st)
@@ -210,9 +220,12 @@ function action_combat_offensive:fight_near()
   local st  = self.st
 
   if not st.vid then
+    local pos = st.movePoint and lvpos(st.movePoint) or nil
+
     local vid = U.findCover(npc, {
-      enemyPos = st.enemyPos,
       radius   = U.random(2, 6),
+      enemyPos = st.enemyPos,
+      position = pos,
     })
 
     if not U.isValidLVID(npc, vid) then
@@ -224,7 +237,6 @@ function action_combat_offensive:fight_near()
   end
 
   U.setDestination(npc, st.vid)
-  U.claimLVID(npc, st.vid)
 
   local move = U.getCombatMoveState(npc, st)
   local look = U.getCombatLookState(npc, st)
@@ -238,10 +250,10 @@ function action_combat_offensive:search()
   local st  = self.st
 
   if not st.vid then
-    local vid
+    local vid = st.movePoint
 
-    if st.enemyPos then
-      vid = U.closestValidLVID(npc, st.enemyPos)
+    if not vid and st.enemyPos then
+      vid = U.bestOpenValidLVID(npc, st.enemyPos)
     end
 
     if not U.isValidLVID(npc, vid) then
@@ -253,7 +265,6 @@ function action_combat_offensive:search()
   end
 
   U.setDestination(npc, st.vid)
-  U.claimLVID(npc, st.vid)
 
   local move = U.getCombatMoveState(npc, st)
   local look = U.getCombatLookState(npc, st)
@@ -272,9 +283,11 @@ function action_combat_offensive:evade()
   end
 
   if not st.vid then
+    local pos = st.movePoint and lvpos(st.movePoint) or st.enemyPos
+
     local vid = U.findSafeCover(npc, {
       radius   = U.random(st.nearDist, st.farDist),
-      position = st.enemyPos or nil,
+      position = pos,
       minDist  = 12,
     })
 
@@ -287,7 +300,6 @@ function action_combat_offensive:evade()
   end
 
   U.setDestination(npc, st.vid)
-  U.claimLVID(npc, st.vid)
 
   local move = U.getCombatMoveState(npc, st)
   local look = U.getCombatLookState(npc, st)
@@ -307,8 +319,9 @@ function action_combat_offensive:reload()
 
     if not cover.mid then
       vid = U.findSafeCover(npc, {
-        minDist = 4,
-        radius  = 8,
+        position = st.movePoint and lvpos(st.movePoint),
+        minDist  = 4,
+        radius   = 8,
       })
     end
 
@@ -321,7 +334,6 @@ function action_combat_offensive:reload()
   end
 
   U.setDestination(npc, st.vid)
-  U.claimLVID(npc, st.vid)
 
   local move = U.getCombatMoveState(npc, st)
   local look = U.getCombatLookState(npc, st)
@@ -355,6 +367,8 @@ function add_to_binder(npc, ini, storage, planner, temp)
     action:add_precondition(WP(EVAL_OFFENSIVE, true))
     action:add_precondition(WP(Combat.EVAL_FACER, false))
     action:add_precondition(WP(Combat.EVAL_FACER_STEAL_UP, false))
+
+    -- action:add_precondition(WP(stalker_ids.property_danger, false))
 
     action:add_effect(WP(Combat.EVAL_LOGIC, false))
     action:add_effect(WP(Combat.EVAL_ENEMY, false))

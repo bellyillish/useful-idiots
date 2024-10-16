@@ -13,7 +13,11 @@ function getGeneralOptions()
     gr = {
       MCM.getTitle({text = "ui_mcm_idiots_title_options"}),
       MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_general"}),
-      MCM.getCheckboxField({id = "indexers", def = true}),
+      MCM.getCheckboxField({id = "indexers",   def = true}),
+      MCM.getCheckboxField({id = "autoSneak",  def = true}),
+      MCM.getCheckboxField({id = "autoProne",  def = true}),
+      MCM.getCheckboxField({id = "autoSprint", def = true}),
+      MCM.getCheckboxField({id = "unstick"}),
       MCM.getLine(),
       MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_combat"}),
       MCM.getCheckboxField({id = "oldCombat"}),
@@ -42,6 +46,20 @@ function getGeneralOptions()
           {"letterica18", "font_xlarge"}
         }
       }
+    }
+  }
+end
+
+
+function getBetaOptions()
+  return {
+    id = "beta",
+    sh = true,
+    gr = {
+      MCM.getTitle({text = "ui_mcm_idiots_title_beta"}),
+      MCM.getNote({text = "ui_mcm_idiots_beta_note"}),
+      MCM.getCheckboxField({id = "noSpatial"}),
+      MCM.getCheckboxField({id = "legacyPathing"}),
     }
   }
 end
@@ -97,10 +115,46 @@ function mcmGetOptions()
         MCM.getTitle({text = "ui_mcm_idiots_title_keybinds"}),
         MCM.getSubtitle({text = "ui_mcm_menu_point"}),
         MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_select"}),
+        MCM.getKeybindKey({ id = "select_key",  hint = "idiots_keybinds_key"}),
+        MCM.getKeybindMod({ id = "select_mod",  hint = "idiots_keybinds_mod"}),
+        MCM.getKeybindMode({id = "select_mode", hint = "idiots_keybinds_mode"}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_deselect"}),
+        MCM.getKeybindKey({ id = "deselect_key",  hint = "idiots_keybinds_key"}),
+        MCM.getKeybindMod({ id = "deselect_mod",  hint = "idiots_keybinds_mod"}),
+        MCM.getKeybindMode({id = "deselect_mode", hint = "idiots_keybinds_mode"}),
+        MCM.getLine(),
         MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_move"}),
         MCM.getKeybindKey({ id = "move_key",  hint = "idiots_keybinds_key", def = 81}),
         MCM.getKeybindMod({ id = "move_mod",  hint = "idiots_keybinds_mod"}),
         MCM.getKeybindMode({id = "move_mode", hint = "idiots_keybinds_mode"}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_away"}),
+        MCM.getKeybindKey({ id = "away_key",  hint = "idiots_keybinds_key"}),
+        MCM.getKeybindMod({ id = "away_mod",  hint = "idiots_keybinds_mod"}),
+        MCM.getKeybindMode({id = "away_mode", hint = "idiots_keybinds_mode"}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_addWaypoint"}),
+        MCM.getKeybindKey({ id = "addWaypoint_key",  hint = "idiots_keybinds_key"}),
+        MCM.getKeybindMod({ id = "addWaypoint_mod",  hint = "idiots_keybinds_mod"}),
+        MCM.getKeybindMode({id = "addWaypoint_mode", hint = "idiots_keybinds_mode"}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_clearWaypoints"}),
+        MCM.getKeybindKey({ id = "clearWaypoints_key",  hint = "idiots_keybinds_key"}),
+        MCM.getKeybindMod({ id = "clearWaypoints_mod",  hint = "idiots_keybinds_mod"}),
+        MCM.getKeybindMode({id = "clearWaypoints_mode", hint = "idiots_keybinds_mode"}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_inventory"}),
+        MCM.getKeybindKey({ id = "inventory_key",  hint = "idiots_keybinds_key"}),
+        MCM.getKeybindMod({ id = "inventory_mod",  hint = "idiots_keybinds_mod"}),
+        MCM.getKeybindMode({id = "inventory_mode", hint = "idiots_keybinds_mode"}),
+        MCM.getNote({text = "ui_mcm_idiots_subtitle_point_inventory_note", clr = {255, 200, 175, 75}}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_reset"}),
+        MCM.getKeybindKey({ id = "reset_key",  hint = "idiots_keybinds_key"}),
+        MCM.getKeybindMod({ id = "reset_mod",  hint = "idiots_keybinds_mod"}),
+        MCM.getKeybindMode({id = "reset_mode", hint = "idiots_keybinds_mode"}),
       }
     }
   }
@@ -119,7 +173,8 @@ function mcmGetOptions()
     id = "idiots",
     gr = {
       getGeneralOptions(),
-      {id = "keybinds", gr = gr}
+      {id = "keybinds", gr = gr},
+      getBetaOptions(),
     }
   }
 end

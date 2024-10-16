@@ -2,7 +2,7 @@
 package.path = package.path .. ".\\gamedata\\scripts\\?.lua;..\\gamedata\\scripts\\?.lua;"
 
 
-MDATA_VER = "0.1-beta.8"
+MDATA_VER = "0.1-beta.9"
 MDATA_KEY = "USEFUL_IDIOTS"
 
 -- companion state config
@@ -12,10 +12,18 @@ ACTIONS = {
     cycle = true,
     actions = {
       {name = "follow", next = "wait", default = true},
-      {name = "wait",   next = "relax", info = "npcx_beh_wait", teleport = false},
+      {name = "wait",   next = "cover",  info = "npcx_beh_wait", teleport = false},
+      {name = "cover",  next = "relax",  info = "npcx_beh_cover", teleport = false},
       {name = "relax",  next = "follow", info = "npcx_beh_substate_relax", teleport = false},
       {name = "patrol", info = "npcx_beh_patrol_mode", teleport = false},
     }
+  },
+  {
+    name = "speed",
+    toggle = true,
+    actions = {
+      {name = "hurry", info = "npcx_beh_hurry"},
+    },
   },
   {
     name = "stance",
@@ -28,11 +36,11 @@ ACTIONS = {
   },
   {
     name = "distance",
-    toggle = true,
+    cycle = true,
     actions = {
-      {name = "cover", info = "npcx_beh_use_cover"},
-      {name = "far",   info = "npcx_beh_distance_far"},
-      {name = "hurry", info = "npcx_beh_hurry"},
+      {name = "near",   next = "normal", info = "npcx_beh_distance_near"},
+      {name = "normal", next = "far",    default = true},
+      {name = "far",    next = "near",   info = "npcx_beh_distance_far"},
     },
   },
   {
@@ -70,9 +78,10 @@ ACTIONS = {
     name = "formation",
     cycle = true,
     actions = {
-      {name = "bunch",  next = "spread", default = true},
-      {name = "spread", next = "line", info = "npcx_beh_formation_spread"},
-      {name = "line",   next = "bunch", info = "npcx_beh_formation_line"},
+      {name = "bunch",   next = "spread", default = true},
+      {name = "spread",  next = "line",    info = "npcx_beh_formation_spread"},
+      {name = "line",    next = "covered", info = "npcx_beh_formation_line"},
+      {name = "covered", next = "bunch",   info = "npcx_beh_formation_covered"},
     },
   }
 }

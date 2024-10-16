@@ -8,6 +8,9 @@
   <string id="ui_mcm_menu_options">
     <text>Options</text>
   </string>
+  <string id="ui_mcm_menu_beta">
+    <text>Beta</text>
+  </string>
   <string id="ui_mcm_menu_keybinds">
     <text>Keybinds</text>
   </string>
@@ -48,6 +51,30 @@
   </string>
   <string id="ui_mcm_idiots_options_indexers_desc">
     <text>Enables/disables the tab number indicators that appear above companions when the UI is open.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoSneak">
+    <text>Enable Auto-Sneak</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoSneak_desc">
+    <text>Disable to prevent companions from automatically sneaking when you sneak.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoProne">
+    <text>Enable Auto-Prone</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoProne_desc">
+    <text>Disable to prevent companions from automatically going prone when you go prone.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoSprint">
+    <text>Enable Auto-Sprint</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoSprint_desc">
+    <text>Disable to prevent companions from automatically sprinting when you sprint.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_unstick">
+    <text>Show Unstick Button</text>
+  </string>
+  <string id="ui_mcm_idiots_options_unstick_desc">
+    <text>Include a button in the UI to manually teleport stuck companions in place.</text>
   </string>
 
   <!-- Combat Options -->
@@ -113,12 +140,56 @@
     <text>Font Size</text>
   </string>
 
+  <!-- Beta Options -->
+  <string id="ui_mcm_idiots_title_beta">
+    <text>Beta Options for Useful Idiots</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_note">
+    <text>You can disable any of the features below if they introduce game-breaking issues. Drop me a note if you do run into any such issues.</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_noSpatial">
+    <text>Disable Spatial Awareness Pathfinding</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_noSpatial_desc">
+    <text>Experimental feature that changes how companions follow you depending on whether you are in an open, enlcosed, or cramped space.</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_legacyPathing">
+    <text>Disable Improved Pathfinding</text>
+  </string>
+  <string id="ui_mcm_idiots_beta_legacyPathing_desc">
+    <text>Experimental feature that tries to improve companion pathfinding, especially indoors and when in enclosed areas.</text>
+  </string>
+
   <!-- Keybinds -->
   <string id="ui_mcm_idiots_title_keybinds">
     <text>Keybinds for Useful Idiots</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_move">
     <text>Move to Point</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_away">
+    <text>Move Out of the Way</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_select">
+    <text>Select Companion</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_deselect">
+    <text>Clear All Selected Companions</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_addWaypoint">
+    <text>Add Waypoint</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_clearWaypoints">
+    <text>Clear All Waypoints</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_inventory">
+    <text>Open Inventory</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_inventory_note">
+    <text>NOTE: The SHIFT modifier doesn't work for this keybind in GAMMA (unless you've disabled GAMMA UI).</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_reset">
+    <text>Re-Sync State</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_key">
     <text>Key</text>
@@ -143,11 +214,19 @@
   <string id="ui_mcm_idiots_subtitle_wait">
     <text>Wait</text>
   </string>
+  <string id="ui_mcm_idiots_subtitle_cover">
+    <text>Find Cover</text>
+  </string>
   <string id="ui_mcm_idiots_subtitle_relax">
     <text>Relax</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_patrol">
     <text>Patrol</text>
+  </string>
+
+  <!-- Speed Keys -->
+  <string id="ui_mcm_idiots_subtitle_hurry">
+    <text>Hurry</text>
   </string>
 
   <!-- Stance Keys -->
@@ -168,14 +247,14 @@
   <string id="ui_mcm_idiots_subtitle_cycle_distance">
     <text>Cycle Distance</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_cover">
-    <text>Cover</text>
+  <string id="ui_mcm_idiots_subtitle_near">
+    <text>Near</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_normal">
+    <text>Normal</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_far">
     <text>Far</text>
-  </string>
-  <string id="ui_mcm_idiots_subtitle_hurry">
-    <text>Hurry</text>
   </string>
 
   <!-- Combat Keys -->
@@ -244,6 +323,9 @@
   </string>
   <string id="ui_mcm_idiots_subtitle_line">
     <text>Line</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_covered">
+    <text>Covered</text>
   </string>
 
   <!-- List Options -->

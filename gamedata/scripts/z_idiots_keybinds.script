@@ -1,0 +1,367 @@
+local CONFIG = a_idiots_config
+local U      = z_idiots_utils
+local C      = z_idiots_companions
+local UI     = z_idiots_ui
+
+
+function onKeyRelease(key)
+  if (dik_to_bind(key) == key_bindings.kCUSTOM18) then
+    UI.openCompanionManager()
+  end
+end
+
+
+function showMessage(key, ...)
+  local message = game.translate_string(key)
+  actor_menu.set_msg(1, string.format(message, ...), 5)
+end
+
+
+function onKeybindEvent(event, dik)
+  local selected   = table.keys(U.SELECTED_IDS)
+  local companions = U.getCompanions()
+
+  if #companions == 0 then
+    return
+  end
+
+  if checkKeybind(event, dik, "point", "select") then
+    local target = U.getTargetCompanion()
+
+    if target then
+      local result = U.selectCompanion(target)
+      local index  = U.indexOfCompanion(target)
+      local count  = #table.keys(U.SELECTED_IDS)
+
+      if result then
+        showMessage("st_idiots_select_message", index, count)
+      elseif count > 0 then
+        showMessage("st_idiots_deselect_message", index, count)
+      else
+        showMessage("st_idiots_deselect_all_message")
+      end
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "deselect") then
+    if U.deselectCompanions() then
+      showMessage("st_idiots_deselect_all_message")
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "move") then
+    local pos  = level.get_target_pos()
+    local npcs = #selected > 0 and selected or companions
+
+    for i, npc in ipairs(npcs) do
+      if U.isCompanion(npc) then
+        U.moveToPoint(npc, pos, #npcs / 2)
+      end
+    end
+
+    if #selected > 0 then
+      showMessage("st_idiots_move_point_message", #selected)
+    else
+      showMessage("st_idiots_move_all_point_message")
+    end
+
+    playParticle(pos)
+    U.SELECTED_IDS = {}
+  end
+
+  if checkKeybind(event, dik, "point", "away") then
+    local npcs = U.getCompanionsInTheWay()
+
+    if #npcs > 0 then
+      for i, npc in ipairs(npcs) do
+        U.moveOutOfTheWay(npc)
+      end
+
+      showMessage("st_idiots_move_away_message", #npcs)
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "addWaypoint") then
+    if #selected == 1 then
+      local pos = level.get_target_pos()
+      local npc = selected[1]
+
+      if U.isCompanion(npc) then
+        U.addWaypoint(npc, pos)
+      end
+
+      showMessage("st_idiots_add_waypoint_message")
+      playParticle(pos)
+    else
+      showMessage("st_idiots_waypoint_error")
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "clearWaypoints") then
+    if #selected == 1 then
+      local npc       = selected[1]
+      local waypoints = U.getAllWaypoints(npc)
+
+      if waypoints and #waypoints > 0 then
+        U.clearWaypoints(npc)
+        showMessage("st_idiots_clear_waypoints_message")
+      end
+    else
+      showMessage("st_idiots_waypoint_error")
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "inventory") then
+    local npc = U.getTargetCompanion(8)
+    if npc then
+      ui_companion_inv.start(npc)
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "reset") then
+    local npcs = #selected > 0 and selected or companions
+
+    for i, npc in ipairs(npcs) do
+      if U.isCompanion(npc) then
+        C.setStates(npc, C.GLOBAL_STATE)
+      end
+    end
+
+    if #selected > 0 then
+      showMessage("st_idiots_resync_message", #selected)
+    else
+      showMessage("st_idiots_resync_all_message")
+    end
+  end
+
+  for ig, group in ipairs(CONFIG.ACTIONS) do
+    if group.cycle then
+      checkKeybind(event, dik, group.name, "cycle_".. group.name)
+    end
+
+    for ia, action in ipairs(group.actions) do
+      checkKeybind(event, dik, group.name, action.name)
+    end
+  end
+end
+
+
+function checkKeybind(event, dik, group, action)
+  local uuid    = "idiots"
+  local kformat = "idiots/keybinds/%s/%s_%s"
+  local key     = ui_mcm.get(kformat:format(group, action, "key"))
+  local mod     = ui_mcm.get(kformat:format(group, action, "mod"))
+  local mode    = ui_mcm.get(kformat:format(group, action, "mode"))
+
+  if not (key and key > 0 and key == dik) then
+    return false
+  end
+  if not ui_mcm.get_mod_key(mod) then
+    return false
+  end
+
+  local trigger = false
+
+  if event == "hold" and mode == 2 and ui_mcm.key_hold(uuid, key) then
+    trigger = true
+  end
+  if event == "press" and mode == 1 and ui_mcm.double_tap(uuid, key) then
+    trigger = true
+  end
+  if event == "press" and mode == 0 then
+    trigger = true
+  end
+  if not trigger then
+    return false
+  end
+
+  local selected = table.keys(U.SELECTED_IDS)
+
+  if action == "cycle_".. group then
+    local nextState
+
+    if #selected > 0 then
+      for i, npc in ipairs(selected) do
+        if i == 1 then
+          nextState = C.cycleActiveState(npc, group)
+        else
+          C.setState(npc, group, nextState, true)
+        end
+      end
+    else
+      nextState = C.cycleActiveState(nil, group)
+    end
+
+    if nextState then
+      showStateMessage(group, nextState, true)
+    end
+  end
+
+  if not C.isStateful(group, action) then
+    return true
+  end
+
+  if group == "jobs" then
+    local jobs      = ui_mcm.get("idiots/options/jobs")
+    local artifacts = ui_mcm.get("idiots/options/artifacts")
+
+    if not jobs or action == "artifacts" and not artifacts then
+      return true
+    end
+  end
+
+  if action == "patrol" then
+    if #selected ~= 1 then
+      return true
+    end
+
+    local waypoints = U.getAllWaypoints(selected[1])
+
+    if not (waypoints and #waypoints >= 2) then
+      return true
+    end
+  end
+
+  local toggleableGroup = CONFIG.ACTIONS_KEYED[group].toggle
+
+  local toggleableAction = toggleableGroup
+    and ui_mcm.get(kformat:format(group, action, "toggle"))
+
+  local nextState
+
+  if #selected > 0 then
+    for i, npc in ipairs(selected) do
+      if i == 1 then
+        if toggleableAction then
+          nextState = C.toggleState(npc, group, action)
+        elseif not C.getState(npc, group, action) then
+          C.setState(npc, group, action, true)
+          nextState = true
+        end
+      else
+        C.setState(npc, group, action, nextState)
+      end
+    end
+
+  elseif toggleableAction then
+    nextState = C.toggleState(nil, group, action)
+  elseif not C.getState(nil, group, action) then
+    C.setState(nil, group, action, true)
+    nextState = true
+  end
+
+  if nextState ~= nil then
+    showStateMessage(group, action, nextState, toggleableGroup)
+  end
+
+  return true
+end
+
+
+function showStateMessage(group, action, enabled, toggle)
+  local groupLabel = group
+    and game.translate_string("st_idiots_".. group)
+
+  local actionLabel = group
+    and game.translate_string("st_idiots_".. group .."_".. action)
+    or  game.translate_string("st_idiots_".. action)
+
+  if group and not toggle then
+    actor_menu.set_msg(1, groupLabel ..": ".. actionLabel, 5)
+  else
+    actor_menu.set_msg(1, actionLabel ..": ".. (enabled and "Enabled" or "Disabled"), 5)
+  end
+end
+
+
+local particle = particles_object("_samples_particles_\\flash_light")
+
+
+function playParticle(pos)
+  if particle:playing() then
+    RemoveTimeEvent("idiots", "move_to_point")
+    particle:stop()
+  end
+
+  CreateTimeEvent("idiots", "move_to_point", 1, function()
+    RemoveTimeEvent("idiots", "move_to_point")
+    particle:stop()
+  end)
+
+  particle:play_at_pos(
+    vec(pos):add(0, -0.5, 0)
+  )
+end
+
+
+function axr_companions.on_key_release()
+  -- disable companion wheel
+end
+
+
+function axr_companions.move_to_point()
+  -- disable move to point
+end
+
+
+-- Voiced Actor
+
+UI.CompanionManager.PlayVoiceOver = axr_companions.UIWheelCompanion.PlayVoiceOver
+UI.CompanionManager.PlaySoundFile = axr_companions.UIWheelCompanion.PlaySoundFile
+
+
+function playVoiceover(group, action, GUI)
+  if not GUI.PlayVoiceOver then
+    return
+  end
+
+  local enabled = C.getState(GUI.ID, group, action)
+
+  if group == "movement" and action == "follow" and not enabled then
+    GUI:PlayVoiceOver("movement", 0)
+  end
+
+  if group == "movement" and action == "wait" and not enabled then
+    GUI:PlayVoiceOver("movement", 2)
+  end
+
+  if group == "readiness" and action == "ignore" and not enabled then
+    GUI:PlayVoiceOver("combat", 1)
+  end
+
+  if group == "readiness" and action == "attack" and not enabled then
+    GUI:PlayVoiceOver("combat", 0)
+  end
+
+  if group == "jobs" and action == "loot_corpses" then
+    GUI:PlayVoiceOver("loot", enabled and 1 or 0)
+  end
+
+  if group == "distance" and action == "far" then
+    GUI:PlayVoiceOver("distance", enabled and 0 or 1)
+  end
+
+  if group == "stance" and action == "stand" and not enabled then
+    GUI:PlayVoiceOver("stealth", 1)
+  end
+
+  if group == "stance" and action == "sneak" and not enabled then
+    GUI:PlayVoiceOver("stealth", 0)
+  end
+end
+
+
+-- Events --
+
+function on_game_start()
+  RegisterScriptCallback("on_key_release", onKeyRelease)
+  RegisterScriptCallback("idiots_on_button", playVoiceover)
+
+  RegisterScriptCallback("on_key_press", function(dik)
+    onKeybindEvent("press", dik)
+  end)
+
+  RegisterScriptCallback("on_key_hold", function(dik)
+    onKeybindEvent("hold", dik)
+  end)
+end
