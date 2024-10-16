@@ -1,112 +1,34 @@
--- shortcut paths to lib
 package.path = package.path .. ".\\gamedata\\scripts\\?.lua;..\\gamedata\\scripts\\?.lua;"
 
+local UTIL = require "illish.util"
+local VEC  = require "illish.vector"
+local POS  = require "illish.pos"
 
-MDATA_VER = "0.1-beta.9"
-MDATA_KEY = "USEFUL_IDIOTS"
 
--- companion state config
-ACTIONS = {
-  {
-    name = "movement",
-    cycle = true,
-    actions = {
-      {name = "follow", next = "wait", default = true},
-      {name = "wait",   next = "cover",  info = "npcx_beh_wait", teleport = false},
-      {name = "cover",  next = "relax",  info = "npcx_beh_cover", teleport = false},
-      {name = "relax",  next = "follow", info = "npcx_beh_substate_relax", teleport = false},
-      {name = "patrol", info = "npcx_beh_patrol_mode", teleport = false},
-    }
-  },
-  {
-    name = "speed",
-    toggle = true,
-    actions = {
-      {name = "hurry", info = "npcx_beh_hurry"},
-    },
-  },
-  {
-    name = "stance",
-    cycle = true,
-    actions = {
-      {name = "stand", next = "sneak", default = true},
-      {name = "sneak", next = "prone", info = "npcx_beh_substate_stealth"},
-      {name = "prone", next = "stand", info = "npcx_beh_substate_prone"},
-    },
-  },
-  {
-    name = "distance",
-    cycle = true,
-    actions = {
-      {name = "near",   next = "normal", info = "npcx_beh_distance_near"},
-      {name = "normal", next = "far",    default = true},
-      {name = "far",    next = "near",   info = "npcx_beh_distance_far"},
-    },
-  },
-  {
-    name = "combat",
-    cycle = true,
-    actions = {
-      {name = "default",   next = "offensive", default = true},
-      {name = "offensive", next = "defensive", info = "npcx_beh_combat_tactics_offensive"},
-      {name = "defensive", next = "default",   info = "npcx_beh_combat_tactics_defensive"},
-      {name = "monolith",  info = "npcx_beh_combat_tactics_monolith"},
-      {name = "camper",    info = "npcx_beh_combat_tactics_camper"},
-      {name = "zombied",   info = "npcx_beh_combat_tactics_zombied"},
-    }
-  },
-  {
-    name = "readiness",
-    cycle = true,
-    actions = {
-      {name = "attack", next = "defend", default = true},
-      {name = "defend", next = "ignore", info = "npcx_beh_ignore_actor_enemies"},
-      {name = "ignore", next = "attack", info = "npcx_beh_ignore_combat"},
-    },
-  },
-  {
-    name = "jobs",
-    toggle = true,
-    actions = {
-      {name = "loot_items",     info = "npcx_beh_gather_items"},
-      {name = "loot_artifacts", info = "npcx_beh_gather_artifacts"},
-      {name = "loot_corpses",   info = "npcx_beh_loot_corpses"},
-      {name = "help_wounded",   info = "npcx_beh_help_wounded"},
-    },
-  },
-  {
-    name = "formation",
-    cycle = true,
-    actions = {
-      {name = "bunch",   next = "spread", default = true},
-      {name = "spread",  next = "line",    info = "npcx_beh_formation_spread"},
-      {name = "line",    next = "covered", info = "npcx_beh_formation_line"},
-      {name = "covered", next = "bunch",   info = "npcx_beh_formation_covered"},
-    },
-  }
-}
+-- GLOBALS --
+_G.time_plus      = UTIL.timePlus
+_G.time_plus_rand = UTIL.timePlusRandom
+_G.time_expired   = UTIL.timeExpired
+_G.time_left      = UTIL.timeLeft
+_G.vec            = VEC.set
+_G.vec_dir        = VEC.direction
+_G.vec_dist       = VEC.distance
+_G.vec_offset     = VEC.offset
+_G.vec_dot        = VEC.dotProduct
+_G.vec_avg        = VEC.average
+_G.vec_rot        = VEC.rotate
+_G.vec_rot_rand   = VEC.rotateRandom
+_G.vec_rot_range  = VEC.rotateRange
+_G.lvid           = POS.lvid
+_G.lvpos          = POS.position
+_G.lvsnap         = POS.snap
 
--- for consistency with Anomaly keybinds
-ACTION_DEFAULT_KEYBINDS = {
-  cycle_movement  = 80,
-  cycle_stance    = 75,
-  cycle_readiness = 79,
-  loot_corpses    = 76,
-}
 
--- ACTIONS but keyed by group/action name
-ACTIONS_KEYED = {}
+-- STORAGE --
+DATA_VER = "0.1-beta.10"
+DATA_KEY = "USEFUL_IDIOTS"
 
-for ig, group in ipairs(ACTIONS) do
-  ACTIONS_KEYED[group.name] = dup_table(group)
-  ACTIONS_KEYED[group.name].actions = {}
-  for ia, action in ipairs(group.actions) do
-    ACTIONS_KEYED[group.name].actions[action.name] = action
-  end
-end
-
--- old mdata keys to purge
-MDATA_STALE_KEYS = {
+DATA_STALE_KEYS = {
   "IDIOTS_STATES",
   "ZCDS_SHARED_ITEMS",
   "ZCDS_STATES",
@@ -114,28 +36,6 @@ MDATA_STALE_KEYS = {
   "CDHTS_STATES",
 }
 
-
-function initStorage(mdata)
-  mdata[MDATA_KEY] = mdata[MDATA_KEY] or {}
-
-  if mdata[MDATA_KEY].VER ~= MDATA_VER then
-    SendScriptCallback("idiots_on_version", mdata, MDATA_VER)
-  end
-
-  mdata[MDATA_KEY].VER = MDATA_VER
-end
-
-
-function purgeStaleKeys(mdata)
-  for i, k in ipairs(MDATA_STALE_KEYS) do
-    mdata[k] = nil
-  end
-end
-
-
-function on_game_start()
-  RegisterScriptCallback("idiots_on_version", purgeStaleKeys)
-end
-
-
+AddScriptCallback("idiots_on_load_state")
+AddScriptCallback("idiots_on_save_state")
 AddScriptCallback("idiots_on_version")

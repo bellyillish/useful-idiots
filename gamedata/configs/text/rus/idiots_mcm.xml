@@ -3,40 +3,49 @@
 <string_table>
   <!-- menu -->
   <string id="ui_mcm_menu_idiots">
-    <text>Полезные идиоты</text>
+    <text>Полезные Идиоты</text>
   </string>
-  <string id="ui_mcm_menu_options">
+  <string id="ui_mcm_menu_idiots_options">
     <text>Настройки</text>
   </string>
-  <string id="ui_mcm_menu_beta">
-    <text>Beta</text>
+  <string id="ui_mcm_menu_idiots_ui">
+    <text>UI</text>
   </string>
-  <string id="ui_mcm_menu_keybinds">
+  <string id="ui_mcm_menu_idiots_keybinds">
     <text>Горячие клавиши</text>
   </string>
-  <string id="ui_mcm_menu_point">
+  <string id="ui_mcm_menu_idiots_point">
     <text>Точки</text>
   </string>
-  <string id="ui_mcm_menu_movement">
+  <string id="ui_mcm_menu_idiots_movement">
     <text>Движение</text>
   </string>
-  <string id="ui_mcm_menu_stance">
+  <string id="ui_mcm_menu_idiots_light">
+    <text>Фонарик</text>
+  </string>
+  <string id="ui_mcm_menu_idiots_speed">
+    <text>Скорость</text>
+  </string>
+  <string id="ui_mcm_menu_idiots_stance">
     <text>Положение</text>
   </string>
-  <string id="ui_mcm_menu_distance">
+  <string id="ui_mcm_menu_idiots_distance">
     <text>Дистанция</text>
   </string>
-  <string id="ui_mcm_menu_combat">
+  <string id="ui_mcm_menu_idiots_combat">
     <text>Бой</text>
   </string>
-  <string id="ui_mcm_menu_readiness">
+  <string id="ui_mcm_menu_idiots_readiness">
     <text>Поведение</text>
   </string>
-  <string id="ui_mcm_menu_jobs">
+  <string id="ui_mcm_menu_idiots_jobs">
     <text>Задачи</text>
   </string>
-  <string id="ui_mcm_menu_formation">
+  <string id="ui_mcm_menu_idiots_formation">
     <text>Построение</text>
+  </string>
+  <string id="ui_mcm_menu_idiots_weapon">
+    <text>Оружие</text>
   </string>
 
   <!-- General Options -->
@@ -46,35 +55,55 @@
   <string id="ui_mcm_idiots_subtitle_options_general">
     <text>Общие настройки</text>
   </string>
-  <string id="ui_mcm_idiots_options_indexers">
-    <text>Показывать индикаторы над спутниками</text>
-  </string>
-  <string id="ui_mcm_idiots_options_indexers_desc">
-    <text>Включает\выключает номера над спутниками когда открыт интерфейс.</text>
-  </string>
   <string id="ui_mcm_idiots_options_autoSneak">
-    <text>Enable Auto-Sneak</text>
+    <text>Включить Авто-Приседание</text>
   </string>
   <string id="ui_mcm_idiots_options_autoSneak_desc">
-    <text>Disable to prevent companions from automatically sneaking when you sneak.</text>
+    <text>Выключите, чтобы компаньоны не приседали вместе с вами одновременно.</text>
   </string>
   <string id="ui_mcm_idiots_options_autoProne">
-    <text>Enable Auto-Prone</text>
+    <text>Включить Авто-Положение лежа</text>
   </string>
   <string id="ui_mcm_idiots_options_autoProne_desc">
-    <text>Disable to prevent companions from automatically going prone when you go prone.</text>
+    <text>Выключите, чтобы компаньоны не принимали положение лёжа с вами одновременно.</text>
   </string>
   <string id="ui_mcm_idiots_options_autoSprint">
-    <text>Enable Auto-Sprint</text>
+    <text>Включить Авто-Бег</text>
   </string>
   <string id="ui_mcm_idiots_options_autoSprint_desc">
-    <text>Disable to prevent companions from automatically sprinting when you sprint.</text>
+    <text>Выключите, чтобы компаньоны не бежали вместе с вами одновременно.</text>
   </string>
-  <string id="ui_mcm_idiots_options_unstick">
-    <text>Show Unstick Button</text>
+  <string id="ui_mcm_idiots_options_autoLight">
+    <text>Включить автоматическое переключение фонарика</text>
   </string>
-  <string id="ui_mcm_idiots_options_unstick_desc">
-    <text>Include a button in the UI to manually teleport stuck companions in place.</text>
+  <string id="ui_mcm_idiots_options_autoLight_desc">
+    <text>Выключите, чтобы компаньоны не включали/выключали фонарики одновременно с вами.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoDeselect">
+    <text>Снять выбор с компаньонов после "Переместиться на точку"/"Смотреть на точку"</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoDeselect_desc">
+    <text>Автоматически снять выбор со всех компаньонов после использования команд
+      "Переместиться на точку" или "Смотреть на точку".</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoReload">
+    <text>Позволить компаньонам перезаряжать все оружие во время бездействия</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoReload_desc">
+    <text>Заставляет компаньонов перезаряжать ВСЕ оружие в их инвентаре после загрузки сохранения,
+      присоединения к отряду игрока, или после боя.
+      Если выключено - они будут перезаряжать только свое активное оружие.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoSwitch">
+    <text>Переключиться на "Ждать" и "Оборонительный бой" после команды "Переместиться на точку"</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoSwitch_desc">
+    <text>При использовании команды "Переместиться на точку" автоматически переключает компаньонов
+      на "Ждать" и "Оборонительный бой", чтобы они оставались на точке до тех пор, пока не будет
+      получено иное указание.
+      Если выключено - компаньоны по-прежнему будут соблюдать приказ
+      "Переместиться на точку", но по ее достижении продолжат то поведение или стиль боя,
+      на которые они обычно назначены.</text>
   </string>
 
   <!-- Combat Options -->
@@ -82,82 +111,120 @@
     <text>Настройки боя</text>
   </string>
   <string id="ui_mcm_idiots_options_oldCombat">
-    <text>Включить режимы боя "Снайпер" и "Монолит".</text>
+    <text>Включить режимы боя "Меткий стрелок", "Монолит" и "Зомби"</text>
   </string>
   <string id="ui_mcm_idiots_options_oldCombat_desc">
-    <text>Включает/выключает команды, позволяющие перевести компаньонов в боевые паттерны «Снайпер» и «Монолит». Они появились в Anomaly, но были отключены. Обратите внимание, что они могут быть багнутыми и поэтому не поддерживаются. Вы можете назначить им бинды клавиш, но они не могут быть активированы клавишей «Циклический бой».</text>
-  </string>
-  <string id="ui_mcm_idiots_options_zombied">
-    <text>Включить режим боя "Зомби".</text>
-  </string>
-  <string id="ui_mcm_idiots_options_zombied_desc">
-    <text>Включает/выключает команду, позволяющую перевести компаньонов в боевой паттерн "Зомби", который прописан в Anomaly зомбированным. Он не тестировался и не поддерживается. Вы можете назначить ему бинд, но они не могут быть активированы клавишей «Циклический бой».</text>
+    <text>Включает/выключает режимы боя "Меткий стрелок", "Монолит" и "Зомби". Они появились в
+      Anomaly, но были отключены.
+      Обратите внимание, что они могут быть багнутыми и НЕ поддерживаются.
+      Вы можете назначить им бинды клавиш, но они не могут быть активированы горячей клавишей
+      "Переключить режим боя".</text>
   </string>
 
   <!-- Jobs Options -->
   <string id="ui_mcm_idiots_subtitle_options_jobs">
     <text>Сбор и обыск</text>
   </string>
-  <string id="ui_mcm_idiots_options_jobs">
-    <text>Включить команды для сбора и обыска</text>
-  </string>
-  <string id="ui_mcm_idiots_options_jobs_desc">
-    <text>Полностью включает\выключает интерфейс для задачи. Удобно, если не собираетесь ничего переключать.</text>
-  </string>
-  <string id="ui_mcm_idiots_options_jobs_note">
-    <text>Примечание: Для работы задачи в Гамме выключите мод "311 NPC Stop Looting Dead Bodies".</text>
-  </string>
   <string id="ui_mcm_idiots_options_noNpcLooting">
     <text>Только спутники могут собирать и обыскивать</text>
   </string>
   <string id="ui_mcm_idiots_options_noNpcLooting_desc">
-    <text>Включает\выключает возможность не-спутникам собирать и обыскивать. По-умолчанию выключено для Аномали и включено для Гаммы.</text>
+    <text>Включает\выключает возможность не-спутникам собирать и обыскивать. По-умолчанию выключено
+      для Anomaly и включено для GAMMA.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_jobs_note">
+    <text>ПРИМЕЧАНИЕ: Для работы этой задачи в GAMMA выключите мод "311 NPC Stop Looting Dead
+      Bodies".</text>
+  </string>
+
+  <!-- Cheats -->
+  <string id="ui_mcm_idiots_subtitle_options_cheats">
+    <text>Читы (почти)</text>
+  </string>
+  <string id="ui_mcm_idiots_options_cheats_note">
+    <text>ПРИМЕЧАНИЕ: Эти опции могут сломать баланс игры!
+      Внимательно читайте описание прежде чем включать их.</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts">
-    <text>Включить возможность управлять сбором артефактов</text>
+    <text>Включить задачу для компаньонов "Собирать артефакты"</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts_desc">
-    <text>Включает\выключает возможность спутников собирать артефакты. Примечание: Вообще это нечестно если у вас не стоит мод который включает спутникам урон от аномалий.</text>
+    <text>Включает\выключает возможность компаньонов собирать артефакты.
+      ПРИМЕЧАНИЕ: Это читерство если у вас не стоит мод, который включает компаньонам урон от
+      аномалий.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_showAllItems">
+    <text>Показать ВСЕ предметы в инвентаре компаньонов</text>
+  </string>
+  <string id="ui_mcm_idiots_options_showAllItems_desc">
+    <text>Показывать все в инвентаре компаньонов, а не только предметы, которые они добыли/собрали
+      для вас.
+      ПРИМЕЧАНИЕ: включение этой может быть читерским, поскольку позволяет вам
+      забирать у компаньонов их изначальное снаряжение. Используйте это только для очистки мусора
+      или в случае,
+      если проблема с модом не позволяет вам получить доступ к добытому/собранному предмету.</text>
   </string>
 
   <!-- UI Options -->
-  <string id="ui_mcm_idiots_subtitle_options_ui">
+  <string id="ui_mcm_idiots_title_ui">
     <text>Настройки интерфейса</text>
   </string>
-  <string id="ui_mcm_idiots_options_scaleX">
+  <string id="ui_mcm_idiots_ui_indexers">
+    <text>Показывать индикаторы над спутниками</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_indexers_desc">
+    <text>Включает\выключает номера над спутниками, когда открыт интерфейс управления компаньонами.</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_showReload">
+    <text>Показывать кнопку "Перезарядка"</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_showReload_desc">
+    <text>Добавить в интерфейс кнопку, позволяющую вручную заставить компаньонов перезарядить все
+      оружие в их инвентаре.</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_showRetreat">
+    <text>Показывать кнопку "Отступление"</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_showRetreat_desc">
+    <text>Добавить в интерфейс кнопку, позволяющую вручную заставить компаньонов отступать (следовать, спешить,
+      игнорировать бой и держаться близко).</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_showUnstick">
+    <text>Показывать кнопку "Освободить"</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_showUnstick_desc">
+    <text>Добавить в интерфейс кнопку, которая поможет освободить компаньонов если они застряли.</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_showTooltips">
+    <text>Показывать всплывающие подсказки для кнопок</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_showTooltips_desc">
+    <text>Показывать всплывающие подсказки при наведении курсора на кнопки интерфейса,
+      состоящие только из значков.</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_ui_customization">
+    <text>Внешний вид интерфейса</text>
+  </string>
+  <string id="ui_mcm_idiots_scheme">
+    <text>Цветовая палитра</text>
+  </string>
+  <string id="ui_mcm_idiots_scheme_desc">
+    <text>Выбор дополнительного цвета интерфейса компаньонов.</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_scaleX">
     <text>Масштаб по X</text>
   </string>
-  <string id="ui_mcm_idiots_options_scaleY">
+  <string id="ui_mcm_idiots_ui_scaleY">
     <text>Масштаб по Y</text>
   </string>
-  <string id="ui_mcm_idiots_options_offsetX">
+  <string id="ui_mcm_idiots_ui_offsetX">
     <text>Положение по X относительно центра</text>
   </string>
-  <string id="ui_mcm_idiots_options_offsetY">
-    <text>Положение по X относительно самого низа</text>
+  <string id="ui_mcm_idiots_ui_offsetY">
+    <text>Положение по Y относительно низа</text>
   </string>
-  <string id="ui_mcm_idiots_options_font">
+  <string id="ui_mcm_idiots_ui_font">
     <text>Размер шрифта</text>
-  </string>
-
-  <!-- Beta Options -->
-  <string id="ui_mcm_idiots_title_beta">
-    <text>Beta Options for Useful Idiots</text>
-  </string>
-  <string id="ui_mcm_idiots_beta_note">
-    <text>You can disable any of the features below if they introduce game-breaking issues. Drop me a note if you do run into any such issues.</text>
-  </string>
-  <string id="ui_mcm_idiots_beta_noSpatial">
-    <text>Disable Spatial Awareness Pathfinding</text>
-  </string>
-  <string id="ui_mcm_idiots_beta_noSpatial_desc">
-    <text>Experimental feature that changes how companions follow you depending on whether you are in an open, enlcosed, or cramped space.</text>
-  </string>
-  <string id="ui_mcm_idiots_beta_legacyPathing">
-    <text>Disable Improved Pathfinding</text>
-  </string>
-  <string id="ui_mcm_idiots_beta_legacyPathing_desc">
-    <text>Experimental feature that tries to improve companion pathfinding, especially indoors and when in enclosed areas.</text>
   </string>
 
   <!-- Keybinds -->
@@ -165,31 +232,41 @@
     <text>Горячие клавиши</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_move">
-    <text>Двигаться к точке</text>
+    <text>Переместиться на точку</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_away">
-    <text>Move Out of the Way</text>
+    <text>Уйди с дороги</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_select">
-    <text>Select Companion</text>
+    <text>Выбрать компаньона</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_deselect">
-    <text>Clear All Selected Companions</text>
+    <text>Очистить всех выбранных компаньонов</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_addWaypoint">
-    <text>Add Waypoint</text>
+    <text>Добавить точку</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_clearWaypoints">
-    <text>Clear All Waypoints</text>
+    <text>Очистить все точки</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_inventory">
-    <text>Open Inventory</text>
+    <text>Открыть инвентарь</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_inventory_note">
-    <text>NOTE: The SHIFT modifier doesn't work for this keybind in GAMMA (unless you've disabled GAMMA UI).</text>
+    <text>П.С: Модификатор SHIFT не работает для этой привязки клавиш в GAMMA (если только вы не
+      отключили GAMMA UI).</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_reset">
-    <text>Re-Sync State</text>
+    <text>Ре-синхронизировать состояние</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_look">
+    <text>Смотреть на точку</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_reload">
+    <text>Перезарядить оружие</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_retreat">
+    <text>Отступление</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_key">
     <text>Клавиша</text>
@@ -201,12 +278,12 @@
     <text>Тип нажатия</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_toggle">
-    <text>Работать по нажатию</text>
+    <text>Переключать по нажатию</text>
   </string>
 
   <!-- Movement Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_movement">
-    <text>Переключить движение</text>
+    <text>Переключить тип движения</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_follow">
     <text>Следовать</text>
@@ -224,6 +301,20 @@
     <text>Патрулировать</text>
   </string>
 
+  <!-- Light Keys -->
+  <string id="ui_mcm_idiots_subtitle_cycle_light">
+    <text>Переключить режим фонарика</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_auto">
+    <text>Стандартное поведение фонарика (авто)</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_off">
+    <text>Фонарик ВЫКЛ</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_on">
+    <text>Фонарик ВКЛ</text>
+  </string>
+
   <!-- Speed Keys -->
   <string id="ui_mcm_idiots_subtitle_hurry">
     <text>Спешить</text>
@@ -231,7 +322,7 @@
 
   <!-- Stance Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_stance">
-    <text>Переключить положение</text>
+    <text>Переключить тип положения</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_stand">
     <text>Стоять</text>
@@ -245,44 +336,76 @@
 
   <!-- Distance Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_distance">
-    <text>Переключить дистанцию</text>
+    <text>Переключить режим дистанции</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_near">
-    <text>Near</text>
+    <text>Держаться рядом</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_normal">
-    <text>Normal</text>
+    <text>Нормально</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_far">
-    <text>Держаться вдали</text>
+    <text>Держаться вдалеке</text>
   </string>
 
   <!-- Combat Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_combat">
-    <text>Переключить бой</text>
+    <text>Переключить режим боя</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_default">
-    <text>Обычный бой</text>
+    <text>Обычный бой (стандартный Anomaly)</text>
   </string>
-    <string id="ui_mcm_idiots_subtitle_offensive">
-    <text>Режим "Offensive"</text>
+  <string id="ui_mcm_idiots_subtitle_assault">
+    <text>Режим "Агрессивный"</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_defensive">
-    <text>Режим "Defensive"</text>
+  <string id="ui_mcm_idiots_subtitle_support">
+    <text>Режим "Поддержка"</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_guard">
+    <text>Режим "Оборонительный"</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_snipe">
+    <text>Режим "Снайпер"</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_monolith">
     <text>Режим "Монолит"</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_camper">
-    <text>Режим "Снайпер"</text>
+    <text>Режим "Меткий стрелок"</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_zombied">
     <text>Режим "Зомби"</text>
   </string>
 
+  <!-- Weapon Keys -->
+  <string id="ui_mcm_idiots_subtitle_cycle_weapon">
+    <text>Переключить тип оружия</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_best">
+    <text>Лучшее оружие</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_pistol">
+    <text>Пистолет</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_shotgun">
+    <text>Дробовик</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_smg">
+    <text>Пистолет-пулемет</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_rifle">
+    <text>Штурмовая винтовка</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_sniper">
+    <text>Снайперская винтовка</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_rpg">
+    <text>РПГ</text>
+  </string>
+
   <!-- Readiness Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_readiness">
-    <text>Переключить поведение</text>
+    <text>Переключить тип поведения в бою</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_attack">
     <text>Атаковать всех</text>
@@ -296,13 +419,13 @@
 
   <!-- Jobs Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_jobs">
-    <text>Переключить задачи</text>
+    <text>Переключить тип задачи</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_loot_items">
     <text>Собирать предметы</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_loot_artifacts">
-    <text>И артефакты</text>
+    <text>Собирать артефакты</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_loot_corpses">
     <text>Обыскивать трупы</text>
@@ -313,7 +436,7 @@
 
   <!-- Formation Keys -->
   <string id="ui_mcm_idiots_subtitle_cycle_formation">
-    <text>Переключить построение</text>
+    <text>Переключить режим построения</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_bunch">
     <text>Вместе</text>
@@ -325,7 +448,7 @@
     <text>Колонна</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_covered">
-    <text>Covered</text>
+    <text>В укрытии</text>
   </string>
 
   <!-- List Options -->
@@ -376,5 +499,44 @@
   </string>
   <string id="ui_mcm_lst_right">
     <text>Право</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_faction">
+    <text>Ваша группировка</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_army">
+    <text>Военные</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_bandit">
+    <text>Бандиты</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_csky">
+    <text>Чистое Небо</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_dolg">
+    <text>Долг</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_ecolog">
+    <text>Экологи</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_freedom">
+    <text>Свобода</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_greh">
+    <text>Грех</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_isg">
+    <text>ИИГ</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_killer">
+    <text>Наемники</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_monolith">
+    <text>Монолит</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_renegade">
+    <text>Ренегаты</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_stalker">
+    <text>Одиночки</text>
   </string>
 </string_table>

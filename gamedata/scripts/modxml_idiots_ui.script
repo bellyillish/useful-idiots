@@ -3,501 +3,612 @@ local DXML   = require "illish.dxml"
 local TABLE  = require "illish.table"
 
 
-function parseIndexers(XML, el, config)
-  local attrs = XML:getAttrWithInherit(el, {"font", "tabCount"})
-  local size, tabCount = attrs.size  or 0, attrs.tabCount or 0
+local LABEL_PREFIX = "st_idiots_"
+local MAX_TABS     = 10
 
-  for i = 1, attrs.tabCount do
-    local indexer = XML:convertElement({
-      name = "indexer_".. i,
-      attr = {
-        font    = attrs.font,
-        width   = size,
-        height  = size,
-        stretch = 1,
-        label   = i,
-      }
-    })
+local ATTRS = {
+  w         = {width = "1024", height = "768", xalign = "c", yalign = "b", dir = "v"},
+  tooltip   = {width="0", height = "0", xalign = "l", yalign = "c", stretch = "1", dir = "h"},
+  dialog    = {width = "fit", height = "fit", dir = "v", stretch = "1"},
+  container = {width = "fit", height = "fit", dir = "h", stretch = "1"},
+  indexer   = {size = "15", dir = "h", xalign = "c", yalign = "c", stretch = "1"},
+  tab       = {size = "30", dir = "h", xalign = "c", yalign = "c", stretch = "1"},
+  group     = {width = "fit", height = "fit", dir = "v"},
+  action    = {xalign = "c", yalign = "c", dir = "h", stretch = "1"},
+  label     = {width = "fill", height = "fill", xalign = "c", yalign = "c"},
+  toggle    = {stretch = "1"},
+  icon      = {stretch = "1"},
+}
 
-    XML:insertElement(indexer, el)
-    addLabel(XML, indexer)
+local PARSERS = {
+  pre      = {},
+  post     = {},
+  finalize = {},
+  cleanup  = {},
+}
+
+local FONTS = {
+  "small",
+  "arial_14",
+  "letterica16",
+  "letterica18",
+  "letterica25",
+}
+
+
+--
+
+
+function parse(XML, el, config, finalization)
+  local name = XML:getElementName(el)
+
+  if not finalization then
+    preAll(XML, el, config)
+  end
+
+  if not finalization and PARSERS.pre[name] then
+    PARSERS.pre[name](XML, el, config)
+  end
+
+
+  if not finalization then
+    if XML:getElementAttr(el).dir then
+      initLayout(XML, el)
+    end
+  end
+
+
+  if finalization and PARSERS.finalize[name] then
+    el = PARSERS.finalize[name](XML, el, config) or el
+  end
+
+  if finalization then
+    finalizeAll(XML, el, config)
+  end
+
+
+  DXML.iterateElements(XML, el, function(child)
+    parse(XML, child, config, finalization)
+  end)
+
+
+  if not finalization and PARSERS.post[name] then
+    PARSERS.post[name](XML, el, config)
+  end
+
+
+  if not finalization then
+    if XML:getElementAttr(el).dir then
+      layoutChildren(XML, el)
+    end
+  end
+
+
+  if finalization and PARSERS.cleanup[name] then
+    el = PARSERS.cleanup[name](XML, el, config) or el
+  end
+
+
+  if finalization then
+    cleanupAll(XML, el, config)
+  end
+
+
+  if finalization then
+    local attrs = XML:getElementAttr(el)
+
+    if attrs.id then
+      XML:renameElement(el, attrs.id)
+      XML:removeElementAttr(el, {"id"})
+    end
   end
 end
 
 
-function parseTitlebarIcon(XML, el, pos)
-  local icon     = XML:queryOne("icon", el)
-  local attrs    = XML:getAttrWithInherit(icon, {"xgap"})
-  local tbheight = XML:getElementAttr(el).height or 0
+function preAll(XML, el, config)
+  local name = XML:getElementName(el)
+  local a    = XML:getElementAttr(el)
 
-  pos = pos or {0, 0}
+  if not ATTRS[name] then
+    return
+  end
 
-  local width, height, xgap =
-    attrs.width  or 0,
-    attrs.height or 0,
-    attrs.xgap     or 0
+  a = TABLE.merge(ATTRS[name], a)
 
-  XML:setElementAttr(icon, {
-    x       = pos[1],
-    y       = pos[2] + (tbheight - height) / 2,
-    stretch = 1,
-  })
+  a.width  = a.width  or a.size
+  a.height = a.height or a.size
+  a.lpad   = a.lpad or a.xpad or a.pad
+  a.rpad   = a.rpad or a.xpad or a.pad
+  a.tpad   = a.tpad or a.ypad or a.pad
+  a.bpad   = a.bpad or a.ypad or a.pad
+  a.xgap   = a.xgap or a.gap
+  a.ygap   = a.ygap or a.gap
+  a.xoff   = a.xoff or a.off
+  a.yoff   = a.yoff or a.off
 
-  pos[1] = pos[1] + width + xgap
+  if a.bg then
+    local texture = XML:convertElement({
+      name = "texture",
+      kids = {{el = "#" .. a.bg}},
+      attr = {a = a.a,  r = a.r,  g = a.g,  b = a.b}
+    })
+
+    a.stretch = 1
+    XML:insertElement(texture, el)
+  end
+
+  XML:setElementAttr(el, a)
 end
 
 
-function parseTitlebarTitle(XML, el, pos)
-  local title    = XML:queryOne("title", el)
-  local attrs    = XML:getAttrWithInherit(title, {"font"})
-  local tbheight = XML:getElementAttr(el).height or 0
+function finalizeAll(XML, el)
+  if not XML:isValid(el.parent) then
+    return
+  end
 
-  pos = pos or {0, 0}
+  local a = XML:getElementAttr(el)
+  local p = XML:getElementAttr(el.parent)
+  local width, height
 
-  XML:setElementAttr(title, {
-    x       = pos[1],
-    y       = pos[2],
-    height  = tbheight,
-    stretch = 1,
-  })
+  if a.width == "fill" and tonumber(p.width) then
+    width = p.width - (a.x or 0) - (p.rpad or 0)
+  end
 
-  local text = XML:convertElement({
-    name = "text",
-    kids = {{el = "#".. (attrs.label or "")}},
-    attr = {
-      font         = attrs.font,
-      align        = "l",
-      vert_align   = "c",
-      complex_mode = 1,
-    },
-  })
+  if a.height == "fill" and tonumber(p.height) then
+    height = p.height - (a.y or 0) - (p.bpad or 0)
+  end
 
-  XML:insertElement(text, title)
-  pos[1] = pos[1] + (attrs.width or 0)
+  if tonumber(width) then
+    width = math.max(tonumber(width), 0)
+  end
+
+  if tonumber(height) then
+    height = math.max(tonumber(height), 0)
+  end
+
+  if width or height then
+    XML:setElementAttr(el, {width = width, height = height})
+  end
 end
 
 
-function parseTitlebarActions(XML, el, pos)
-  local actions  = XML:queryOne("actions", el)
-  local tbheight = XML:getElementAttr(el).height or 0
+function cleanupAll(XML, el)
+  if not XML:isValid(el) then
+    return
+  end
 
-  pos = pos or {0, 0}
+  local a      = XML:getElementAttr(el)
+  local bounds = DXML.getChildrenBounds(XML, el)
 
-  parseActions(XML, actions, {pos[1], 0})
-  local attrs = XML:getElementAttr(actions)
+  if not bounds then
+    return
+  end
 
-  XML:setElementAttr(actions, {
-    x = pos[1] - (attrs.width or 0),
-    y = pos[2] + (tbheight - (attrs.height or 0)) / 2
-  })
+  if a.xalign == "c" and tonumber(a.width) then
+    local offset = (a.width - bounds.w) / 2
+
+    DXML.iterateElements(XML, el, function(child)
+      if XML:getElementName(child) == "text" then
+        return
+      end
+
+      local c = XML:getElementAttr(child)
+
+      if a.dir == "v" then
+        offset = c.width and (a.width - (a.lpad or 0) - (a.rpad or 0) - c.width) / 2 or 0
+        XML:setElementAttr(child, {x = (a.lpad or 0) + offset})
+      else
+        XML:setElementAttr(child, {x = (c.x or 0) + offset})
+      end
+    end)
+  end
+
+  if a.yalign == "c" and tonumber(a.height) then
+    local offset = (a.height - bounds.h) / 2
+
+    DXML.iterateElements(XML, el, function(child)
+      if XML:getElementName(child) == "text" then
+        return
+      end
+
+      local c = XML:getElementAttr(child)
+
+      if a.dir == "h" then
+        offset = c.height and (a.height - (a.tpad or 0) - (a.bpad or 0) - c.height) / 2 or 0
+        XML:setElementAttr(child, {y = (a.tpad or 0) + offset})
+      else
+        XML:setElementAttr(child, {y = (c.y or 0) + offset})
+      end
+    end)
+  end
+
+  if a.xalign == "r" and tonumber(a.width) then
+    local offset = (a.width - bounds.w)
+
+    DXML.iterateElements(XML, el, function(child)
+      if XML:getElementName(child) == "text" then
+        return
+      end
+
+      local c = XML:getElementAttr(child)
+
+      if a.dir == "v" then
+        offset = c.width and (a.width - (a.lpad or 0) - (a.rpad or 0) - c.width) or 0
+        XML:setElementAttr(child, {x = (a.lpad or 0) + offset})
+      else
+        XML:setElementAttr(child, {x = (c.x or 0) + offset})
+      end
+    end)
+  end
+
+  if a.yalign == "b" and tonumber(a.height) then
+    local offset = (a.height - bounds.h)
+
+    DXML.iterateElements(XML, el, function(child)
+      if XML:getElementName(child) == "text" then
+        return
+      end
+
+      local c = XML:getElementAttr(child)
+
+      if a.dir == "h" then
+        offset = c.height and (a.height - (a.tpad or 0) - (a.bpad or 0) - c.height) or 0
+        XML:setElementAttr(child, {y = (a.tpad or 0) + offset})
+      else
+        XML:setElementAttr(child, {y = (c.y or 0) + offset})
+      end
+    end)
+  end
 end
 
 
-function parseTitlebar(XML, el, pos, config)
-  local attrs = XML:getElementAttr(el)
+function initLayout(XML, el)
+  local dir = XML:getElementAttr(el).dir
 
-  local xpad, ypad, width, height =
-    attrs.xpad     or 0,
-    attrs.ypad     or 0,
-    attrs.width  or 0,
-    attrs.height or 0
+  el.__layout = {
+    x = 0,
+    y = 0,
+    h = dir and dir:find("h") and 1 or 0,
+    v = dir and dir:find("v") and 1 or 0,
+  }
 
-  local tbpos = {xpad, ypad}
-
-  parseTitlebarIcon(XML, el, tbpos)
-  parseTitlebarTitle(XML, el, tbpos)
-
-  tbpos[1] = attrs.width - xpad
-  parseTitlebarActions(XML, el, tbpos)
-
-  XML:setElementAttr(el, {
-    x       = pos and pos[1],
-    y       = pos and pos[2],
-    height  = attrs.height + ypad * 2,
-    stretch = 1,
-  })
+  return el.__layout
 end
 
 
-function parseTabs(XML, el, pos, config)
-  local attrs = XML:getAttrWithInherit(el, {"font", "tabCount"})
-
-  local xpad, ypad, xgap, wtab, htab, tabCount =
-    attrs.xpad    or 0,
-    attrs.ypad    or 0,
-    attrs.xgap    or 0,
-    attrs.wtab    or 0,
-    attrs.htab    or 0,
-    attrs.tabCount or 0
-
-  local tpos = {xpad, ypad}
-
-  for i = 0, attrs.tabCount do
-    local label, name = i, "tab_".. i
-
-    if i == 0 then
-      label = attrs.label
-      name  = "tab_all"
-    else
-      tpos[1] = tpos[1] + xgap
+function getCurrentLayout(XML, el)
+  while DXML.isValid(XML, el) do
+    if el.__layout then
+      return el.__layout
     end
 
-    local tab = XML:convertElement({
-      name = name,
-      attr = {
-        label   = label,
-        font    = attrs.font,
-        x       = tpos[1],
-        y       = tpos[2],
-        width   = attrs.wtab,
-        height  = attrs.htab,
-        stretch = 1,
-      }
-    })
+    el = el.parent
+  end
+end
 
-    addLabel(XML, tab)
 
-    XML:insertElement(tab, el)
-    tpos[1] = tpos[1] + wtab
+function layoutChildren(XML, el)
+  local layout = getCurrentLayout(XML, el)
+    or {x = 0, y = 0, h = 0, v = 0}
+
+  local p = XML:getElementAttr(el)
+
+  if p.lpad then
+    layout.x = layout.x + p.lpad
+  end
+  if p.tpad then
+    layout.y = layout.y + p.tpad
   end
 
-  tpos[2] = tpos[2] + htab
+  DXML.iterateElements(XML, el, function(child)
+    local i = XML:getElementPosition(child)
+    local a = XML:getElementAttr(child)
 
-  XML:setElementAttr(el, {
-    x       = pos and pos[1],
-    y       = pos and pos[2],
-    width   = tpos[1] + xpad,
-    height  = tpos[2] + ypad,
-    stretch = 1,
-  })
+    local x, y = layout.x, layout.y
+
+    if i > 1 and p.dir == "h" and p.xgap then
+      x = x + p.xgap * layout.h
+      layout.x = x
+    end
+
+    if i > 1 and p.dir == "v" and p.ygap then
+      y = y + p.ygap * layout.v
+      layout.y = y
+    end
+
+    if a.xoff then
+      x = x + a.xoff
+      if p.dir == "h" then
+        layout.x = x
+      end
+    end
+
+    if a.yoff then
+      y = y + a.yoff
+      if p.dir == "v" then
+        layout.y = y
+      end
+    end
+
+    local width, height = a.width, a.height
+
+    width  = tonumber(width)  and math.max(tonumber(width), 0)  or width
+    height = tonumber(height) and math.max(tonumber(height), 0) or height
+
+    XML:setElementAttr(child, {
+      x      = x,
+      y      = y,
+      width  = width,
+      height = height,
+    })
+
+    layout.x = layout.x + (tonumber(width)  or 0) * layout.h
+    layout.y = layout.y + (tonumber(height) or 0) * layout.v
+  end)
+
+  local bounds = DXML.getChildrenBounds(XML, el)
+
+  if not bounds then
+    return
+  end
+
+  if p.width == "fit" then
+    XML:setElementAttr(el, {width = bounds.w + (p.lpad or 0) + (p.rpad or 0)})
+  end
+
+  if p.height == "fit" then
+    XML:setElementAttr(el, {height = bounds.h + (p.tpad or 0) + (p.bpad or 0)})
+  end
 end
 
 
-function addToggle(XML, el, pos)
-  local attrs = XML:getAttrWithInherit(el, {"toggleSize", "togglePad"})
-  local name  = XML:getElementName(el)
+function getFont(XML, el)
+  local fontSize = XML:getNearestAttr(el, "fontSize")
+  local font     = XML:getNearestAttr(el, "font")
+  local baseSize = ui_mcm.get("idiots/ui/font")
 
-  pos = pos or {0, 0}
+  if fontSize and baseSize then
+    font = FONTS[math.max(1, math.min(baseSize + fontSize, #FONTS))]
+  end
 
-  local toggleSize, togglePad, height =
-    attrs.toggleSize or 0,
-    attrs.togglePad  or 0,
-    attrs.height     or 0
-
-  local texture = XML:convertElement({
-    name = "texture",
-    kids = {{el = "#idiots_ui_dark"}}
-  })
-
-  pos[1] = pos[1] + togglePad
-
-  local toggle = XML:convertElement({
-    name = "toggle",
-    kids = {texture},
-    attr = {
-      x       = pos[1],
-      y       = pos[2] + (height - toggleSize) / 2,
-      width   = toggleSize,
-      height  = toggleSize,
-      stretch = 1,
-    },
-  })
-
-  pos[1] = pos[1] + toggleSize + togglePad
-  XML:insertElement(toggle, el)
+  return font
 end
 
 
-function addIcon(XML, el, pos)
-  local attrs = XML:getAttrWithInherit(el, {"icon", "compact", "iconSize", "iconPad"})
-  local name  = XML:getElementName(el)
-
-  pos = pos or {0, 0}
-
-  local iconSize, iconPad, width, height =
-    attrs.iconSize or 0,
-    attrs.iconPad  or 0,
-    attrs.width    or 0,
-    attrs.height   or 0
-
-  local hint = attrs.hint == "1"
-    and "st_idiots_".. name:lower()
-    or  attrs.hint
-
-  local icon = attrs.icon == "1"
-    and "icon_idiots_".. name:lower()
-    or  attrs.icon
-
-  local texture = XML:convertElement({
-    name = "texture",
-    kids = {{el = "#".. icon}}
-  })
-
-  pos[1] = attrs.compact
-    and pos[1] + (width - pos[1] - iconSize) / 2
-    or  pos[1] + iconSize
-
-  local icon = XML:convertElement({
-    name = "icon",
-    kids = {texture},
-    attr = {
-      hint    = hint,
-      x       = pos[1],
-      y       = pos[2] + (height - iconSize) / 2,
-      width   = iconSize,
-      height  = iconSize,
-      stretch = 1,
-    },
-  })
-
-  pos[1] = attrs.compact
-    and width
-    or  pos[1] + iconSize + iconPad
-
-  XML:insertElement(icon, el)
-end
+--
 
 
-function addLabel(XML, el, pos)
-  local attrs = XML:getAttrWithInherit(el, {"label", "toggle", "icon", "font", "group"})
-  local name  = XML:getElementName(el)
-
-  pos = pos or {0, 0}
-  local width, height = attrs.width or 0, attrs.height or 0
-
-  local str = attrs.label
-    or "st_idiots_".. (attrs.group and attrs.group .."_" or "").. name:lower()
-
-  local align = (attrs.toggle or attrs.icon)
-    and "l" or "c"
-
-  local text = XML:convertElement({
-    name = "text",
-    kids = {{el = "#".. str}},
-    attr = {
-      font         = attrs.font,
-      align        = align,
-      vert_align   = "c",
-      complex_mode = 1
-    },
-  })
+function PARSERS.pre.indexer(XML, el)
+  local a = XML:getElementAttr(el)
 
   local label = XML:convertElement({
     name = "label",
-    kids = {text},
     attr = {
-      x       = pos[1],
-      y       = pos[2],
-      width   = width - pos[1],
-      height  = height,
-      stretch = 1,
+      font   = getFont(XML, el),
+      xalign = a.xalign,
+      yalign = a.yalign,
+      width  = "fill",
+      height = "fill",
     },
   })
 
-  pos[1] = width
-  XML:insertElement(label, el)
+  XML:wrapChildren(el, label)
 end
 
 
-function parseAction(XML, el, pos)
-  local attrs = XML:getAttrWithInherit(el, {"waction", "haction", "xgap", "ygap", "toggle", "icon", "compact", "group"})
-
-  local waction, haction, xgap, ygap, width, height =
-    attrs.waction or 0,
-    attrs.haction or 0,
-    attrs.xgap    or 0,
-    attrs.ygap    or 0,
-    attrs.width   or attrs.waction or 0,
-    attrs.height  or attrs.haction or 0
-
+function PARSERS.pre.dialog(XML, el, config)
   XML:setElementAttr(el, {
-    stretch = 1,
-    group   = attrs.group,
-    width   = width,
-    height  = height,
-    x       = pos and pos[1],
-    y       = pos and pos[2],
-  })
-
-  pos[1] = pos[1] + width
-  local cpos = {0, 0}
-
-  if attrs.toggle then
-    addToggle(XML, el, cpos)
-  end
-  if attrs.icon then
-    addIcon(XML, el, cpos)
-  end
-  if not attrs.compact then
-    addLabel(XML, el, cpos)
-  end
-end
-
-
-function parseActions(XML, el, pos, config)
-  local cols  = XML:query("col", el)
-  local attrs = XML:getElementAttr(el)
-
-  local xpad, ypad  = attrs.xpad or 0, attrs.ypad or 0
-  local rpos    = {xpad, ypad}
-  local mw, mh  = 0, 0
-
-  for index, col in ipairs(cols) do
-    rpos[2], mw = ypad, 0
-
-    local attrs = XML:getAttrWithInherit(col, {"waction", "haction", "xgap", "ygap"})
-    local xgap    = attrs.xgap or 0
-
-    if index > 1 then
-      rpos[1] = rpos[1] + xgap
-    end
-
-    XML:iterateElements(col, function(child, index)
-      local attrs = XML:getAttrWithInherit(child, {"waction", "haction", "xgap", "ygap"})
-
-      local waction, haction, xgap, ygap =
-        attrs.width  or attrs.waction or 0,
-        attrs.height or attrs.haction or 0,
-        attrs.xgap or 0,
-        attrs.ygap or 0
-
-      if index > 1 then
-        rpos[2] = rpos[2] + ygap
-      end
-
-      local cpos = {rpos[1], rpos[2]}
-
-      if XML:getElementName(child) == "row" then
-        XML:setElementAttr(child, {
-          waction = (waction - xgap * (#child.kids - 1)) / #child.kids
-        })
-
-        XML:iterateElements(child, function(action, index)
-          if index > 1 then
-            cpos[1] = cpos[1] + xgap
-          end
-
-          parseAction(XML, action, cpos)
-          XML:insertElement(action, el)
-        end)
-      else
-        parseAction(XML, child, cpos)
-        XML:insertElement(child, el)
-      end
-
-      rpos[2] = rpos[2] + haction
-      mw = math.max(mw, waction)
-      mh = math.max(mh, rpos[2])
-    end)
-
-    XML:removeElement(col)
-    rpos[1] = rpos[1] + mw
-  end
-
-  XML:setElementAttr(el, {
-    x       = pos and pos[1],
-    y       = pos and pos[2],
-    width   = rpos[1] + xpad,
-    height  = mh + ypad,
-    stretch = 1
-  })
-
-  pos[2] = pos[2] + mh + ypad
-
-
-  local names = XML:iterateElements(el, function(child)
-    return XML:getElementName(child)
-  end)
-
-  XML:setElementAttr(el, {names = table.concat(names, ',')})
-end
-
-
-function parseContainer(XML, el, config)
-  local bounds = XML:getChildBounds(el)
-
-  XML:setElementAttr(el, {
-    width   = bounds.w,
-    height  = bounds.h,
-    stretch = 1,
-  })
-
-  local attrs = XML:getElementAttr(el)
-  local x, y = 0, 0
-
-  if attrs.xalign == "center" then
-    x = (1024 - attrs.width) / 2
-  elseif attrs.xalign == "right" then
-    x = 1024 - attrs.width
-  end
-
-  if attrs.yalign == "center" then
-    y = (768 - attrs.height) / 2
-  elseif attrs.yalign == "bottom" then
-    y = 768 - attrs.height
-  end
-
-  XML:setElementAttr(el, {
-    x = x + (attrs.xoffset or 0),
-    y = y + (attrs.yoffset or 0)
+    xoff = config.offsetX or XML:getElementAttr(el).xoff,
+    yoff = config.offsetY or XML:getElementAttr(el).yoff,
   })
 end
 
 
-function applyOptions(XML, config)
+function PARSERS.pre.w(XML, el, config)
+  local font = FONTS[tonumber(config.font)]
+
+  if font then
+    XML:setElementAttr(el, {font = font})
+  end
+
   if not config.unstick then
-    local unstick = XML:queryOne("unstick")
+    local unstick = XML:queryOne("action[name=unstick]")
     if unstick then
       XML:removeElement(unstick)
     end
   end
 
+  if not config.reload then
+    local reload = XML:queryOne("action[name=reload]")
+    if reload then
+      XML:removeElement(reload)
+    end
+  end
+
+  if not config.retreat then
+    local retreat = XML:queryOne("action[name=retreat]")
+    if retreat then
+      XML:removeElement(retreat)
+    end
+  end
+
   if not config.oldCombat then
-    local monolith = XML:queryOne("monolith")
-    local camper   = XML:queryOne("camper")
+    local monolith = XML:queryOne("action[name=monolith]")
+    local zombied  = XML:queryOne("action[name=zombied]")
+    local camper   = XML:queryOne("action[name=camper]")
 
     if monolith then
       XML:removeElement(monolith)
+    end
+    if zombied then
+      XML:removeElement(zombied)
     end
     if camper then
       XML:removeElement(camper)
     end
   end
 
-  if not config.zombied then
-    local zombied = XML:queryOne("zombied")
-    if zombied then
-      XML:removeElement(zombied)
-    end
-  end
-
-  if not config.jobs then
-    local jobs = XML:queryOne("col[group=jobs]")
-    if jobs then
-      XML:removeElement(jobs)
-    end
-  end
-
   if not config.artifacts then
-    local artifacts = XML:queryOne("loot_artifacts")
+    local artifacts = XML:queryOne("action[name=loot_artifacts]")
     if artifacts then
       XML:removeElement(artifacts)
     end
   end
+end
 
-  local container = XML:queryOne("container")
-  if not container then
-    return
+
+function PARSERS.pre.tab(XML, el)
+  local a = XML:getElementAttr(el)
+
+  local label = XML:convertElement({
+    name = "label",
+    attr = {
+      font   = getFont(XML, el),
+      xalign = a.xalign,
+      yalign = a.yalign,
+      width  = "fill",
+      height = "fill",
+    },
+  })
+
+  XML:wrapChildren(el, label)
+end
+
+
+function PARSERS.pre.label(XML, el)
+  local a = XML:getElementAttr(el)
+
+  local text = XML:convertElement({
+    name = "text",
+    attr = {
+      font         = getFont(XML, el),
+      align        = a.xalign,
+      vert_align   = a.yalign,
+      complex_mode = 1,
+    },
+  })
+
+  XML:wrapChildren(el, text)
+end
+
+
+function PARSERS.pre.action(XML, el)
+  local a  = XML:getElementAttr(el)
+  local id = (a.group and a.group .. "_" or "") .. (a.name or "action")
+
+  local text = #el.kids == 1 and XML:isText(el.kids[1])
+    and XML:getText(el)
+    or  LABEL_PREFIX .. id
+
+  if a.compact == "1" then
+    XML:removeElementAttr(el, {"dir"})
+    XML:setElementAttr(el, {tip = text})
+  else
+    local label = XML:convertElement({
+      name = "label",
+      kids = {{el = "#" .. text}},
+      attr = {
+        font   = getFont(XML, el),
+        xalign = a.xalign,
+        yalign = a.yalign,
+        width  = "fill",
+        height = "fill",
+      },
+    })
+
+    XML:insertElement(label, el)
   end
 
-  local attrs = XML:getElementAttr(container)
+  if a.icon then
+    local iconSize = XML:getNearestAttr(el, "iconSize")
 
-  XML:setElementAttr(container, {
-    font    = config.font or attrs.font,
-    xoffset = config.offsetX or attrs.xoffset,
-    yoffset = config.offsetY or attrs.yoffset,
-  })
+    local size = a.compact ~= "1"
+      and (iconSize or math.min(a.width, a.height))
+      or  "fill"
+
+    local icon = XML:convertElement({
+      name = "icon",
+      kids = {{el = "#" .. a.icon}},
+      attr = {width = size, height = size},
+    })
+
+    XML:insertElement(icon, el, 1)
+  end
+
+  if a.toggle == "1" then
+    local toggleSize = XML:getNearestAttr(el, "toggleSize")
+
+    local size = a.compact ~= "1"
+      and (toggleSize or math.min(a.width, a.height))
+      or  "fill"
+
+    local toggle = XML:convertElement({
+      name = "toggle",
+      attr = {width = size, height = size},
+    })
+
+    XML:insertElement(toggle, el, 1)
+  end
 end
+
+
+function PARSERS.pre.group(XML, el)
+  if #el.kids == 0 then
+    XML:removeElement(el)
+  end
+end
+
+
+function PARSERS.pre.icon(XML, el)
+  if #el.kids == 1 and XML:isText(el.kids[1]) then
+    XML:wrapChildren(el, XML:convertElement({name = "texture"}))
+  end
+end
+
+
+function PARSERS.finalize.group(XML, el)
+  local p = XML:getElementAttr(el)
+
+  XML:iterateElements(el, function(child)
+    local a = XML:getElementAttr(child)
+
+    XML:setElementAttr(child, {
+      x = p.x and a.x and a.x + p.x,
+      y = p.y and a.y and a.y + p.y,
+    })
+  end)
+end
+
+
+function PARSERS.cleanup.group(XML, el)
+  XML:unwrapElement(el)
+end
+
+
+function PARSERS.pre.tooltip(XML, el, config)
+  local a = XML:getElementAttr(el)
+
+  local text = XML:convertElement({
+    name = "text",
+    attr = {
+      font         = getFont(XML, el),
+      align        = a.xalign,
+      vert_align   = a.yalign,
+      complex_mode = 0,
+    },
+  })
+
+  local tip = XML:convertElement({
+    name = "tip",
+    kids = {text},
+    attr = {width = 0, height = 0},
+  })
+
+  XML:insertElement(tip, el)
+end
+
+
+--
 
 
 function onReadHUDXML(name, XML)
@@ -506,50 +617,34 @@ function onReadHUDXML(name, XML)
   end
 
   local config = {
-    unstick   = ui_mcm.get("idiots/options/unstick"),
     oldCombat = ui_mcm.get("idiots/options/oldCombat"),
-    zombied   = ui_mcm.get("idiots/options/zombied"),
-    jobs      = ui_mcm.get("idiots/options/jobs"),
     artifacts = ui_mcm.get("idiots/options/artifacts"),
-    font      = ui_mcm.get("idiots/options/font"),
-    scaleX    = ui_mcm.get("idiots/options/scaleX"),
-    scaleY    = ui_mcm.get("idiots/options/scaleY"),
-    offsetX   = ui_mcm.get("idiots/options/offsetX"),
-    offsetY   = ui_mcm.get("idiots/options/offsetY"),
+    unstick   = ui_mcm.get("idiots/ui/showUnstick"),
+    reload    = ui_mcm.get("idiots/ui/showReload"),
+    retreat   = ui_mcm.get("idiots/ui/showRetreat"),
+    scaleX    = ui_mcm.get("idiots/ui/scaleX"),
+    scaleY    = ui_mcm.get("idiots/ui/scaleY"),
+    offsetX   = ui_mcm.get("idiots/ui/offsetX"),
+    offsetY   = ui_mcm.get("idiots/ui/offsetY"),
+    font      = ui_mcm.get("idiots/ui/font"),
   }
 
   DXML.extendXMLObject(XML)
-  applyOptions(XML, config)
 
-  local pos = {0, 0}
+  try(parse, XML, XML:getRoot(), config)
+  try(parse, XML, XML:getRoot(), config, true)
 
-  local indexers = XML:queryOne("container > indexers")
-  parseIndexers(XML, indexers, config)
+  XML:fixAndScaleAll(XML:getRoot(), config.scaleX, config.scaleY)
 
-  local actions = XML:queryOne("container > actions")
-  parseActions(XML, actions, {0, 0}, config)
-
-  local width = XML:getElementAttr(actions).width
-
-  local tabs = XML:queryOne("container > tabs")
-  XML:setElementAttr(tabs, {width = width})
-  parseTabs(XML, tabs, pos, config)
-
-  pos[2] = pos[2] + XML:getElementAttr(tabs).height
-
-  local titlebar = XML:queryOne("container > titlebar")
-  XML:setElementAttr(titlebar, {width = width})
-  parseTitlebar(XML, titlebar, pos, config)
-
-  local tbpy  = XML:getElementAttr(titlebar).ypad or 0
-  local actpy = XML:getElementAttr(actions).ypad  or 0
-  pos[2] = pos[2] + XML:getElementAttr(titlebar).height - math.min(tbpy, actpy)
-
-  XML:setElementAttr(actions, {y = pos[2]})
-
-  local container = XML:queryOne("container")
-  XML:fixAndScaleAll(container, config.scaleX, config.scaleY)
-  parseContainer(XML, container, config)
+  for i, el in ipairs(XML:query("action")) do
+    XML:wrapElement(el, XML:convertElement({name = "stub"}))
+  end
+  for i, el in ipairs(XML:query("indexer")) do
+    XML:wrapElement(el, XML:convertElement({name = "stub"}))
+  end
+  for i, el in ipairs(XML:query("tab")) do
+    XML:wrapElement(el, XML:convertElement({name = "stub"}))
+  end
 end
 
 
