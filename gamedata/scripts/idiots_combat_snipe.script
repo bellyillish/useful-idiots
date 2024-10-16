@@ -1,0 +1,335 @@
+local WP     = world_property
+local UTIL   = require "illish.util"
+local POS    = require "illish.pos"
+local NPC    = require "illish.npc"
+local COMBAT = require "illish.combat"
+
+EVAL_FACER = xrs_facer.evid_facer
+EVAL_ENEMY = stalker_ids.property_enemy
+EVAL_LOGIC = xr_evaluators_id.state_mgr + 4
+EVAL_ID    = stalker_ids.property_script  + 3160
+ACTION_ID  = xr_actions_id.chugai_actions + 160
+
+
+-- EVALUATOR --
+  class "evaluator_combat_type" (property_evaluator)
+
+
+  function evaluator_combat_type:__init(name, storage, type) super(nil, name)
+    self.st   = storage
+    self.type = type
+  end
+
+
+  function evaluator_combat_type:evaluate()
+    local npc  = self.object
+    return db.storage[npc:id()].script_combat_type == self.type
+  end
+--
+
+
+-- ACTION METHODS --
+  class "action_combat_snipe" (action_base)
+
+
+  function action_combat_snipe:__init(name, storage) super(nil, name)
+    self.st = storage
+  end
+
+
+  function action_combat_snipe:initialize()
+    action_base.initialize(self)
+
+    self.npc_on_hit_callback  = COMBAT.combatHitCallback
+    self.npc_on_hear_callback = COMBAT.combatHearCallback
+
+    RegisterScriptCallback("npc_on_hit_callback",  self)
+    RegisterScriptCallback("npc_on_hear_callback", self)
+
+    self:initConfig()
+    self:initEnemy()
+    self:initState()
+    self:updateEnemy()
+    self:updateState()
+  end
+
+
+  function action_combat_snipe:execute()
+    action_base.execute(self)
+
+    self:updateEnemy()
+    self:updateState()
+
+    local config = self.st.config
+    local state  = self.st.state
+    local npc    = self.object
+
+    if state.action == "dodge"
+      then self:dodge()
+    elseif state.action == "attack"
+      then self:attack()
+    elseif state.action == "idle"
+      then state.vid = npc:level_vertex_id()
+    end
+
+    if not POS.isValidLVID(npc, state.vid) then
+      state.vid     = npc:level_vertex_id()
+      state.expires = time_plus(config.vidRetry)
+    end
+
+    state.reached = state.vid == npc:level_vertex_id()
+    POS.setLVID(npc, state.vid)
+
+    local move = COMBAT.getCombatMoveState(self)
+    local look = COMBAT.getCombatLookState(self)
+
+    state_mgr.set_state(npc, move, nil, nil, look, {fast_set = true})
+  end
+
+
+  function action_combat_snipe:finalize()
+    action_base.finalize(self)
+
+    UnregisterScriptCallback("npc_on_hit_callback",  self)
+    UnregisterScriptCallback("npc_on_hear_callback", self)
+  end
+--
+
+
+-- STATE --
+  function action_combat_snipe:initConfig()
+    local st = self.st
+
+    st.config = {
+      alwaysSee      = 2,
+      vidRetry       = 1000,
+      useTeamSight   = true,
+      recoverHealth  = {0.28, 0.48},
+      spottedTimeout = {800,  1200},
+      lookTimeout    = {2500, 5000},
+    }
+  end
+
+
+  function action_combat_snipe:initEnemy()
+    local config = self.st.config
+    local npc    = self.object
+    local st     = self.st
+
+    self.enemySpace = POS.assessSpace
+
+    st.enemy = {
+      id           = nil,
+      pos          = nil,
+      dist         = nil,
+      dir          = nil,
+      spottedUntil = nil,
+      spotted      = true,
+      seen         = false,
+      wounded      = false,
+    }
+  end
+
+
+  function action_combat_snipe:updateEnemy(debugEnemy)
+    self.st.lastEnemy = dup_table(self.st.enemy)
+
+    local config = self.st.config
+    local enemy  = self.st.enemy
+    local npc    = self.object
+
+    local be = debugEnemy or npc:best_enemy()
+    if not be then
+      return
+    end
+
+    if enemy.id ~= be:id() then
+      enemy.spotted = true
+    end
+
+    enemy.seen = npc:see(be) or COMBAT.hasLineOfSight(npc, be)
+    enemy.id   = be:id()
+
+    local reset = false
+    local pos   = false
+
+    if enemy.seen or enemy.spotted then
+      reset = true
+      pos   = true
+
+    elseif distance_between(be, npc) <= config.alwaysSee then
+      reset = true
+      pos   = true
+
+    elseif config.useTeamSight and COMBAT.teamSeesEnemy(npc, be) then
+      reset = true
+      pos   = true
+
+    elseif not time_expired(enemy.spottedUntil) then
+      pos = true
+    end
+
+    if pos then
+      enemy.pos     = utils_obj.safe_bone_pos(be, "bip01_head")
+      enemy.wounded = IsWounded(be)
+    end
+
+    if reset then
+      enemy.spottedUntil = time_plus_rand(config.spottedTimeout)
+    end
+
+    if time_expired(enemy.spottedUntil) then
+      enemy.holdUntil = enemy.holdUntil or time_plus_rand(config.holdDelay)
+    else
+      enemy.holdUntil = nil
+    end
+
+    enemy.dir  = vec_dir(utils_obj.safe_bone_pos(npc, "bip01_r_finger02"),  enemy.pos)
+    enemy.dist = vec_dist(npc:position(), enemy.pos)
+
+    enemy.spotted = false
+  end
+
+
+  function action_combat_snipe:initState()
+    local config = self.st.config
+    local st     = self.st
+
+    self.isReloading    = NPC.isReloading
+    self.assessCover    = POS.assessCover
+    self.nearbyGrenades = POS.nearbyGrenades
+    self.getWeaponType  = NPC.getWeaponType
+
+    st.state = {
+      action      = nil,
+      vid         = nil,
+      expires     = nil,
+      grenades    = nil,
+      weapon      = nil,
+      cover       = nil,
+      coverOrder  = nil,
+      startPos    = nil,
+      reached     = false,
+      reloading   = false,
+      recovering  = false,
+    }
+  end
+
+
+  function action_combat_snipe:updateState()
+    self.st.lastState = dup_table(self.st.state)
+
+    local lastState = self.st.lastState
+    local config    = self.st.config
+    local state     = self.st.state
+    local enemy     = self.st.enemy
+    local npc       = self.object
+
+    if not state.startPos then
+      state.startPos = npc:position()
+    end
+
+    state.grenades  = self.nearbyGrenades(npc:position(), config.dodgeDist)
+    state.cover     = self.assessCover(npc:position(), enemy.pos)
+    state.weapon    = self.getWeaponType(npc)
+    state.reloading = self.isReloading(npc)
+
+    state.recovering = npc.health <= config.recoverHealth[1]
+      or lastState.recovering and npc.health <= config.recoverHealth[2]
+
+    state.coverOrder = (state.recovering or state.reloading)
+      and "peek"
+      or  "shoot"
+
+    if state.reached then
+      self.st.moveState = nil
+    end
+
+    if state.grenades
+      then state.action = "dodge"
+      else state.action = "attack"
+    end
+
+    if self.st.movePoint then
+      state.startPos    = lvpos(self.st.movePoint)
+      self.st.movePoint = nil
+      state.expires     = 0
+    end
+
+    if lastState.action ~= state.action then
+      state.expires = 0
+    end
+
+    if time_expired(state.expires) then
+      state.expires = nil
+      state.vid     = nil
+    end
+
+    state.reached = state.vid == npc:level_vertex_id()
+  end
+--
+
+
+-- ACTIONS --
+  function action_combat_snipe:dodge()
+    local config = self.st.config
+    local state  = self.st.state
+    local npc    = self.object
+
+    if state.vid then
+      local dir = vec_dir(npc:position(), lvpos(state.vid))
+      if vec_dot(dir, state.grenades.avgDir) > 0 then
+        state.vid = nil
+      end
+    end
+
+    if not state.vid then
+      local dist = UTIL.random(10, 14, 1)
+      local rot  = 180 + UTIL.randomRange(45)
+      local dir  = vec_rot(state.grenades.avgDir, rot)
+      local pos  = vec_offset(npc:position(), dir, dist)
+
+      state.vid = POS.bestOutsideValidLVID(npc, npc:position(), pos)
+    end
+  end
+
+
+  function action_combat_snipe:attack()
+    local state = self.st.state
+    local npc   = self.object
+
+    if not state.vid then
+      state.vid = POS.bestOutsideUnclaimedLVID(npc, npc:position(), state.startPos)
+    end
+  end
+--
+
+
+-- BINDER --
+  function add_to_binder(npc, ini, storage, planner, temp)
+    local planner = npc:motivation_action_manager()
+
+    if not planner then
+      return
+    end
+
+    planner:add_evaluator(EVAL_ID,
+      evaluator_combat_type("combat_snipe", storage, "snipe")
+    )
+
+    local action = action_combat_snipe("combat_snipe", storage)
+
+    if action then
+      action:add_precondition(WP(EVAL_LOGIC, true))
+      action:add_precondition(WP(EVAL_ENEMY, true))
+      action:add_precondition(WP(EVAL_ID, true))
+      action:add_precondition(WP(EVAL_FACER, false))
+
+      action:add_effect(WP(EVAL_LOGIC, false))
+      action:add_effect(WP(EVAL_ENEMY, false))
+      action:add_effect(WP(EVAL_ID, false))
+
+      planner:add_action(ACTION_ID, action)
+    end
+  end
+--

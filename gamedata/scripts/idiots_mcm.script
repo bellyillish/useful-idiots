@@ -1,0 +1,237 @@
+local MCM   = require "illish.mcm"
+local TABLE = require "illish.table"
+local NPC   = require "illish.npc"
+
+
+-- CONSTS --
+  local isGAMMA = grok_gamma_manual_on_startup
+    and true
+    or  false
+
+  ANOMALY_KEYBINDS = {
+    cycle_movement  = 80,
+    cycle_stance    = 75,
+    cycle_readiness = 79,
+    loot_corpses    = 76,
+  }
+--
+
+
+-- CONFIG --
+  function getGeneralOptions()
+    return {
+      id = "options",
+      sh = true,
+      gr = {
+        MCM.getTitle({text = "ui_mcm_idiots_title_options"}),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_general"}),
+        MCM.getCheckboxField({id = "autoSneak",    def = true}),
+        MCM.getCheckboxField({id = "autoProne",    def = true}),
+        MCM.getCheckboxField({id = "autoSprint",   def = true}),
+        MCM.getCheckboxField({id = "autoLight",    def = true}),
+        MCM.getCheckboxField({id = "autoReload",   def = true}),
+        MCM.getCheckboxField({id = "autoDeselect", def = true}),
+        MCM.getCheckboxField({id = "autoSwitch"}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_combat"}),
+        MCM.getCheckboxField({id = "oldCombat"}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_jobs"}),
+        MCM.getCheckboxField({id = "noNpcLooting", def = isGAMMA}),
+        MCM.getNote({text = "ui_mcm_idiots_options_jobs_note", clr = {255, 200, 175, 75}}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_cheats"}),
+        MCM.getNote({text = "ui_mcm_idiots_options_cheats_note", clr = {255, 200, 175, 75}}),
+        MCM.getCheckboxField({id = "artifacts"}),
+        MCM.getCheckboxField({id = "showAllItems"}),
+      }
+    }
+  end
+
+
+  function getInterfaceOptions()
+    return {
+      id = "ui",
+      sh = true,
+      gr = {
+        MCM.getTitle({text = "ui_mcm_idiots_title_ui"}),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_general"}),
+        MCM.getCheckboxField({id = "indexers", def = true}),
+        MCM.getCheckboxField({id = "showReload"}),
+        MCM.getCheckboxField({id = "showUnstick"}),
+        MCM.getCheckboxField({id = "showTooltips", def = true}),
+        MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_ui_customization"}),
+        {
+          id   = "scheme",
+          type = "list",
+          hint = "idiots_scheme",
+          val  = 0,
+          def  = "faction",
+          content = {
+            {"faction",  "idiots_faction"},
+            {"army",     "idiots_army"},
+            {"bandit",   "idiots_bandit"},
+            {"csky",     "idiots_csky"},
+            {"dolg",     "idiots_dolg"},
+            {"ecolog",   "idiots_ecolog"},
+            {"freedom",  "idiots_freedom"},
+            {"greh",     "idiots_greh"},
+            {"isg",      "idiots_isg"},
+            {"killer",   "idiots_killer"},
+            {"monolith", "idiots_monolith"},
+            {"renegade", "idiots_renegade"},
+            {"stalker",  "idiots_stalker"},
+          }
+        },
+
+        MCM.getScaleField({id = "scaleX", max = 4}),
+        MCM.getScaleField({id = "scaleY", max = 4}),
+        MCM.getOffsetXField({id = "offsetX", min = -2048, max = 2048, def = 0}),
+        MCM.getOffsetYField({id = "offsetY", min = -2048, max = 0, def = 0}),
+        {
+          id   = "font",
+          type = ui_mcm.kb_mod_list,
+          val  = 0,
+          def  = "2",
+          content = {
+            {"1", "font_small"},
+            {"2", "font_medium"},
+            {"3", "font_large"},
+            {"4", "font_xlarge"}
+          }
+        }
+      }
+    }
+  end
+
+
+  function getKeybindFields(name, toggle)
+    local def = ANOMALY_KEYBINDS[name]
+
+    local gr = {
+      MCM.getLine(),
+      MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_" .. name}),
+      MCM.getKeybindKey({ id = name .."_key",  hint = "idiots_keybinds_key", def = def}),
+      MCM.getKeybindMod({ id = name .."_mod",  hint = "idiots_keybinds_mod"}),
+      MCM.getKeybindMode({id = name .."_mode", hint = "idiots_keybinds_mode"}),
+    }
+
+    if toggle then
+      gr[#gr + 1] = MCM.getCheckboxField({id = name .."_toggle", def = true, hint = "idiots_keybinds_toggle"})
+    end
+
+    return gr
+  end
+
+
+  function getKeybindSection(group, actions, cycle, toggle)
+    local options = {
+      MCM.getTitle({text = "ui_mcm_idiots_title_keybinds"}),
+      MCM.getSubtitle({text = "ui_mcm_menu_" .. group}),
+    }
+
+    if cycle then
+      options = TABLE.imerge(options, getKeybindFields("cycle_" .. group))
+    end
+
+    for i, action in ipairs(actions) do
+      options = TABLE.imerge(options, getKeybindFields(action, toggle))
+    end
+
+    return {
+      id = group,
+      sh = true,
+      gr = options,
+    }
+  end
+
+
+  function mcmGetOptions()
+    local gr = {
+      {
+        id = "point",
+        sh = true,
+        gr = {
+          MCM.getTitle({text = "ui_mcm_idiots_title_keybinds"}),
+          MCM.getSubtitle({text = "ui_mcm_menu_point"}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_select"}),
+          MCM.getKeybindKey({ id = "select_key",  hint = "idiots_keybinds_key"}),
+          MCM.getKeybindMod({ id = "select_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "select_mode", hint = "idiots_keybinds_mode"}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_deselect"}),
+          MCM.getKeybindKey({ id = "deselect_key",  hint = "idiots_keybinds_key"}),
+          MCM.getKeybindMod({ id = "deselect_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "deselect_mode", hint = "idiots_keybinds_mode"}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_move"}),
+          MCM.getKeybindKey({ id = "move_key",  hint = "idiots_keybinds_key", def = 81}),
+          MCM.getKeybindMod({ id = "move_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "move_mode", hint = "idiots_keybinds_mode"}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_look"}),
+          MCM.getKeybindKey({ id = "look_key",  hint = "idiots_keybinds_key"}),
+          MCM.getKeybindMod({ id = "look_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "look_mode", hint = "idiots_keybinds_mode"}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_away"}),
+          MCM.getKeybindKey({ id = "away_key",  hint = "idiots_keybinds_key"}),
+          MCM.getKeybindMod({ id = "away_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "away_mode", hint = "idiots_keybinds_mode"}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_addWaypoint"}),
+          MCM.getKeybindKey({ id = "addWaypoint_key",  hint = "idiots_keybinds_key"}),
+          MCM.getKeybindMod({ id = "addWaypoint_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "addWaypoint_mode", hint = "idiots_keybinds_mode"}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_clearWaypoints"}),
+          MCM.getKeybindKey({ id = "clearWaypoints_key",  hint = "idiots_keybinds_key"}),
+          MCM.getKeybindMod({ id = "clearWaypoints_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "clearWaypoints_mode", hint = "idiots_keybinds_mode"}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_inventory"}),
+          MCM.getKeybindKey({ id = "inventory_key",  hint = "idiots_keybinds_key"}),
+          MCM.getKeybindMod({ id = "inventory_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "inventory_mode", hint = "idiots_keybinds_mode"}),
+          MCM.getNote({text = "ui_mcm_idiots_subtitle_point_inventory_note", clr = {255, 200, 175, 75}}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_reload"}),
+          MCM.getKeybindKey({ id = "reload_key",  hint = "idiots_keybinds_key"}),
+          MCM.getKeybindMod({ id = "reload_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "reload_mode", hint = "idiots_keybinds_mode"}),
+          MCM.getLine(),
+          MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_point_reset"}),
+          MCM.getKeybindKey({ id = "reset_key",  hint = "idiots_keybinds_key"}),
+          MCM.getKeybindMod({ id = "reset_mod",  hint = "idiots_keybinds_mod"}),
+          MCM.getKeybindMode({id = "reset_mode", hint = "idiots_keybinds_mode"}),
+        }
+      }
+    }
+
+    for ig, group in ipairs(NPC.ACTIONS) do
+      local actions = {}
+
+      for ia, action in ipairs(group.actions) do
+        actions[#actions + 1] = action.name
+      end
+
+      gr[#gr + 1] = getKeybindSection(group.name, actions, group.cycle, group.toggle)
+    end
+
+    return {
+      id = "idiots",
+      gr = {
+        getGeneralOptions(),
+        getInterfaceOptions(),
+        {id = "keybinds", gr = gr},
+      }
+    }
+  end
+--
+
+
+function on_mcm_load()
+  return mcmGetOptions()
+end
