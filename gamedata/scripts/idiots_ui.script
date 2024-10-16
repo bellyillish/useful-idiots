@@ -1,0 +1,820 @@
+local UTIL = require "illish.util"
+local NPC  = require "illish.npc"
+local WPN  = require "illish.weapon"
+local BEH  = require "illish.beh"
+
+
+GUI = nil
+
+
+COLORS = {
+  neutral  = {61, 61, 61},
+  bandit   = {99, 109, 107},
+  stalker  = {135, 105, 31},
+  army     = {120, 92, 16},
+  greh     = {144, 70, 40},
+  dolg     = {135, 31, 32},
+  isg      = {124, 20, 42},
+  freedom  = {9, 107, 19},
+  renegade = {12, 83, 48},
+  monolith = {121, 79, 17},
+  csky     = {41, 104, 145},
+  killer   = {24, 70, 128},
+  ecolog   = {8, 103, 86},
+}
+
+
+function color(faction, alpha)
+  alpha = alpha or 255
+  local rgb = faction and COLORS[faction] or COLORS.neutral
+
+  return GetARGB(alpha, unpack(rgb))
+end
+
+
+class "CompanionManager" (CUIScriptWnd)
+
+
+function CompanionManager:__init(id) super()
+  self.xml = CScriptXmlInit()
+  self.xml:ParseFile("idiots_ui.xml")
+
+  local companions = NPC.getCompanions()
+  self.singleMode  = #companions == 1
+
+  if id and NPC.isCompanion(id) then
+    self.ID = id
+  elseif self.singleMode then
+    self.ID = companions[1]:id()
+  end
+
+  local scheme = ui_mcm.get("idiots/ui/scheme") or "faction"
+  if scheme == "faction" then
+    scheme = get_actor_true_community()
+  end
+
+  self.scheme   = scheme
+  self.indexers = {}
+  self.tabs     = {}
+  self.buttons  = {}
+
+  self:SetWndRect(Frect():set(0, 0, 1024, 768))
+
+  self:InitIndexers()
+  self:InitDialog()
+  self:InitTabs()
+  self:InitTitlebar()
+  self:InitButtons()
+  self:InitTooltip()
+end
+
+
+function CompanionManager:InitDialog()
+  if not self.xml:NodeExist("dialog") then
+    return
+  end
+
+  self.dialog = self.xml:InitStatic("dialog", self)
+
+  if not self.xml:NodeExist("dialog:fade") then
+    return
+  end
+
+  self.fade = self.xml:InitStatic("dialog:fade", self.dialog)
+
+  local r = self.xml:ReadAttribute("dialog", 0, "r") or 0
+  local g = self.xml:ReadAttribute("dialog", 0, "g") or 0
+  local b = self.xml:ReadAttribute("dialog", 0, "b") or 0
+  local a = self.xml:ReadAttribute("dialog:fade", 0, "a") or 255
+
+  local w = self.fade:GetWidth() or self.dialog:GetWidth() / 2
+  local h = self.dialog:GetHeight()
+
+  self.fade:SetWndPos(vector2():set(0, 0))
+  self.fade:SetWndSize(vector2():set(w, h))
+  self.fade:InitTexture("idiots_fade")
+  self.fade:SetTextureColor(GetARGB(a, r, g, b))
+  self.fade:SetStretchTexture(true)
+end
+
+
+-- INDEXERS --
+function CompanionManager:InitIndexers()
+  local enableIndexers = ui_mcm.get("idiots/ui/indexers")
+
+  if not (enableIndexers and self.xml:NodeExist("dialog:indexers")) then
+    return
+  end
+
+  local count = self.xml:GetNodesNum("dialog:indexers", 0, "stub")
+
+  for i = 0, count - 1 do
+    self.xml:NavigateToNode("dialog:indexers")
+    self.xml:NavigateToNode("stub", i)
+
+    local indexer = self.xml:InitStatic("indexer", self)
+    indexer.label = self.xml:InitTextWnd("indexer:label", indexer)
+    self.indexers[i + 1] = indexer
+
+    indexer:Show(false)
+    self.xml:NavigateToRoot()
+  end
+end
+
+
+function CompanionManager:UpdateIndexers()
+  local companions = NPC.getCompanions()
+
+  for i, indexer in ipairs(self.indexers) do
+    local companion = companions[i]
+
+    if not companion then
+      return
+    end
+
+    indexer:InitTexture("idiots_circle")
+    indexer:SetTextureColor(
+      self.ID == companion:id()
+        and color(self.scheme)
+        or  GetARGB(128, 8, 8, 8)
+    )
+
+    local wpos = utils_obj.safe_bone_pos(companion, "bip01_head")
+    local position = game.world2ui(
+      vector():set(wpos.x, wpos.y + 0.51, wpos.z)
+    )
+
+    if position.x < 0 then
+      indexer:Show(false)
+    else
+      local w = indexer:GetWidth()
+      local h = indexer:GetHeight()
+      indexer:SetWndPos(vector2():set(position.x - w/2, position.y - w/2))
+      indexer:Show(true)
+    end
+  end
+end
+
+
+-- TABS --
+function CompanionManager:InitTabs()
+  if not self.xml:NodeExist("dialog:tabs") then
+    return
+  end
+
+  self.tabbar = self.xml:InitStatic("dialog:tabs", self.dialog)
+  local count = self.xml:GetNodesNum("dialog:tabs", 0, "stub")
+
+  for i = 0, count - 1 do
+    self.xml:NavigateToNode("dialog:tabs")
+    self.xml:NavigateToNode("stub", i)
+
+    local tab = self.xml:Init3tButton("tab", self.tabbar)
+
+    tab.bg = self.xml:InitStatic("tab", tab)
+    tab.bg:SetWndSize(vector2():set(tab:GetWidth(), tab:GetHeight()))
+    tab.bg:SetWndPos(vector2():set(0, 0))
+    tab.bg:InitTexture("idiots_square")
+
+    tab.label = self.xml:InitTextWnd("tab:label", tab)
+
+    local name = "tab_" .. (i + 1)
+
+    self:Register(tab, name)
+
+    self:AddCallback(name, ui_events.BUTTON_CLICKED, function()
+      self:OnClickTab(i)
+    end, self)
+
+    if i == 0 then
+      self.globalTab = tab
+    else
+      self.tabs[i] = tab
+    end
+
+    self.xml:NavigateToRoot()
+  end
+
+  self:UpdateTabs()
+end
+
+
+function CompanionManager:UpdateTabs()
+  local companions = NPC.getCompanions()
+
+  if self.globalTab then
+    self.globalTab:Enable(not self.singleMode)
+
+    local hovering = self.globalTab:IsCursorOverWindow()
+
+    local textColor = nil
+      or self.singleMode and GetARGB(32, 255, 255, 255)
+      or hovering and GetARGB(255, 255, 255, 255)
+      or GetARGB(224, 255, 255, 255, 255)
+
+    local bgColor = nil
+      or not self.ID and color(self.scheme)
+      or hovering and GetARGB(24, 255, 255, 255)
+      or GetARGB(0, 255, 255, 255)
+
+    self.globalTab.label:SetTextColor(textColor)
+    self.globalTab.bg:SetTextureColor(bgColor)
+  end
+
+  if #self.tabs < 1 then
+    return
+  end
+
+  for i, tab in ipairs(self.tabs) do
+    local companion = companions[i]
+    local active    = companion and companion:id() == self.ID
+    local hovering  = tab:IsCursorOverWindow()
+
+    local textColor = nil
+      or active and GetARGB(255, 255, 255, 255)
+      or hovering and GetARGB(255, 255, 255, 255)
+      or GetARGB(224, 255, 255, 255, 255)
+
+    local bgColor = nil
+      or active and color(self.scheme)
+      or hovering and GetARGB(24, 255, 255, 255)
+      or GetARGB(0, 255, 255, 255)
+
+    tab.label:SetTextColor(textColor)
+    tab.bg:SetTextureColor(bgColor)
+
+    tab:Enable(companion ~= nil)
+    tab:Show(companion ~= nil)
+  end
+end
+
+
+function CompanionManager:OnClickTab(index)
+  local companions = NPC.getCompanions()
+
+  if companions[index] then
+    self.ID = companions[index]:id()
+  else
+    self.ID = nil
+  end
+
+  self:UpdateTabs()
+  self:UpdateButtons()
+  self:UpdateTitlebar()
+end
+
+
+-- TITLEBAR --
+function CompanionManager:InitTitlebar()
+  if not self.xml:NodeExist("dialog:titlebar") then
+    return
+  end
+
+  local titlebar = self.xml:InitStatic("dialog:titlebar", self.dialog)
+
+  if self.xml:NodeExist("dialog:titlebar:icon") then
+    titlebar.icon = self.xml:InitStatic("dialog:titlebar:icon", titlebar)
+  end
+
+  if self.xml:NodeExist("dialog:titlebar:title") then
+    titlebar.title = self.xml:InitTextWnd("dialog:titlebar:title", titlebar)
+  end
+
+  self.titlebar = titlebar
+  self:InitTitlebarButtons()
+  self:UpdateTitlebar()
+end
+
+
+function CompanionManager:InitTitlebarButtons()
+  if not self.xml:NodeExist("dialog:titlebar:actions") then
+    return
+  end
+
+  local actions = self.xml:InitStatic("dialog:titlebar:actions", self.titlebar)
+  local count   = self.xml:GetNodesNum("dialog:titlebar:actions", 0, "stub")
+
+  if count == 0 then
+    return
+  end
+
+  for i = 0, count - 1 do
+    self.xml:NavigateToNode("dialog:titlebar:actions")
+    self.xml:NavigateToNode("stub", i)
+
+    local action  = self.xml:Init3tButton("action", actions)
+    local name    = self.xml:ReadAttribute("action", 0, "name")
+    local group   = self.xml:ReadAttribute("action", 0, "group")
+    local compact = self.xml:ReadAttribute("action", 0, "compact")
+    local tip     = self.xml:ReadAttribute("action", 0, "tip")
+
+    if name == "" then
+      name = nil
+    end
+    if group == "" then
+      group = nil
+    end
+
+    if not self.xml:NodeExist("action:toggle") then
+      action.bg = self.xml:InitStatic("action", action)
+      action.bg:SetWndSize(vector2():set(action:GetWidth(), compact and 3 or action:GetHeight()))
+      action.bg:SetWndPos(vector2():set(0, compact and action:GetHeight() or 0))
+      action.bg:InitTexture("idiots_square")
+    end
+
+    if self.xml:NodeExist("action:toggle") then
+      action.toggle = self.xml:InitStatic("action:toggle", action)
+      action.toggle:InitTexture("idiots_square")
+    end
+    if self.xml:NodeExist("action:icon") then
+      action.icon = self.xml:InitStatic("action:icon", action)
+    end
+    if self.xml:NodeExist("action:label") then
+      action.label = self.xml:InitTextWnd("action:label", action)
+    end
+
+    local id = name
+      and (group and group .. "_" or "") .. name
+      or  nil
+
+    if name then
+      self:Register(action, id)
+
+      self:AddCallback(id, ui_events.BUTTON_CLICKED, function()
+        self:OnClickButton(group, name)
+      end, self)
+    end
+
+    action.group = group
+    action.name  = name
+    action.tip   = tip
+    action.id    = id
+
+    self.buttons[id] = action
+    self.xml:NavigateToRoot()
+  end
+
+  -- self:UpdateButtons()
+end
+
+
+function CompanionManager:UpdateTitlebar()
+  if not self.titlebar then
+    return
+  end
+
+  local texture, title
+
+  if self.ID then
+    local companion = NPC.getCompanion(self.ID)
+
+    if companion then
+      texture = companion:character_icon()
+      title   = companion:character_name()
+    end
+  else
+    texture = "ui_new_game_flair_" .. get_actor_true_community()
+    title   = game.translate_string("st_idiots_title_all")
+  end
+
+  if self.titlebar.icon then
+    self.titlebar.icon:InitTexture(texture)
+  end
+
+  if self.titlebar.title then
+    self.titlebar.title:SetText(title)
+  end
+end
+
+
+-- BUTTONS --
+function CompanionManager:InitButtons()
+  if not self.xml:NodeExist("dialog:actions") then
+    return
+  end
+
+  local actions = self.xml:InitStatic("dialog:actions", self.dialog)
+  local count   = self.xml:GetNodesNum("dialog:actions", 0, "stub")
+
+  if count == 0 then
+    return
+  end
+
+  for i = 0, count - 1 do
+    self.xml:NavigateToNode("dialog:actions")
+    self.xml:NavigateToNode("stub", i)
+
+    local action    = self.xml:Init3tButton("action", actions)
+    local name      = self.xml:ReadAttribute("action", 0, "name")
+    local group     = self.xml:ReadAttribute("action", 0, "group")
+    local tip       = self.xml:ReadAttribute("action", 0, "tip")
+
+    if name == "" then
+      name = nil
+    end
+    if group == "" then
+      group = nil
+    end
+
+    if not self.xml:NodeExist("action:toggle") then
+      action.bg = self.xml:InitStatic("action", action)
+      action.bg:SetWndSize(vector2():set(action:GetWidth(), action:GetHeight()))
+      action.bg:SetWndPos(vector2():set(0, 0))
+      action.bg:InitTexture("idiots_square")
+    end
+
+    if self.xml:NodeExist("action:toggle") then
+      action.toggle = self.xml:InitStatic("action:toggle", action)
+      action.toggle:InitTexture("idiots_square")
+    end
+    if self.xml:NodeExist("action:icon") then
+      action.icon = self.xml:InitStatic("action:icon", action)
+    end
+    if self.xml:NodeExist("action:label") then
+      action.label = self.xml:InitTextWnd("action:label", action)
+    end
+
+    local id = name
+      and (group and group .. "_" or "") .. name
+      or  nil
+
+    if name then
+      self:Register(action, id)
+
+      self:AddCallback(id, ui_events.BUTTON_CLICKED, function()
+        self:OnClickButton(group, name)
+      end, self)
+    end
+
+    action.group = group
+    action.name  = name
+    action.tip   = tip
+    action.id    = id
+
+    self.buttons[id] = action
+    self.xml:NavigateToRoot()
+  end
+
+  self:UpdateButtons()
+end
+
+
+function CompanionManager:UpdateButtons()
+  if not self.buttons then
+    return
+  end
+
+  local waypointCount = self.ID
+    and BEH.getAllWaypoints(self.ID)
+    and #BEH.getAllWaypoints(self.ID)
+    or  0
+
+  local distance
+
+  if self.ID then
+    local npc = NPC.getCompanion(self.ID)
+    if npc then
+      distance = npc:position():distance_to(db.actor:position())
+    end
+  end
+
+  if self.buttons.inventory then
+    self.buttons.inventory:Enable(self.ID and distance and distance <= 8)
+  end
+
+  if self.buttons.add_waypoint then
+    self.buttons.add_waypoint:Enable(self.ID)
+  end
+
+  if self.buttons.clear_waypoints then
+    self.buttons.clear_waypoints:Enable(self.ID and waypointCount > 0)
+  end
+
+  if self.buttons.movement_patrol then
+    self.buttons.movement_patrol:Enable(self.ID and waypointCount > 1)
+  end
+
+  if self.buttons.jobs_loot_artifacts then
+    self.buttons.jobs_loot_artifacts:Enable(NPC.getState(self.ID, "jobs", "loot_items"))
+  end
+
+  if self.buttons.reset then
+    self.buttons.reset:Enable(not self.singleMode)
+
+    if self.buttons.reset.label then
+      self.buttons.reset.label:SetText(
+        game.translate_string(self.ID and "st_idiots_reset" or "st_idiots_reset_all")
+      )
+    end
+  end
+
+  if self.buttons.unstick then
+    self.buttons.unstick:Enable(self.ID)
+  end
+
+  if self.buttons.formation_bunch then
+    self.buttons.formation_bunch:Enable(not self.ID or self.singleMode)
+  end
+
+  if self.buttons.formation_spread then
+    self.buttons.formation_spread:Enable(not self.ID or self.singleMode)
+  end
+
+  if self.buttons.formation_line then
+    self.buttons.formation_line:Enable(not self.ID or self.singleMode)
+  end
+
+  if self.buttons.formation_covered then
+    self.buttons.formation_covered:Enable(not self.ID or self.singleMode)
+  end
+
+  local tip
+
+  for id, button in pairs(self.buttons) do
+    local name, group, enabled =
+      button.name,
+      button.group,
+      button:IsEnabled()
+
+    local stateful = NPC.isStateful(group, name)
+    local hovering = button:IsCursorOverWindow()
+
+    local active = enabled and stateful
+      and NPC.getState(self.ID, group, name)
+
+    local textColor = nil
+      or enabled and active and GetARGB(255, 255, 255, 255)
+      or enabled and hovering and GetARGB(255, 255, 255, 255)
+      or enabled and GetARGB(184, 255, 255, 255, 255)
+      or GetARGB(32, 255, 255, 255)
+
+    local toggleColor = nil
+      or enabled and active and color(self.scheme)
+      or enabled and hovering and color(self.scheme, 64)
+      or enabled and GetARGB(32, 255, 255, 255)
+      or GetARGB(0, 255, 255, 255)
+
+    local bgColor = nil
+      or enabled and active and color(self.scheme)
+      or enabled and hovering and GetARGB(32, 255, 255, 255)
+      or GetARGB(0, 255, 255, 255)
+
+    if button.bg then
+      button.bg:SetTextureColor(bgColor)
+    end
+
+    if button.toggle then
+      button.toggle:SetTextureColor(toggleColor)
+    end
+
+    if button.icon then
+      button.icon:SetTextureColor(textColor)
+    end
+
+    if button.label then
+      button.label:SetTextColor(textColor)
+    end
+
+    if button:IsCursorOverWindow() then
+      tip = button.tip
+    end
+  end
+
+  self:SetTooltip(tip)
+end
+
+
+function CompanionManager:InitTooltip()
+  local showTooltips  = ui_mcm.get("idiots/ui/showTooltips")
+
+  if not (showTooltips and self.xml:NodeExist("tooltip")) then
+    return
+  end
+
+  self.tooltip = self.xml:InitStatic("tooltip", self)
+  self.tooltip:InitTexture("idiots_square")
+  self.tooltip:SetTextureColor(GetARGB(255, 8, 8, 8))
+
+  self.tooltip.label = self.xml:InitTextWnd("tooltip:tip", self.tooltip)
+  self.tooltip.label:SetTextColor(GetARGB(224, 255, 255, 255))
+
+  self:SetTooltip()
+end
+
+
+function CompanionManager:SetTooltip(tip)
+  tip = tip ~= "" and tip or nil
+
+  if not self.tooltip then
+    return
+  end
+
+  if not tip or tip and self.tip then
+    self.tooltipDelay = 0
+  elseif not self.tooltipDelay then
+    self.tooltipDelay = UTIL.timePlus(250)
+  end
+
+  if not UTIL.timeExpired(self.tooltipDelay) then
+    return
+  end
+
+  self.tooltipDelay = nil
+
+  if self.tip ~= tip then
+    self.tooltip:Show(false)
+    self.tooltip:SetWndPos(vector2():set(0, 0))
+    self.tooltip:SetWndSize(vector2():set(0, 0))
+
+    self.tooltip.label:SetText("")
+    self.tip = tip
+
+    if not tip then
+      return
+    end
+
+    self.tooltip.label:SetText(game.translate_string(tip))
+    self.tooltip.label:AdjustHeightToText()
+    self.tooltip.label:AdjustWidthToText()
+    self.tooltip.label:SetWndPos(vector2():set(4, 2))
+
+    local width  = self.tooltip.label:GetWidth()
+    local height = self.tooltip.label:GetHeight()
+
+    self.tooltip:SetWndSize(vector2():set(width + 8, height + 4))
+    self.tooltip:Show(true)
+  end
+
+  local width  = self.tooltip.label:GetWidth()
+  local height = self.tooltip.label:GetHeight()
+
+  local pos = GetCursorPosition()
+
+  self.tooltip:SetWndPos(vector2():set(pos.x - ((width + 8) / 2), pos.y - 30))
+end
+
+
+function CompanionManager:OnClickButton(group, action)
+  SendScriptCallback("idiots_on_button", group, action, self)
+
+  if NPC.isStateful(group, action) then
+    return NPC.toggleState(self.ID, group, action)
+  end
+
+  if action == "reset" then
+    if self.ID then
+      NPC.setStates(self.ID, NPC.GLOBAL_STATE)
+    else
+      for _, npc in ipairs(NPC.getCompanions()) do
+        NPC.setStates(npc, NPC.GLOBAL_STATE)
+      end
+    end
+  end
+
+  if action == "reload" then
+    if self.ID then
+      NPC.setReloadModes(NPC.get(self.ID), WPN.RELOAD_ALL, WPN.NOT_FULL)
+    else
+      for _, npc in ipairs(NPC.getCompanions()) do
+        NPC.setReloadModes(npc, WPN.RELOAD_ALL, WPN.NOT_FULL)
+      end
+    end
+  end
+
+  if action == "add_waypoint" then
+    if self.ID then
+      BEH.addWaypoint(self.ID, db.actor:position())
+      self:UpdateButtons()
+    end
+  end
+
+  if action == "clear_waypoints" then
+    if self.ID then
+      BEH.clearWaypoints(self.ID)
+      self:UpdateButtons()
+    end
+  end
+
+  if action == "inventory" then
+    local npc = self.ID and NPC.getCompanion(self.ID)
+    if npc then
+      self:Close()
+      ui_companion_inv.start(npc)
+    end
+  end
+
+  if action == "unstick" then
+    local npc = self.ID and NPC.getCompanion(self.ID)
+    if npc then
+      alife():teleport_object(npc:id(), npc:game_vertex_id(), npc:level_vertex_id(), npc:position())
+    end
+  end
+
+  if action == "retreat" then
+    NPC.setState(self.ID, "movement",  "follow", true)
+    NPC.setState(self.ID, "readiness", "ignore", true)
+    NPC.setState(self.ID, "speed",     "hurry",  true)
+    NPC.setState(self.ID, "distance",  "near",   true)
+  end
+end
+
+
+-- MISC --
+local CLOSE_TIMEOUT
+
+
+function CompanionManager:OnKeyboard(dik, action)
+  local res  = CUIScriptWnd.OnKeyboard(self, dik, action)
+  local bind = dik_to_bind(dik)
+
+  if res ~= false or action ~= ui_events.WINDOW_KEY_RELEASED then
+    return res
+  end
+
+  if not UTIL.timeExpired(CLOSE_TIMEOUT + 100) then
+    return
+  end
+
+  if bind == key_bindings.kQUIT or bind == key_bindings.kUSE or bind == key_bindings.kCUSTOM18
+    then self:Close()
+  end
+
+  return res
+end
+
+
+function CompanionManager:Close()
+  self:HideDialog()
+  Unregister_UI("CompanionManager")
+  GUI = nil
+end
+
+
+-- VOICE --
+CompanionManager.PlayVoiceOver = axr_companions.UIWheelCompanion.PlayVoiceOver
+CompanionManager.PlaySoundFile = axr_companions.UIWheelCompanion.PlaySoundFile
+
+
+-- OPEN --
+function openCompanionManager()
+  hide_hud_inventory()
+
+  if not GUI then
+    local target = NPC.getTargetCompanion()
+
+    if not target and #NPC.getCompanions() == 0 then
+      actor_menu.set_msg(1, game.translate_string("st_no_companions"), 8)
+      return
+    end
+
+    GUI = CompanionManager(target and target:id() or nil)
+  end
+
+  if GUI and not GUI:IsShown() then
+    GUI:SetAutoDelete(true)
+    GUI:AllowMovement(true)
+    GUI:ShowDialog(true)
+    GUI:Show(true)
+
+    CLOSE_TIMEOUT = time_global()
+    Register_UI("CompanionManager", "idiots_ui")
+  end
+end
+
+
+-- CALLBACKS --
+local function onStateChange(id, group, state, enabled)
+  if GUI and GUI.ID == id then
+    if GUI.singleMode then
+      NPC.GLOBAL_STATE = NPC.getAllStates(GUI.ID)
+    end
+    GUI:UpdateButtons()
+  end
+end
+
+
+local onUpdateIndexers = UTIL.throttle(function()
+  local enableIndexers = ui_mcm.get("idiots/ui/indexers")
+
+  if enableIndexers and GUI and GUI:IsShown() then
+    GUI:UpdateIndexers()
+  end
+end, 25)
+
+
+local onUpdateButtons = UTIL.throttle(function()
+  if GUI and GUI:IsShown() then
+    GUI:UpdateButtons()
+    GUI:UpdateTabs()
+  end
+end, 50)
+
+
+function on_game_start()
+  RegisterScriptCallback("actor_on_update",  onUpdateIndexers)
+  RegisterScriptCallback("actor_on_update",  onUpdateButtons)
+  RegisterScriptCallback("idiots_on_state",  onStateChange)
+end
+
+
+AddScriptCallback("idiots_on_button")

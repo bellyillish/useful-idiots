@@ -1,0 +1,674 @@
+local WP     = world_property
+local UTIL   = require "illish.util"
+local TABLE  = require "illish.table"
+local VEC    = require "illish.vector"
+local POS    = require "illish.pos"
+local WPN    = require "illish.weapon"
+local NPC    = require "illish.npc"
+local COMBAT = require "illish.combat"
+
+EVAL_FF    = rx_ff.evaid
+EVAL_FACER = xrs_facer.evid_facer
+EVAL_ENEMY = stalker_ids.property_enemy
+EVAL_LOGIC = xr_evaluators_id.state_mgr + 4
+EVAL_ID    = stalker_ids.property_script  + 3140
+ACTION_ID  = xr_actions_id.chugai_actions + 140
+
+
+-- EVALUATOR --
+  class "evaluator_combat_type" (property_evaluator)
+
+
+  function evaluator_combat_type:__init(name, storage, type) super(nil, name)
+    self.st   = storage
+    self.type = type
+  end
+
+
+  function evaluator_combat_type:evaluate()
+    local npc  = self.object
+    return db.storage[npc:id()].script_combat_type == self.type
+  end
+--
+
+
+-- ACTION METHODS --
+  class "action_combat_assault" (action_base)
+
+
+  function action_combat_assault:__init(name, storage) super(nil, name)
+    self.st = storage
+  end
+
+
+  function action_combat_assault:initialize()
+    action_base.initialize(self)
+
+    self.npc_on_hit_callback  = COMBAT.combatHitCallback
+    self.npc_on_hear_callback = COMBAT.combatHearCallback
+
+    RegisterScriptCallback("npc_on_hit_callback",  self)
+    RegisterScriptCallback("npc_on_hear_callback", self)
+
+    self:initConfig()
+    self:initEnemy()
+    self:initState()
+    self:updateEnemy()
+    self:updateState()
+  end
+
+
+  function action_combat_assault:execute()
+    action_base.execute(self)
+
+    self:updateEnemy()
+    self:updateState()
+
+    local config = self.st.config
+    local state  = self.st.state
+    local npc    = self.object
+
+    if state.action == "dodge"
+      then self:dodge()
+    elseif state.action == "movePoint"
+      then self:movePoint()
+    elseif state.action == "ffstrafe"
+      then self:ffstrafe()
+    elseif state.action == "strafe"
+      then self:strafe()
+    elseif state.action == "push"
+      then self:push()
+    elseif state.action == "search"
+      then self:search()
+    elseif state.action == "mutant"
+      then self:mutant()
+    elseif state.action == "flank"
+      then self:flank()
+    elseif state.action == "attack"
+      then self:attack()
+    elseif state.action == "idle"
+      then state.vid = npc:level_vertex_id()
+    end
+
+    if not POS.isValidLVID(npc, state.vid) then
+      state.vid     = npc:level_vertex_id()
+      state.expires = time_plus(config.vidRetry)
+    end
+
+    state.reached = state.vid == npc:level_vertex_id()
+    POS.setLVID(npc, state.vid)
+
+    local move = COMBAT.getCombatMoveState(self)
+    local look = COMBAT.getCombatLookState(self)
+
+    state_mgr.set_state(npc, move, nil, nil, look, {fast_set = true})
+  end
+
+
+  function action_combat_assault:finalize()
+    action_base.finalize(self)
+
+    UnregisterScriptCallback("npc_on_hit_callback",  self)
+    UnregisterScriptCallback("npc_on_hear_callback", self)
+  end
+--
+
+
+-- STATE --
+  function action_combat_assault:initConfig()
+    local st = self.st
+
+    st.config = {
+      targetZone     = 1,
+      alwaysSee      = 2,
+      vidRetry       = 1000,
+      useTeamSight   = true,
+      recoverHealth  = {0.32, 0.48},
+      spottedTimeout = {800,  1200},
+      lookTimeout    = {2500, 5000},
+      holdDelay      = {1600, 3200},
+      moveDelay      = {2800, 4800},
+      ffDelay        = {1200, 1600},
+      zones = {
+        shotgun = {6,  16, 26, 36},
+        pistol  = {8,  18, 30, 40},
+        smg     = {12, 22, 34, 44},
+        rifle   = {14, 26, 40, 52},
+        rpg     = {16, 28, 44, 56},
+        sniper  = {18, 32, 48, 64},
+        other   = {10, 20, 30, 40},
+      },
+    }
+  end
+
+
+  function action_combat_assault:initEnemy()
+    local config = self.st.config
+    local npc    = self.object
+    local st     = self.st
+
+    self.enemySpace = POS.assessSpace
+
+    st.enemy = {
+      id           = nil,
+      pos          = nil,
+      dist         = nil,
+      dir          = nil,
+      lookDir      = nil,
+      space        = nil,
+      spottedUntil = nil,
+      spotted      = true,
+      seen         = false,
+      wounded      = false,
+      flankable    = false,
+      mutant       = false,
+    }
+  end
+
+
+  function action_combat_assault:updateEnemy()
+    self.st.lastEnemy = dup_table(self.st.enemy)
+
+    local config = self.st.config
+    local enemy  = self.st.enemy
+    local npc    = self.object
+
+    local be = npc:best_enemy()
+    if not be then
+      return
+    end
+
+    if enemy.id ~= be:id() then
+      enemy.spotted = true
+    end
+
+    enemy.seen   = npc:see(be) or COMBAT.hasLineOfSight(npc, be)
+    enemy.mutant = IsMonster(be)
+    enemy.id     = be:id()
+
+    local reset = false
+    local pos   = false
+
+    if enemy.seen or enemy.spotted then
+      reset = true
+      pos   = true
+
+    elseif distance_between(be, npc) <= config.alwaysSee then
+      reset = true
+      pos   = true
+
+    elseif config.useTeamSight and COMBAT.teamSeesEnemy(npc, be) then
+      reset = true
+      pos   = true
+
+    elseif not time_expired(enemy.spottedUntil) then
+      pos = true
+    end
+
+    local ally = pos and be:best_enemy() or npc
+
+    if pos then
+      enemy.pos       = utils_obj.safe_bone_pos(be, "bip01_head")
+      enemy.space     = self.enemySpace(enemy.pos)
+      enemy.flankable = ally:id() ~= npc:id()
+      enemy.wounded   = IsWounded(be)
+    end
+
+    if reset then
+      enemy.spottedUntil = time_plus_rand(config.spottedTimeout)
+    end
+
+    if time_expired(enemy.spottedUntil) then
+      enemy.holdUntil = enemy.holdUntil or time_plus_rand(config.holdDelay)
+    else
+      enemy.holdUntil = nil
+    end
+
+    enemy.dir     = vec_dir(utils_obj.safe_bone_pos(npc, "bip01_r_finger02"),  enemy.pos)
+    enemy.dist    = vec_dist(npc:position(), enemy.pos)
+    enemy.lookDir = vec_dir(enemy.pos, ally:position())
+
+    enemy.spotted = false
+  end
+
+
+  function action_combat_assault:initState()
+    local config = self.st.config
+    local st     = self.st
+
+    self.assessCover    = POS.assessCover
+    self.isReloading    = NPC.isReloading
+    self.getWeaponType  = NPC.getWeaponType
+    self.nearbyGrenades = POS.nearbyGrenades
+    self.updateNextZone = COMBAT.updateNextZone
+    self.getCurrentZone = COMBAT.getCurrentZone
+    self.getTargetZone  = COMBAT.getTargetZone
+
+    st.state = {
+      action      = nil,
+      vid         = nil,
+      expires     = nil,
+      grenades    = nil,
+      weapon      = nil,
+      cover       = nil,
+      nextZone    = nil,
+      currentZone = nil,
+      targetZone  = nil,
+      coverOrder  = nil,
+      ffDelay     = nil,
+      ffTimeout   = nil,
+      reached     = false,
+      reloading   = false,
+      recovering  = false,
+      dontShoot   = false,
+    }
+  end
+
+
+  function action_combat_assault:updateState()
+    self.st.lastState = dup_table(self.st.state)
+
+    local lastState = self.st.lastState
+    local config    = self.st.config
+    local state     = self.st.state
+    local enemy     = self.st.enemy
+    local npc       = self.object
+
+    state.grenades    = self.nearbyGrenades(npc:position(), config.dodgeDist)
+    state.cover       = self.assessCover(npc:position(), enemy.pos)
+    state.dontShoot   = db.storage[npc:id()].rx_dont_shoot
+    state.weapon      = self.getWeaponType(npc)
+    state.reloading   = self.isReloading(npc)
+    state.currentZone = self:getCurrentZone()
+    state.targetZone  = self:getTargetZone()
+
+    state.recovering = npc.health <= config.recoverHealth[1]
+      or lastState.recovering and npc.health <= config.recoverHealth[2]
+
+    state.coverOrder = (state.recovering or state.reloading)
+      and "peek"
+      or  "shoot"
+
+    if state.dontShoot then
+      state.ffTimeout = time_plus(500)
+      if state.reached and not state.ffDelay then
+        state.ffDelay = time_plus_rand(config.ffDelay)
+      end
+    end
+
+    if state.grenades then
+      state.action = "dodge"
+
+    elseif self.st.movePoint then
+      state.action = "movePoint"
+
+    elseif time_expired(state.ffDelay) and not time_expired(state.ffTimeout) then
+      state.action = "ffstrafe"
+
+    elseif enemy.wounded and not enemy.mutant then
+      state.action = "push"
+
+    elseif time_expired(enemy.holdUntil) then
+      state.action = nil
+        or lastState.action == "search" and "search"
+        or lastState.action == "push"   and time_expired(state.expires) and "search"
+        or lastState.action == "push"   and "push"
+        or lastState.action == "strafe" and time_expired(state.expires) and "push"
+        or "strafe"
+
+    elseif enemy.mutant then
+      state.action = "mutant"
+
+    elseif enemy.flankable or lastState.action == "flank" and not state.reached then
+      state.action = "flank"
+
+    else
+      state.action = "attack"
+    end
+
+    if lastState.action ~= state.action then
+      if (lastState.action == "ffstrafe" or lastState.action == "movePoint") and state.action ~= "dodge" then
+        state.vid = npc:level_vertex_id()
+        state.expires = nil
+      else
+        state.expires = 0
+      end
+    end
+
+    if time_expired(state.expires) then
+      state.expires = nil
+      state.vid     = nil
+    end
+
+    state.reached = state.vid == npc:level_vertex_id()
+
+    if state.reached then
+      self.st.moveState = nil
+    end
+  end
+--
+
+
+-- ACTIONS --
+  function action_combat_assault:dodge()
+    local config = self.st.config
+    local state  = self.st.state
+    local npc    = self.object
+
+    if state.vid then
+      local dir = vec_dir(npc:position(), lvpos(state.vid))
+      if vec_dot(dir, state.grenades.avgDir) > 0 then
+        state.vid, state.expires = nil, nil
+      end
+    end
+
+    if not state.vid then
+      local dist = UTIL.random(10, 14, 1)
+      local rot  = 180 + UTIL.randomRange(45)
+      local dir  = vec_rot(state.grenades.avgDir, rot)
+      local pos  = vec_offset(npc:position(), dir, dist)
+
+      state.vid = POS.bestOutsideValidLVID(npc, npc:position(), pos)
+    end
+  end
+
+
+  function action_combat_assault:movePoint()
+    local state = self.st.state
+
+    if state.reached then
+      self.st.movePoint = nil
+    end
+
+    if not state.vid then
+      state.vid = self.st.movePoint
+    end
+  end
+
+
+  function action_combat_assault:ffstrafe()
+    local config = self.st.config
+    local state  = self.st.state
+    local enemy  = self.st.enemy
+    local npc    = self.object
+
+    if state.reached and not state.expires then
+      state.expires = time_plus_rand(config.ffDelay)
+    end
+
+    if not state.vid then
+      state.vid = POS.getStrafePos(npc, {enemyPos = enemy.pos})
+    end
+  end
+
+
+  function action_combat_assault:strafe()
+    local state = self.st.state
+    local enemy = self.st.enemy
+    local npc   = self.object
+
+    if state.reached and not state.expires then
+      state.expires = time_plus_rand(2500, 4000)
+    end
+
+    if not state.vid then
+      NPC.setReloadModes(npc, WPN.RELOAD_ACTIVE, WPN.HALF_EMPTY)
+
+      state.vid = POS.getStrafePos(npc, {
+        distance = UTIL.random(6, 10, 1),
+        enemyPos = enemy.pos,
+      })
+    end
+  end
+
+
+  function action_combat_assault:push()
+    local state = self.st.state
+    local enemy = self.st.enemy
+    local npc   = self.object
+
+    if state.reached and not state.expires then
+      state.expires = time_plus_rand(5000, 7500)
+    end
+
+    if state.reached and time_expired(state.expires) then
+      enemy.wounded = false
+    end
+
+    if not state.vid then
+      local dist = UTIL.random(2, 4, 1)
+      local dir  = vec_rot_range(enemy.dir, 180)
+      local pos  = vec_offset(enemy.pos, dir, dist)
+
+      state.vid = POS.bestOutsideUnclaimedLVID(npc, npc:position(), pos)
+    end
+  end
+
+
+  function action_combat_assault:search()
+    local state = self.st.state
+    local enemy = self.st.enemy
+    local npc   = self.object
+
+    if state.reached and not state.expires then
+      state.expires = time_plus_rand(7000, 9000)
+    end
+
+    if not state.vid then
+      local dist = UTIL.random(6, 10, 1)
+      local dir  = vec_rot_range(enemy.dir, 90)
+      local pos  = vec_offset(enemy.pos, dir, dist)
+
+      state.vid = POS.bestOutsideUnclaimedLVID(npc, npc:position(), pos)
+    end
+  end
+
+
+  function action_combat_assault:flank()
+    local config = self.st.config
+    local enemy  = self.st.enemy
+    local state  = self.st.state
+    local npc    = self.object
+
+    local zones = config.zones[state.weapon] or config.zones.other
+
+    if state.vid and vec_dist(enemy.pos, lvpos(state.vid)) < zones[1] and enemy.space == "open" then
+      state.vid, state.expires = nil, nil
+
+    elseif state.reached and not state.expires and state.cover > 5 then
+      state.expires = time_plus_rand(config.moveDelay)
+
+    elseif state.reached and not state.expires and enemy.space == "open" and state.currentZone ~= state.targetZone then
+      state.expires = time_plus_rand(config.moveDelay)
+
+    elseif state.reached and not state.expires and enemy.space ~= "open" and state.currentZone > state.targetZone then
+      state.expires = time_plus_rand(config.moveDelay)
+    end
+
+    if not state.vid then
+      local dir1 = vec(enemy.dir):invert()
+      local dir2 = vec_rot(enemy.lookDir, -90)
+      local dir3 = vec_rot(enemy.lookDir,  90)
+
+      local dir = nil
+        or vec_dot(dir1, enemy.lookDir) < 0 and dir1
+        or vec_dot(dir1, dir2) > vec_dot(dir1, dir3) and dir2
+        or dir3
+
+      local points = VEC.pointsAlongAxis({
+        radius     = self:updateNextZone(),
+        position   = enemy.pos,
+        direction  = dir,
+        arcLength  = 18,
+        spacing    = 2,
+        rowSpacing = 3,
+        rows       = 3,
+      })
+
+      local best = POS.pickByBestCover(npc, points, {
+        order    = COMBAT.COVER_ORDER[state.coverOrder],
+        findFn   = POS.bestOutsideUnclaimedLVID,
+        findFrom = npc:position(),
+        enemyPos = enemy.pos,
+      })
+
+      if best then
+        state.vid = best.vid
+      end
+    end
+  end
+
+
+  function action_combat_assault:attack()
+    local config = self.st.config
+    local enemy  = self.st.enemy
+    local state  = self.st.state
+    local npc    = self.object
+
+    local zones = config.zones[state.weapon] or config.zones.other
+
+    if state.vid and vec_dist(enemy.pos, lvpos(state.vid)) < zones[1] and enemy.space == "open" then
+      state.vid, state.expires = nil, nil
+
+    elseif state.reached and state.reloading and state.cover < 3 then
+      state.vid, state.expires = nil, nil
+
+    elseif state.reached and not state.expires and (state.cover < 2 or state.cover > 4) then
+      state.expires = time_plus_rand(config.moveDelay)
+
+    elseif state.reached and not state.expires and enemy.space == "open" and state.currentZone ~= state.targetZone then
+      state.expires = time_plus_rand(config.moveDelay)
+
+    elseif state.reached and not state.expires and enemy.space ~= "open" and state.currentZone > state.targetZone then
+      state.expires = time_plus_rand(config.moveDelay)
+    end
+
+    if not state.vid then
+      local dir    = vec(enemy.dir):invert()
+      local radius = self:updateNextZone()
+
+      local angle = UTIL.random(20, 40)
+      local dir1  = vec_rot(dir,  angle)
+      local dir2  = vec_rot(dir, -angle)
+
+      local points1 = VEC.pointsAlongAxis({
+        position   = enemy.pos,
+        radius     = radius,
+        direction  = dir1,
+        arcLength  = 10,
+        spacing    = 2,
+        rowSpacing = 3,
+        rows       = 4,
+      })
+
+      local points2 = VEC.pointsAlongAxis({
+        position   = enemy.pos,
+        radius     = radius,
+        direction  = dir2,
+        arcLength  = 10,
+        spacing    = 2,
+        rowSpacing = 3,
+        rows       = 4,
+      })
+
+      local best = POS.pickByBestCover(npc, TABLE.imerge(points1, points2), {
+        order    = COMBAT.COVER_ORDER[state.coverOrder],
+        findFn   = POS.bestOutsideUnclaimedLVID,
+        findFrom = npc:position(),
+        enemyPos = enemy.pos,
+      })
+
+      if not best or best.score == 6 and enemy.space ~= "open" then
+        local points = VEC.pointsAlongAxis({
+          position   = enemy.pos,
+          direction  = dir,
+          arcLength  = 32,
+          radius     = 12,
+          spacing    = 2,
+          rowSpacing = 3,
+          rows       = 2,
+        })
+
+        best = POS.pickByBestCover(npc, points, {
+          order    = COMBAT.COVER_ORDER[state.coverOrder],
+          findFn   = POS.bestInsideUnclaimedLVID,
+          findFrom = enemy.pos,
+          enemyPos = enemy.pos,
+          minDist  = 4,
+        })
+      end
+
+      if best then
+        state.vid = best.vid
+      end
+    end
+  end
+
+
+  function action_combat_assault:mutant()
+    local config = self.st.config
+    local enemy  = self.st.enemy
+    local state  = self.st.state
+    local npc    = self.object
+
+    local zones = config.zones[state.weapon] or config.zones.other
+
+    if state.vid and vec_dist(enemy.pos, lvpos(state.vid)) < zones[1] then
+      state.vid, state.expires = nil, nil
+
+    elseif state.reached and state.currentZone < state.targetZone then
+      state.vid, state.expires = nil, nil
+
+    elseif state.reached and not state.expires and state.cover > 5 then
+      state.expires = time_plus_rand(config.moveDelay)
+
+    elseif state.reached and not state.expires and state.currentZone > state.targetZone then
+      state.expires = time_plus_rand(config.moveDelay)
+    end
+
+    if not state.vid then
+      local dist = self:updateNextZone()
+      local dir1 = vec_rot(enemy.dir, 180 + UTIL.random(36, 72))
+      local dir2 = vec_rot(enemy.dir, 180 - UTIL.random(36, 72))
+      local pos1 = vec_offset(enemy.pos, dir1, dist)
+      local pos2 = vec_offset(enemy.pos, dir2, dist)
+      local vid1 = POS.bestOutsideUnclaimedLVID(npc, npc:position(), pos1)
+      local vid2 = POS.bestOutsideUnclaimedLVID(npc, npc:position(), pos2)
+
+      state.vid = vec_dist(npc:position(), lvpos(vid2)) > vec_dist(npc:position(), lvpos(vid1))
+        and vid2
+        or  vid1
+    end
+  end
+--
+
+
+-- BINDER --
+  function add_to_binder(npc, ini, storage, planner, temp)
+    planner:add_evaluator(EVAL_ID,
+      evaluator_combat_type("combat_assault", storage, "assault")
+    )
+
+    local action = action_combat_assault("combat_assault", storage)
+
+    if action then
+      action:add_precondition(WP(EVAL_ENEMY, true))
+      action:add_precondition(WP(EVAL_ID, true))
+      action:add_precondition(WP(EVAL_FACER, false))
+
+      action:add_effect(WP(EVAL_LOGIC, false))
+      action:add_effect(WP(EVAL_ENEMY, false))
+      action:add_effect(WP(EVAL_ID, false))
+
+      planner:add_action(ACTION_ID, action)
+
+      if (schemes.rx_ff) then
+        local ffAction = planner:action(rx_ff.evaid)
+
+        if ffAction then
+          ffAction:add_precondition(WP(EVAL_ID, false))
+        end
+      end
+    end
+  end
+--

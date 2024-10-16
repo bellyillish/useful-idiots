@@ -42,6 +42,18 @@
   <string id="st_idiots_deselect_all_message">
     <text>All companions deselected.</text>
   </string>
+  <string id="st_idiots_retreat_message">
+    <text>Forcing %s companion(s) to retreat.</text>
+  </string>
+  <string id="st_idiots_retreat_all_message">
+    <text>Forcing all companions to retreat.</text>
+  </string>
+  <string id="st_idiots_enabled_message">
+    <text>Enabled</text>
+  </string>
+  <string id="st_idiots_disabled_message">
+    <text>Disabled</text>
+  </string>
 
   <!-- Titlebar Buttons -->
   <string id="st_idiots_reset_all">
@@ -49,6 +61,9 @@
   </string>
   <string id="st_idiots_reset">
     <text>Re-Sync</text>
+  </string>
+  <string id="st_idiots_reload">
+    <text>Reload</text>
   </string>
   <string id="st_idiots_unstick">
     <text>Unstick</text>
@@ -61,6 +76,9 @@
   </string>
   <string id="st_idiots_add_waypoint">
     <text>Add Waypoint</text>
+  </string>
+  <string id="st_idiots_retreat">
+    <text>Quick Retreat</text>
   </string>
 
   <!-- Movement -->
@@ -81,6 +99,17 @@
   </string>
   <string id="st_idiots_movement_patrol">
     <text>Patrol</text>
+  </string>
+
+  <!-- Light -->
+  <string id="st_idiots_light_auto">
+    <text>Default Light</text>
+  </string>
+  <string id="st_idiots_light_off">
+    <text>Light Off</text>
+  </string>
+  <string id="st_idiots_light_on">
+    <text>Light On</text>
   </string>
 
   <!-- Speeds -->
@@ -123,11 +152,17 @@
   <string id="st_idiots_combat_default">
     <text>Default Combat</text>
   </string>
-  <string id="st_idiots_combat_offensive">
-    <text>Offensive Combat</text>
+  <string id="st_idiots_combat_assault">
+    <text>Assault Combat</text>
   </string>
-  <string id="st_idiots_combat_defensive">
-    <text>Defensive Combat</text>
+  <string id="st_idiots_combat_support">
+    <text>Support Combat</text>
+  </string>
+  <string id="st_idiots_combat_guard">
+    <text>Guard Combat</text>
+  </string>
+  <string id="st_idiots_combat_snipe">
+    <text>Sniper Combat</text>
   </string>
   <string id="st_idiots_combat_monolith">
     <text>Monolith Combat</text>
@@ -139,12 +174,38 @@
     <text>Zombied Combat</text>
   </string>
 
+  <!-- Weapon -->
+  <string id="st_idiots_weapon">
+    <text>Weapon</text>
+  </string>
+  <string id="st_idiots_weapon_best">
+    <text>Best</text>
+  </string>
+  <string id="st_idiots_weapon_pistol">
+    <text>Pistol</text>
+  </string>
+  <string id="st_idiots_weapon_shotgun">
+    <text>Shotgun</text>
+  </string>
+  <string id="st_idiots_weapon_smg">
+    <text>SMG</text>
+  </string>
+  <string id="st_idiots_weapon_rifle">
+    <text>Rifle</text>
+  </string>
+  <string id="st_idiots_weapon_sniper">
+    <text>Sniper</text>
+  </string>
+  <string id="st_idiots_weapon_rpg">
+    <text>RPG</text>
+  </string>
+
   <!-- Readiness -->
   <string id="st_idiots_readiness">
     <text>Readiness</text>
   </string>
   <string id="st_idiots_readiness_attack">
-    <text>Attack</text>
+    <text>Attack Enemies</text>
   </string>
   <string id="st_idiots_readiness_defend">
     <text>Defend Only</text>
