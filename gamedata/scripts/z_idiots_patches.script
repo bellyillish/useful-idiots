@@ -1,0 +1,880 @@
+local WP      = world_property
+local CONFIG  = a_idiots_config
+local ASSAULT = idiots_combat_assault
+local MONSTER = idiots_combat_monster
+local SUPPORT = idiots_combat_support
+local SNIPE   = idiots_combat_snipe
+local GUARD   = idiots_combat_guard
+local TABLE   = require "illish.table"
+local UTIL    = require "illish.util"
+local VEC     = require "illish.vector"
+local POS     = require "illish.pos"
+local WPN     = require "illish.weapon"
+local NPC     = require "illish.npc"
+local BEH     = require "illish.beh"
+
+ACTION_BEH  = axr_beh.beh_actid
+EVAL_GATHER = xr_gather_items.evaid
+EVAL_CORPSE = xr_evaluators_id.corpse_exist
+EVAL_ITEMS  = stalker_ids.property_items
+EVAL_HEAL   = xr_evaluators_id.wounded_exist
+
+
+LOOT_SHARED_ITEMS = {}
+LOOT_SHARING_NPCS = {}
+
+
+-- UTILS_OBJ --
+  BONE_ALIASES = {
+    spine = {"spine", "spine_1", "bip01_spine", "bip01_spine1"},
+    head  = {"head", "head_boss", "bip01_head"},
+  }
+
+  -- fix errors from inconsistent head and spine bone IDs in monsters
+  function utils_obj.safe_bone_pos(obj, bone)
+    if obj:get_bone_id(bone) ~= 65535 then
+      return obj:bone_position(bone)
+    end
+
+    for match, aliases in pairs(BONE_ALIASES) do
+      if bone:find(match) then
+        for i, alias in ipairs(aliases) do
+          if obj:get_bone_id(alias) ~= 65535 then
+            return obj:bone_position(alias)
+          end
+        end
+      end
+    end
+
+    return vec(obj:position()):add(0, 0.5, 0)
+  end
+--
+
+
+-- AXR_BEH --
+  CUSTOM_TARGETS = {
+    cover_spot   = BEH.setTargetCoverSpot,
+    cover_actor  = BEH.setTargetFollowActor,
+    follow_actor = BEH.setTargetFollowActor,
+    look_around  = BEH.setTargetLookAround,
+    relax_spot   = BEH.setTargetRelaxSpot,
+  }
+
+  local __init_custom_data   = axr_beh.init_custom_data
+  local __initialize         = axr_beh.action_beh.initialize
+  local __set_desired_target = axr_beh.action_beh.set_desired_target
+  local __beh_move           = axr_beh.action_beh.beh_move
+  local __beh_wait           = axr_beh.action_beh.beh_wait
+  local __beh_cover          = axr_beh.action_beh.beh_cover
+  local __beh_add_to_binder  = axr_beh.add_to_binder
+
+
+  function axr_beh.init_custom_data(npc, ini, section, st, scheme)
+    __init_custom_data(npc, ini, section, st, scheme)
+    st.normal_desired_dist = ini:r_string_to_condlist(section, "normal_desired_dist", "4")
+  end
+
+
+  function axr_beh.action_beh:initialize()
+    __initialize(self)
+
+    local wmode = ui_mcm.get("idiots/options/autoReload")
+      and WPN.RELOAD_ALL
+      or  WPN.RELOAD_ACTIVE
+
+    NPC.setReloadModes(self.object, wmode, WPN.NOT_FULL)
+  end
+
+
+  function axr_beh.action_beh:set_desired_target()
+    local npc = self.object
+    local st  = self.st
+
+    local target = xr_logic.pick_section_from_condlist(db.actor, npc, st.goto_target)
+
+    if st.target == target and st.desired_target then
+      st.savedTarget = dup_table(st.desired_target)
+    else
+      st.lookTimer   = nil
+      st.lookPoint   = nil
+      st.savedTarget = {}
+    end
+
+    st.lastTarget   = st.target
+    st.lastKeepType = st.keepType
+
+    local success  = __set_desired_target(self)
+    local targetFn = CUSTOM_TARGETS[target]
+
+    if success or not (NPC.isCompanion(npc) and targetFn) then
+      return success
+    end
+
+    st.keepType = xr_logic.pick_section_from_condlist(db.actor, npc, st.keep_distance)
+
+    return targetFn(self)
+  end
+
+
+  function axr_beh.action_beh:beh_move()
+    local npc = self.object
+    local st  = self.st
+
+    if not (NPC.isCompanion(npc) and CUSTOM_TARGETS[st.target]) then
+      return __beh_move(self)
+    end
+
+    if not st.setStateFn then
+      st.setStateFn = UTIL.throttle(state_mgr.set_state, 100)
+    end
+
+    local move = BEH.getBehMoveState(self)
+    local look = BEH.getBehLookState(self)
+
+    st.setStateFn(npc, move, nil, nil, look, {fast_set = true})
+  end
+
+
+  function axr_beh.action_beh:beh_wait()
+    local npc = self.object
+    local st  = self.st
+
+    if not (NPC.isCompanion(npc) and CUSTOM_TARGETS[st.target]) then
+      return __beh_wait(self)
+    end
+
+    self:beh_move()
+  end
+
+
+  function axr_beh.action_beh:beh_cover()
+    local npc = self.object
+    local st  = self.st
+
+    if not (NPC.isCompanion(npc) and CUSTOM_TARGETS[st.target]) then
+      return __beh_cover(self)
+    end
+
+    self:beh_move()
+  end
+
+
+  function axr_beh.action_beh:beh_relax()
+    local npc = self.object
+    local st  = self.st
+
+    if not (NPC.isCompanion(npc) and CUSTOM_TARGETS[st.target]) then
+      return __beh_wait(self)
+    end
+
+    self:beh_move()
+  end
+
+
+  function axr_beh.add_to_binder(npc, ...)
+    __beh_add_to_binder(npc, ...)
+
+    if not NPC.isCompanion(npc) then
+      return
+    end
+
+    local manager = npc:motivation_action_manager()
+    local action  = manager:action(ACTION_BEH)
+
+    if (schemes.gather_items) then
+      action:add_precondition(WP(EVAL_GATHER, false))
+    end
+    if (schemes.corpse_detection) then
+      action:add_precondition(WP(EVAL_CORPSE, false))
+    end
+    if (schemes.help_wounded) then
+      action:add_precondition(WP(EVAL_HEAL, false))
+    end
+
+    action:add_precondition(WP(EVAL_ITEMS, false))
+  end
+--
+
+
+-- XR_COMBAT --
+  local __combat_evaluate  = xr_combat.evaluator_check_combat.evaluate
+  local __add_to_binder    = xr_combat.add_to_binder
+
+  -- prevent companions from getting stuck in legacy combat types
+  function xr_combat.evaluator_check_combat:evaluate()
+    xr_combat.set_combat_type(self.object, db.actor, self.st)
+    return __combat_evaluate(self)
+  end
+
+  -- add custom combat types
+  function xr_combat.add_to_binder(npc, ini, scheme, section, storage, temp)
+    __add_to_binder(npc, ini, scheme, section, storage, temp)
+
+    if not NPC.isCompanion(npc) then
+      return
+    end
+
+    local manager = npc:motivation_action_manager()
+
+    if not manager then
+      return
+    end
+
+    if temp.section then
+      ASSAULT.add_to_binder(npc, ini, storage, manager, temp)
+      MONSTER.add_to_binder(npc, ini, storage, manager, temp)
+      SUPPORT.add_to_binder(npc, ini, storage, manager, temp)
+      SNIPE.add_to_binder(npc, ini, storage, manager, temp)
+      GUARD.add_to_binder(npc, ini, storage, manager, temp)
+    end
+  end
+--
+
+
+-- XR_COMBAT_ZOMBIED --
+  local __zombied_evaluate = xr_combat_zombied.evaluator_combat_zombied.evaluate
+
+  -- allow companions to be in "zombied" combat
+  function xr_combat_zombied.evaluator_combat_zombied:evaluate()
+    local enabled = ui_mcm.get("idiots/options/oldCombat")
+    local npc = self.object
+
+    if enabled and NPC.isCompanion(npc) and NPC.getState(npc, "combat", "zombied") then
+      return true
+    end
+
+    return __zombied_evaluate(self)
+  end
+--
+
+
+-- XR_COMBAT_IGNORE --
+  local __is_enemy = xr_combat_ignore.is_enemy
+
+  -- fix bug where companions and enemies to ignore each other when sneaking,
+  -- within 30m, and not fighting with the player
+  function xr_combat_ignore.is_enemy(npc, enemy, no_memory)
+    if not (NPC.isCompanion(npc) or NPC.isCompanion(enemy)) then
+      return __is_enemy(npc, enemy, no_memory)
+    end
+
+    -- temporary patches
+    local __send      = _G.SendScriptCallback
+    local __fighting  = xr_combat_ignore.fighting_with_actor_npcs
+    local __overrides = xr_combat_ignore.ignore_enemy_by_overrides
+
+    -- proxy for fighting_with_actor_npcs
+    local meta = {}
+
+    function meta:__index(id)
+      if not self.called and (id == npc:id() or id == enemy:id()) then
+        self.called = true
+        return true
+      end
+      return __fighting[id]
+    end
+
+    function meta:__newindex(id, value)
+      __fighting[id] = value
+    end
+
+    -- add proxy after "on_enemy_eval" is done
+    function _G.SendScriptCallback(name, ...)
+      __send(name, ...)
+      if name == "on_enemy_eval" then
+        _G.SendScriptCallback = __send
+        xr_combat_ignore.fighting_with_actor_npcs = setmetatable({called = false}, meta)
+      end
+    end
+
+    -- cleanup before ignore_enemy_by_overrides() is called
+    function xr_combat_ignore.ignore_enemy_by_overrides(...)
+      xr_combat_ignore.fighting_with_actor_npcs  = __fighting
+      xr_combat_ignore.ignore_enemy_by_overrides = __overrides
+      return __overrides(...)
+    end
+
+    local isEnemy = __is_enemy(npc, enemy, no_memory)
+
+    -- cleanup again in case is_enemy() returns early
+    _G.SendScriptCallback = __send
+    xr_combat_ignore.fighting_with_actor_npcs  = __fighting
+    xr_combat_ignore.ignore_enemy_by_overrides = __overrides
+
+    return isEnemy
+  end
+--
+
+
+-- AXR_COMPANIONS --
+  local __is_assigned_item = axr_companions.is_assigned_item
+
+  -- sync with global state when joining
+  function axr_companions.add_to_actor_squad(npc)
+    axr_companions.non_task_companions[npc:id()] = true
+    se_save_var(npc:id(), npc:name(), "companion", true)
+    npc:inactualize_patrol_path()
+    axr_companions.setup_companion_logic(npc, db.storage[npc:id()], false)
+
+    -- reset other flags
+    save_var(npc, "fight_from_point", nil)
+
+    -- load companion states
+    NPC.setStates(npc, NPC.GLOBAL_STATE)
+  end
+
+  -- don't teleport if flag is set in NPC.ACTIONS
+  function axr_companions.companion_squad_can_teleport(squad)
+    local sim = alife()
+    local id  = squad:commander_id()
+    local se  = sim:object(id)
+
+    if se and se_load_var(se.id, se:name(), "companion_cannot_teleport") then
+      return false
+    end
+
+    for ig, group in ipairs(NPC.ACTIONS) do
+      for ia, action in ipairs(group.actions) do
+        if action.teleport == false and sim:has_info(id, action.info) then
+          return false
+        end
+      end
+    end
+
+    return true
+  end
+
+  -- disable anomaly companion wheel
+  function axr_companions.on_key_release()
+  end
+
+  -- disable anomaly move to point
+  function axr_companions.move_to_point()
+  end
+
+  -- show all or only gathered and looted items in inventory
+  function axr_companions.is_assigned_item(npcID, itemID)
+    local showAll = ui_mcm.get("idiots/options/showAllItems")
+
+    if NPC.isCompanion(npcID) and (showAll or LOOT_SHARED_ITEMS[itemID]) then
+      return true
+    end
+
+    return __is_assigned_item(npcID, itemID)
+  end
+--
+
+
+-- XR_GATHER_ITEMS
+  local __gather_initialize    = xr_gather_items.act_gather_itm.initialize
+  local __gather_finalize      = xr_gather_items.act_gather_itm.finalize
+  local __gather_find_item     = xr_gather_items.eva_gather_itm.find_valid_item
+  local __gather_add_to_binder = xr_gather_items.add_to_binder
+
+  -- start tracking gathered items
+  function xr_gather_items.act_gather_itm:initialize()
+    if NPC.isCompanion(self.object) then
+      LOOT_SHARING_NPCS[self.object:id()] = true
+    end
+
+    __gather_initialize(self)
+  end
+
+  -- stop tracking gathered items
+  function xr_gather_items.act_gather_itm:finalize()
+    if NPC.isCompanion(self.object) then
+      LOOT_SHARING_NPCS[self.object:id()] = nil
+    end
+
+    __gather_finalize(self)
+  end
+
+  -- enable/disable artifact gathering
+  function xr_gather_items.eva_gather_itm:find_valid_item()
+    if NPC.isCompanion(self.object) then
+      if not self.st.ARTIFACTS_ORIGINAL then
+        self.st.ARTIFACTS_ORIGINAL = self.st.gather_artefact_items_enabled
+        self.st.ARTIFACTS_DISABLER = {{"false"}}
+      end
+
+      local artifactsEnabled = ui_mcm.get("idiots/options/artifacts")
+
+      if not artifactsEnabled
+        then self.st.gather_artefact_items_enabled = self.st.ARTIFACTS_DISABLER
+        else self.st.gather_artefact_items_enabled = self.st.ARTIFACTS_ORIGINAL
+      end
+    end
+
+    return __gather_find_item(self)
+  end
+
+  -- disable NPC gathering
+  function xr_gather_items.add_to_binder(npc, ...)
+    __gather_add_to_binder(npc, ...)
+
+    if not npc or NPC.isCompanion(npc) then
+      return
+    end
+
+    local noGathering = ui_mcm.get("idiots/options/noNpcLooting")
+    local manager     = npc:motivation_action_manager()
+
+    if not (noGathering and manager) then
+      return
+    end
+
+    manager:add_evaluator(EVAL_GATHER, property_evaluator_const(false))
+  end
+--
+
+
+-- XR_CORPSE_DETECTION --
+  local __corpse_initialize    = xr_corpse_detection.action_search_corpse.initialize
+  local __corpse_finalize      = xr_corpse_detection.action_search_corpse.finalize
+  local __corpse_add_to_binder = xr_corpse_detection.add_to_binder
+
+  -- start tracking looted items
+  function xr_corpse_detection.action_search_corpse:initialize()
+    if NPC.isCompanion(self.object) then
+      LOOT_SHARING_NPCS[self.object:id()] = true
+    end
+
+    __corpse_initialize(self)
+  end
+
+  -- stop tracking looted items
+  function xr_corpse_detection.action_search_corpse:finalize()
+    if NPC.isCompanion(self.object) then
+      LOOT_SHARING_NPCS[self.object:id()] = nil
+    end
+
+    __corpse_finalize(self)
+  end
+
+  -- disable NPC looting
+  function xr_corpse_detection.add_to_binder(npc, ...)
+    __corpse_add_to_binder(npc, ...)
+
+    if not npc or NPC.isCompanion(npc) then
+      return
+    end
+
+    local noLooting = ui_mcm.get("idiots/options/noNpcLooting")
+    local manager   = npc:motivation_action_manager()
+
+    if not (noLooting and manager) then
+      return
+    end
+
+    manager:add_evaluator(EVAL_CORPSE, property_evaluator_const(false))
+  end
+--
+
+
+-- XR_HELP_WOUNDED --
+  local __help_wounded_evaluate = xr_help_wounded.evaluator_wounded_exist.evaluate
+
+  -- add a condlist to axr_beh to help wounded
+  function xr_help_wounded.evaluator_wounded_exist:evaluate()
+    if NPC.isCompanion(self.object) then
+      local npc = self.object
+      local st  = self.a
+
+      if not st.help_wounded_cond then
+        st.help_wounded_cond = xr_logic.parse_condlist(npc, "beh", "help_wounded_enabled", st.help_wounded_enabled)
+      end
+
+      st.help_wounded_enabled = xr_logic.pick_section_from_condlist(db.actor, npc, st.help_wounded_cond) == "true"
+    end
+
+    return __help_wounded_evaluate(self)
+  end
+--
+
+
+-- SR_LIGHT --
+  local __check_light = sr_light.check_light
+
+  function sr_light.check_light(npc)
+    if not NPC.isCompanion(npc) then
+      __check_light(npc)
+      return
+    end
+
+    local state = NPC.getActiveState(npc, "light")
+    local torch = npc:object("device_torch")
+
+    if not (torch and state) then
+      __check_light(npc)
+      return
+    end
+
+    if state == "off" or state == "on" then
+      torch:enable_attachable_item(state == "on")
+      return
+    end
+
+    local mimicActor = ui_mcm.get("idiots/options/autoLight")
+
+    if not (mimicActor and NPC.isFollower(npc)) then
+      __check_light(npc)
+      return
+    end
+
+    local actorTorch   = db.actor:item_in_slot(10)
+    local actorEnabled = actorTorch and actorTorch:torch_enabled() or false
+
+    torch:enable_attachable_item(actorEnabled)
+  end
+--
+
+
+-- XR_CONDITIONS --
+  function xr_conditions.follow_crouch(actor, npc)
+    if not ui_mcm.get("idiots/options/autoSneak") then
+      return false
+    end
+    return IsMoveState("mcCrouch") and NPC.isFollower(npc)
+  end
+
+
+  function xr_conditions.follow_prone(actor, npc)
+    if not ui_mcm.get("idiots/options/autoProne") then
+      return false
+    end
+    return IsMoveState("mcCrouch") and IsMoveState("mcAccel") and NPC.isFollower(npc)
+  end
+
+
+  function xr_conditions.follow_sprint(actor, npc)
+    if not ui_mcm.get("idiots/options/autoSprint") then
+      return false
+    end
+    return IsMoveState("mcSprint") and NPC.isFollower(npc)
+  end
+
+
+  function xr_conditions.scripted_combat(actor, npc)
+    return db.storage[npc:id()].script_combat_type ~= nil
+  end
+
+
+  function xr_conditions.fighting_monster(actor, npc)
+    return IsMonster(npc:best_enemy())
+  end
+--
+
+
+-- ANIMATIONS --
+  -- fix prone animation
+  state_lib.states.prone.movement = move.stand
+  state_lib.states.prone_idle.movement = move.stand
+  state_lib.states.prone_fire.movement = move.stand
+  state_lib.states.prone_sniper_fire.movement = move.stand
+  state_lib.states.prone_sniper_fire.direction = nil
+
+  state_mgr_animation_list.animations.prone.prop.moving = nil
+  state_mgr_animation_list.animations.prone_idle.prop.moving = nil
+--
+
+
+-- STATE_MGR --
+  local __set_state = state_mgr.set_state
+
+  -- 1. force {fast_set = true} on all companion animations because it seems to
+  --    fix issues with them getting stuck or being unresponsive
+  -- 2. swap hide with hide_na after "in" animation because it makes companions
+  --    twitch oddly when idle
+  -- 3. swap prone with prone_idle after "in" animation because otherwise
+  --    companions get up with every direction change
+  -- 4. validate look_position and look_dir because directions with very small
+  --    or zero magnitudes can make NPCs/companions disappear
+  function state_mgr.set_state(npc, state_name, callback, timeout, target, extra)
+    if NPC.isCompanion(npc) then
+      local st = db.storage[npc:id()]
+
+      if state_name == "hide" then
+        st.__idiots_prone_fix = nil
+        if not st.__idiots_hide_fix then
+          st.__idiots_hide_fix = time_plus(1000)
+        elseif time_expired(st.__idiots_hide_fix) then
+          state_name = "hide_na"
+        end
+
+      elseif state_name == "prone" then
+        st.__idiots_hide_fix  = nil
+        if not st.__idiots_prone_fix then
+          st.__idiots_prone_fix = time_plus(1000)
+        elseif time_expired(st.__idiots_prone_fix) then
+          state_name = "prone_idle"
+        end
+
+      else
+        st.__idiots_hide_fix  = nil
+        st.__idiots_prone_fix = nil
+      end
+
+      extra = extra or {}
+      extra.fast_set = extra.fast_set ~= false
+    end
+
+    if extra then
+      if extra.look_position then
+        local dir = VEC.direction(npc:position(), extra.look_position)
+        if UTIL.round(dir:magnitude()) ~= 1 then
+          extra.look_position = nil
+        end
+      end
+      if extra.look_dir then
+        if UTIL.round(extra.look_dir:magnitude()) ~= 1 then
+          extra.look_dir = nil
+        end
+      end
+    end
+
+    return __set_state(npc, state_name, callback, timeout, target, extra)
+  end
+--
+
+
+-- CALLBACKS --
+  -- switch weapons
+  function onChooseWeapon(npc, wpn, flags)
+    if not NPC.isCompanion(npc) then
+      return
+    end
+
+    local selected = NPC.getActiveState(npc, "weapon")
+    local wmode    = NPC.getReloadWeaponMode(npc)
+    local weapons  = NPC.getGuns(npc)
+
+    -- unloaded
+    if wmode then
+      local id = NPC.setReloadWeapon(npc)
+
+      if id then
+        flags.gun_id = id
+        return
+      end
+
+      if wmode == WPN.RELOAD_ALL then
+        for i, weapon in ipairs(weapons) do
+          if WPN.isUnloaded(weapon) then
+            flags.gun_id = weapon:id()
+            return
+          end
+        end
+      end
+    end
+
+    -- nothing to reload
+    NPC.setReloadModes(npc, 0, 0)
+
+    table.sort(weapons, function(w1, w2)
+      -- selected in UI
+      local t1 = WPN.getType(w1)
+      local t2 = WPN.getType(w2)
+
+      if t1 ~= t2 and t1 == selected then
+        return true
+      elseif t1 ~= t2 and t2 == selected then
+        return false
+      end
+
+      -- repair kit type
+      local kits = {"pistol", "shotgun", "rifle_5", "rifle_7"}
+      local p1 = TABLE.keyof(kits, WPN.getRepairType(w1))
+      local p2 = TABLE.keyof(kits, WPN.getRepairType(w2))
+
+      if p1 ~= p2 and (not p1 or p1 > p2) then
+        return true
+      elseif p1 ~= p2 and (not p2 or p1 < p2) then
+        return false
+      end
+
+      -- cost
+      return WPN.getCost(w2) < WPN.getCost(w1)
+    end)
+
+    if weapons[1] then
+      flags.gun_id = weapons[1]:id()
+    end
+  end
+
+  -- track gathered/looted item
+  function onTakeItem(npc, item)
+    if NPC.isCompanion(npc) and LOOT_SHARING_NPCS[npc:id()] then
+      LOOT_SHARED_ITEMS[item:id()] = true
+    end
+  end
+
+  -- cleanup gathered/looted item
+  function onEntityUnregister(entity)
+    LOOT_SHARED_ITEMS[entity.id] = nil
+  end
+
+  -- reconfigure on MCM changes
+  function reconfigureStates()
+    -- old combat disabled
+    if not ui_mcm.get("idiots/options/oldCombat") then
+      local gstate = NPC.getActiveState(nil, "combat")
+      if gstate == "monolith" or gstate == "camper" or gstate == "zombied" then
+        NPC.setState(nil, "combat", "default", true)
+      end
+
+      for i, npc in ipairs(NPC.getCompanions()) do
+        local state = NPC.getActiveState(npc, "combat")
+        if state == "monolith" or state == "camper" or state == "zombied" then
+          NPC.setState(npc, "combat", "default", true)
+        end
+      end
+    end
+
+    -- artifact gathering disabled
+    if not ui_mcm.get("idiots/options/artifacts") then
+      NPC.setState(nil, "jobs", "loot_artifacts", false)
+
+      for i, npc in ipairs(NPC.getCompanions()) do
+        NPC.setState(npc, "jobs", "loot_artifacts", false)
+      end
+    end
+  end
+
+  -- prep storage
+  function initStorage()
+    local mdata = alife_storage_manager.get_state()
+
+    if not mdata[CONFIG.DATA_KEY] then
+      mdata[CONFIG.DATA_KEY] = {}
+    end
+
+    return mdata[CONFIG.DATA_KEY]
+  end
+
+  -- load data
+  function onLoadState(mdata)
+    local data = initStorage()
+
+    -- purge old mod keys
+    for i, k in ipairs(CONFIG.DATA_STALE_KEYS) do
+      mdata[k] = nil
+    end
+
+    -- migrate old jobs keys
+    if data.IDIOTS_SHARED_ITEMS then
+      data.sharedItems = data.IDIOTS_SHARED_ITEMS
+    end
+    if data.IDIOTS_SHARING_NPCS then
+      data.sharingNPCs = data.IDIOTS_SHARING_NPCS
+    end
+
+    data.IDIOTS_SHARED_ITEMS = nil
+    data.IDIOTS_SHARING_NPCS = nil
+
+    -- check version
+    if data.VER ~= CONFIG.DATA_VER then
+      data.VER = CONFIG.DATA_VER
+      data.companionStates = nil
+      data.globalState = nil
+    end
+
+    -- load jobs data
+    if data.sharedItems then
+      LOOT_SHARED_ITEMS = data.sharedItems
+    end
+    if data.sharingNPCs then
+      LOOT_SHARING_NPCS = data.sharingNPCs
+    end
+
+    -- load global state
+    if data.globalState then
+      NPC.GLOBAL_STATE = TABLE.merge(NPC.GLOBAL_STATE, data.globalState)
+    else
+      NPC.GLOBAL_STATE = dup_table(NPC.DEFAULT_STATE)
+    end
+
+    -- old combat disabled
+    if not ui_mcm.get("idiots/options/oldCombat") then
+      local gstate = NPC.getActiveState(nil, "combat")
+
+      if gstate == "monolith" or gstate == "camper" or gstate == "zombied" then
+        NPC.setState(nil, "combat", "default", true)
+      end
+    end
+
+    -- artifact gathering disabled
+    if not ui_mcm.get("idiots/options/artifacts") then
+      NPC.setState(nil, "jobs", "loot_artifacts", false)
+    end
+  end
+
+  -- save data
+  function onSaveState()
+    local data = initStorage()
+
+    data.globalState = NPC.GLOBAL_STATE
+    data.sharedItems = LOOT_SHARED_ITEMS
+    data.sharingNPCs = LOOT_SHARING_NPCS
+
+    data.companionStates = {}
+
+    for i, npc in ipairs(NPC.getCompanions()) do
+      data.companionStates[npc:id()] = NPC.getAllStates(npc)
+    end
+  end
+
+  -- load npc states
+  function onNpcSpawn(npc)
+    if not NPC.isCompanion(npc) then
+      return
+    end
+
+    local data = initStorage()
+
+    -- reset other flags
+    save_var(npc, "fight_from_point", nil)
+
+    -- load companion states
+    if data.companionStates and data.companionStates[npc:id()] then
+      NPC.setStates(npc, data.companionStates[npc:id()])
+    else
+      NPC.setStates(npc, NPC.GLOBAL_STATE)
+    end
+
+    -- old combat disabled
+    if not ui_mcm.get("idiots/options/oldCombat") then
+      local state = NPC.getActiveState(npc, "combat")
+
+      if state == "monolith" or state == "camper" or state == "zombied" then
+        NPC.setState(npc, "combat", "default", true)
+      end
+    end
+
+    -- artifact gathering disabled
+    if not ui_mcm.get("idiots/options/artifacts") then
+      NPC.setState(npc, "jobs", "loot_artifacts", false)
+    end
+  end
+
+  -- clear saved data
+  function onFirstUpdate()
+    local data = initStorage()
+
+    data.companionStates = nil
+    data.globalState     = nil
+    data.sharingNPCs     = nil
+    data.sharedItems     = nil
+  end
+
+
+  function on_game_start()
+    RegisterScriptCallback("load_state", onLoadState)
+    RegisterScriptCallback("save_state", onSaveState)
+    RegisterScriptCallback("npc_on_net_spawn", onNpcSpawn)
+    RegisterScriptCallback("actor_on_first_update", onFirstUpdate)
+    RegisterScriptCallback("server_entity_on_unregister", onEntityUnregister)
+    RegisterScriptCallback("mcm_option_change", reconfigureStates)
+    RegisterScriptCallback("npc_on_choose_weapon", onChooseWeapon)
+    RegisterScriptCallback("npc_on_item_take", onTakeItem)
+  end
+--

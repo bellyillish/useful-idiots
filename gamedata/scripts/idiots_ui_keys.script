@@ -1,0 +1,389 @@
+local UI  = idiots_ui
+local WPN = require "illish.weapon"
+local NPC = require "illish.npc"
+local BEH = require "illish.beh"
+
+
+local flash = particles_object("_samples_particles_\\flash_light")
+
+
+function playParticle(pos)
+  if flash:playing() then
+    RemoveTimeEvent("idiots", "move_to_point")
+    flash:stop()
+  end
+
+  CreateTimeEvent("idiots", "move_to_point", 1, function()
+    RemoveTimeEvent("idiots", "move_to_point")
+    flash:stop()
+  end)
+
+  flash:play_at_pos(vec(pos):add(0, -0.5, 0))
+end
+
+
+function playVoiceover(group, action, GUI)
+  if not GUI.PlayVoiceOver then
+    return
+  end
+
+  local enabled = NPC.getState(GUI.ID, group, action)
+
+  if group == "movement" and action == "follow" and not enabled then
+    GUI:PlayVoiceOver("movement", 0)
+  end
+
+  if group == "movement" and action == "wait" and not enabled then
+    GUI:PlayVoiceOver("movement", 2)
+  end
+
+  if group == "readiness" and action == "ignore" and not enabled then
+    GUI:PlayVoiceOver("combat", 1)
+  end
+
+  if group == "readiness" and action == "attack" and not enabled then
+    GUI:PlayVoiceOver("combat", 0)
+  end
+
+  if group == "jobs" and action == "loot_corpses" then
+    GUI:PlayVoiceOver("loot", enabled and 1 or 0)
+  end
+
+  if group == "distance" and action == "far" then
+    GUI:PlayVoiceOver("distance", enabled and 0 or 1)
+  end
+
+  if group == "stance" and action == "stand" and not enabled then
+    GUI:PlayVoiceOver("stealth", 1)
+  end
+
+  if group == "stance" and action == "sneak" and not enabled then
+    GUI:PlayVoiceOver("stealth", 0)
+  end
+end
+
+
+function showMessage(key, ...)
+  local message = game.translate_string(key)
+  actor_menu.set_msg(1, string.format(message, ...), 5)
+end
+
+
+function showStateMessage(group, action, enabled, toggle)
+  local groupLabel = group
+    and game.translate_string("st_idiots_" .. group)
+
+  local actionLabel = group
+    and game.translate_string("st_idiots_" .. group .. "_" .. action)
+    or  game.translate_string("st_idiots_" .. action)
+
+  local statusLabel = enabled
+    and game.translate_string("st_idiots_enabled_message")
+    or  game.translate_string("st_idiots_disabled_message")
+
+  if group and not toggle
+    then showMessage(groupLabel  .. ": " .. actionLabel)
+    else showMessage(actionLabel .. ": " .. statusLabel)
+  end
+end
+
+
+function onKeybindEvent(event, dik)
+  local selected   = table.keys(NPC.SELECTED_IDS)
+  local companions = NPC.getCompanions()
+
+  if #companions == 0 then
+    return
+  end
+
+  if checkKeybind(event, dik, "point", "select") then
+    local target = NPC.getTargetCompanion()
+
+    if target then
+      local result = NPC.select(target)
+      local index  = NPC.indexOfCompanion(target)
+      local count  = #table.keys(NPC.SELECTED_IDS)
+
+      if result
+        then showMessage("st_idiots_select_message", index, count)
+      elseif count > 0
+        then showMessage("st_idiots_deselect_message", index, count)
+        else showMessage("st_idiots_deselect_all_message")
+      end
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "deselect") then
+    if NPC.deselectAll() then
+      showMessage("st_idiots_deselect_all_message")
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "move") then
+    local autoSwitch = ui_mcm.get("idiots/options/autoSwitch")
+    local npcs = #selected > 0 and selected or companions
+    local pos  = level.get_target_pos()
+
+    for i, npc in ipairs(npcs) do
+      if type(npc) == "number" then
+        npc = NPC.getCompanion(npc)
+      end
+      if npc then
+        NPC.moveToPoint(npc, pos)
+        if autoSwitch and #selected > 0 then
+          NPC.setState(npc, "movement", "wait", true)
+          NPC.setState(npc, "combat", "guard", true)
+        end
+      end
+    end
+
+    if autoSwitch and #selected == 0 then
+      NPC.setState(nil, "movement", "wait", true)
+      NPC.setState(nil, "combat", "guard", true)
+    end
+
+    if #selected > 0
+      then showMessage("st_idiots_move_point_message", #selected)
+      else showMessage("st_idiots_move_all_point_message")
+    end
+
+    if ui_mcm.get("idiots/options/autoDeselect") then
+      NPC.SELECTED_IDS = {}
+    end
+
+    playParticle(pos)
+  end
+
+  if checkKeybind(event, dik, "point", "look") then
+    local pos  = level.get_target_pos()
+    local npcs = #selected > 0 and selected or companions
+
+    for i, npc in ipairs(npcs) do
+      if type(npc) == "number" then
+        npc = NPC.getCompanion(npc)
+      end
+      if npc then
+        NPC.lookAtPoint(npc, pos)
+      end
+    end
+
+    if ui_mcm.get("idiots/options/autoDeselect") then
+      NPC.SELECTED_IDS = {}
+    end
+
+    playParticle(pos)
+  end
+
+  if checkKeybind(event, dik, "point", "away") then
+    local npcs = NPC.getBlockingCompanions()
+
+    if #npcs > 0 then
+      for i, npc in ipairs(npcs) do
+        NPC.moveOutOfTheWay(npc)
+      end
+      showMessage("st_idiots_move_away_message", #npcs)
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "addWaypoint") then
+    if #selected == 1 then
+      local pos = level.get_target_pos()
+      local npc = selected[1]
+
+      if NPC.isCompanion(npc) then
+        BEH.addWaypoint(npc, pos)
+      end
+
+      showMessage("st_idiots_add_waypoint_message")
+      playParticle(pos)
+    else
+      showMessage("st_idiots_waypoint_error")
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "clearWaypoints") then
+    if #selected == 1 then
+      local npc = selected[1]
+      local waypoints = BEH.getAllWaypoints(npc)
+
+      if waypoints and #waypoints > 0 then
+        BEH.clearWaypoints(npc)
+        showMessage("st_idiots_clear_waypoints_message")
+      end
+    else
+      showMessage("st_idiots_waypoint_error")
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "inventory") then
+    local npc = NPC.getTargetCompanion(8)
+    if npc then
+      ui_companion_inv.start(npc)
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "reset") then
+    local npcs = #selected > 0 and selected or companions
+
+    for i, npc in ipairs(npcs) do
+      if NPC.isCompanion(npc) then
+        NPC.setStates(npc, NPC.GLOBAL_STATE)
+      end
+    end
+
+    if #selected > 0
+      then showMessage("st_idiots_resync_message", #selected)
+      else showMessage("st_idiots_resync_all_message")
+    end
+  end
+
+  if checkKeybind(event, dik, "point", "reload") then
+    local npcs = #selected > 0 and selected or companions
+
+    for i, npc in ipairs(npcs) do
+      if NPC.isCompanion(npc) then
+        NPC.setReloadModes(npc, WPN.RELOAD_ALL, WPN.NOT_FULL)
+      end
+    end
+  end
+
+  for ig, group in ipairs(NPC.ACTIONS) do
+    if group.cycle then
+      checkKeybind(event, dik, group.name, "cycle_" .. group.name)
+    end
+
+    for ia, action in ipairs(group.actions) do
+      checkKeybind(event, dik, group.name, action.name)
+    end
+  end
+end
+
+
+function checkKeybind(event, dik, group, action)
+  local uuid    = "idiots"
+  local kformat = "idiots/keybinds/%s/%s_%s"
+
+  local key  = ui_mcm.get(kformat:format(group, action, "key"))
+  local mod  = ui_mcm.get(kformat:format(group, action, "mod"))
+  local mode = ui_mcm.get(kformat:format(group, action, "mode"))
+
+  if not (key and key > 0 and key == dik and ui_mcm.get_mod_key(mod)) then
+    return false
+  end
+
+  local trigger = false
+
+  if event == "hold" and mode == 2 and ui_mcm.key_hold(uuid, key)
+    then trigger = true
+  elseif event == "press" and mode == 1 and ui_mcm.double_tap(uuid, key)
+    then trigger = true
+  elseif event == "press" and mode == 0
+    then trigger = true
+  end
+
+  if not trigger then
+    return false
+  end
+
+  local selected = table.keys(NPC.SELECTED_IDS)
+
+  if action == "cycle_" .. group then
+    local nextState
+
+    if #selected > 0 then
+      for i, npc in ipairs(selected) do
+        if i == 1 then
+          nextState = NPC.cycleActiveState(npc, group)
+        else
+          NPC.setState(npc, group, nextState, true)
+        end
+      end
+    else
+      nextState = NPC.cycleActiveState(nil, group)
+    end
+
+    if nextState then
+      showStateMessage(group, nextState, true)
+    end
+  end
+
+  if not NPC.isStateful(group, action) then
+    return true
+  end
+
+  if group == "jobs" then
+    local artifacts = ui_mcm.get("idiots/options/artifacts")
+
+    if action == "artifacts" and not artifacts then
+      return true
+    end
+  end
+
+  if action == "patrol" then
+    if #selected ~= 1 then
+      return true
+    end
+
+    local waypoints = BEH.getAllWaypoints(selected[1])
+
+    if not (waypoints and #waypoints >= 2) then
+      return true
+    end
+  end
+
+  local toggleableGroup = NPC.ACTIONS_KEYED[group].toggle
+
+  local toggleableAction = toggleableGroup
+    and ui_mcm.get(kformat:format(group, action, "toggle"))
+
+  local nextState
+
+  if #selected > 0 then
+    for i, npc in ipairs(selected) do
+      if i == 1 then
+        if toggleableAction then
+          nextState = NPC.toggleState(npc, group, action)
+        elseif not NPC.getState(npc, group, action) then
+          NPC.setState(npc, group, action, true)
+          nextState = true
+        end
+      else
+        NPC.setState(npc, group, action, nextState)
+      end
+    end
+
+  elseif toggleableAction then
+    nextState = NPC.toggleState(nil, group, action)
+
+  elseif not NPC.getState(nil, group, action) then
+    NPC.setState(nil, group, action, true)
+    nextState = true
+  end
+
+  if nextState ~= nil then
+    showStateMessage(group, action, nextState, toggleableGroup)
+  end
+
+  return true
+end
+
+
+function onKeyRelease(key)
+  if (dik_to_bind(key) == key_bindings.kCUSTOM18) then
+    UI.openCompanionManager()
+  end
+end
+
+
+function on_game_start()
+  RegisterScriptCallback("on_key_release", onKeyRelease)
+  RegisterScriptCallback("idiots_on_button", playVoiceover)
+
+  RegisterScriptCallback("on_key_press", function(dik)
+    onKeybindEvent("press", dik)
+  end)
+
+  RegisterScriptCallback("on_key_hold", function(dik)
+    onKeybindEvent("hold", dik)
+  end)
+end
