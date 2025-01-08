@@ -179,6 +179,13 @@
     <text>Добавить в интерфейс кнопку, позволяющую вручную заставить компаньонов перезарядить все
       оружие в их инвентаре.</text>
   </string>
+  <string id="ui_mcm_idiots_ui_showRetreat">
+    <text>Показывать кнопку "Отступление"</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_showRetreat_desc">
+    <text>Добавить в интерфейс кнопку, позволяющую вручную заставить компаньонов отступать (следовать, спешить,
+      игнорировать бой и держаться близко).</text>
+  </string>
   <string id="ui_mcm_idiots_ui_showUnstick">
     <text>Показывать кнопку "Телепорт"</text>
   </string>
@@ -254,6 +261,9 @@
   </string>
   <string id="ui_mcm_idiots_subtitle_point_reload">
     <text>Перезарядить оружие</text>
+  </string>
+  <string id="ui_mcm_idiots_subtitle_point_retreat">
+    <text>Отступление</text>
   </string>
   <string id="ui_mcm_idiots_keybinds_key">
     <text>Клавиша</text>
@@ -512,7 +522,7 @@
     <text>Грех</text>
   </string>
   <string id="ui_mcm_lst_idiots_isg">
-    <text>UNISG</text>
+    <text>ИИГ</text>
   </string>
   <string id="ui_mcm_lst_idiots_killer">
     <text>Наемники</text>
