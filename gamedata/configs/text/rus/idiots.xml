@@ -10,49 +10,49 @@
 
   <!-- Messages -->
   <string id="st_idiots_move_point_message">
-    <text>Перемещение %s компаньона(ов) в точку.</text>
+    <text>Перемещение %s компаньона(ов) на точку.</text>
   </string>
   <string id="st_idiots_move_all_point_message">
-    <text>Перемещение всех компаньонов в точку.</text>
+    <text>Перемещение всех компаньонов на точку.</text>
   </string>
   <string id="st_idiots_move_away_message">
-    <text>Убираем с пути %s компаньона(ов).</text>
+    <text>С пути убирается %s компаньона(ов).</text>
   </string>
   <string id="st_idiots_add_waypoint_message">
-    <text>Метка добавлена.</text>
+    <text>Точка добавлена.</text>
   </string>
   <string id="st_idiots_waypoint_error">
-    <text>Для добавления или удаления меток необходимо выбрать ровно 1 компаньона.</text>
+    <text>Для добавления или удаления точек необходимо выбрать ТОЛЬКО одного компаньона.</text>
   </string>
   <string id="st_idiots_clear_waypoints_message">
-    <text>Все метки удалены.</text>
+    <text>Все точки удалены.</text>
   </string>
   <string id="st_idiots_resync_message">
-    <text>С общим значением синхронизирован(но) %s компаньон(ов).</text>
+    <text>С общими настройками состояния синхронизирован(но) %s компаньон(ов).</text>
   </string>
   <string id="st_idiots_resync_all_message">
-    <text>С общим значением синхронизированны все компаньоны.</text>
+    <text>С общими настройками состояния синхронизированны все компаньоны.</text>
   </string>
   <string id="st_idiots_select_message">
-    <text>Выбран компаньон #%s. %s компаньон(ы) выбран(о).</text>
+    <text>Выбран компаньон #%s. Выбран(о) %s компаньон(ов).</text>
   </string>
   <string id="st_idiots_deselect_message">
     <text>Отменен выбор компаньона #%s. Выбран(о) %s компаньон(ов).</text>
   </string>
   <string id="st_idiots_deselect_all_message">
-    <text>Выбор компаньонов отменен.</text>
+    <text>Снят выбор со всех компаньонов.</text>
   </string>
   <string id="st_idiots_retreat_message">
-    <text>Forcing %s companion(s) to retreat.</text>
+    <text>Приказ отступать отдан %s компаньон(ам/у).</text>
   </string>
   <string id="st_idiots_retreat_all_message">
-    <text>Forcing all companions to retreat.</text>
+    <text>Приказ отступать отдан всем компаньонам.</text>
   </string>
   <string id="st_idiots_enabled_message">
-    <text>На</text>
+    <text>Включено</text>
   </string>
   <string id="st_idiots_disabled_message">
-    <text>Выключенный</text>
+    <text>Выключено</text>
   </string>
 
   <!-- Titlebar Buttons -->
@@ -63,22 +63,22 @@
     <text>Синхронизировать повторно</text>
   </string>
   <string id="st_idiots_reload">
-    <text>перезарядить</text>
+    <text>Перезарядка</text>
   </string>
   <string id="st_idiots_unstick">
-    <text>Unstick</text>
+    <text>Телепорт</text>
   </string>
   <string id="st_idiots_inventory">
     <text>Инвентарь</text>
   </string>
   <string id="st_idiots_clear_waypoints">
-    <text>Убрать точки</text>
+    <text>Очистить все точки</text>
   </string>
   <string id="st_idiots_add_waypoint">
     <text>Добавить точку</text>
   </string>
   <string id="st_idiots_retreat">
-    <text>Quick Retreat</text>
+    <text>Быстрое отступление</text>
   </string>
 
   <!-- Movement -->
@@ -92,7 +92,7 @@
     <text>Ждать</text>
   </string>
   <string id="st_idiots_movement_cover">
-    <text>Использовать укрытие</text>
+    <text>Найти укрытие</text>
   </string>
   <string id="st_idiots_movement_relax">
     <text>Отдыхать</text>
@@ -103,13 +103,13 @@
 
   <!-- Light -->
   <string id="st_idiots_light_auto">
-    <text>Default Light</text>
+    <text>Стандартное поведение фонарика (авто)</text>
   </string>
   <string id="st_idiots_light_off">
-    <text>Light Off</text>
+    <text>Фонарик ВЫКЛ</text>
   </string>
   <string id="st_idiots_light_on">
-    <text>Light On</text>
+    <text>Фонарик ВКЛ</text>
   </string>
 
   <!-- Speeds -->
@@ -147,57 +147,57 @@
 
   <!-- Combat -->
   <string id="st_idiots_combat">
-    <text>Бой</text>
+    <text>Режим боя</text>
   </string>
   <string id="st_idiots_combat_default">
-    <text>Обычный бой</text>
+    <text>Обычный (Anomaly)</text>
   </string>
   <string id="st_idiots_combat_assault">
-    <text>Активный бой</text>
+    <text>Агрессивный</text>
   </string>
   <string id="st_idiots_combat_support">
-    <text>Support Combat</text>
+    <text>Поддержка</text>
   </string>
   <string id="st_idiots_combat_guard">
-    <text>Оборонительный бой</text>
+    <text>Оборонительный</text>
   </string>
   <string id="st_idiots_combat_snipe">
-    <text>снайпер бой</text>
+    <text>Снайпер</text>
   </string>
   <string id="st_idiots_combat_monolith">
-    <text>Режим "Монолит"</text>
+    <text>"Монолит"</text>
   </string>
   <string id="st_idiots_combat_camper">
-    <text>Режим "Снайпер"</text>
+    <text>"Меткий стрелок"</text>
   </string>
   <string id="st_idiots_combat_zombied">
-    <text>Режим "Зомби"</text>
+    <text>"Зомби"</text>
   </string>
 
   <!-- Weapon -->
   <string id="st_idiots_weapon">
-    <text>Weapon</text>
+    <text>Оружие</text>
   </string>
   <string id="st_idiots_weapon_best">
-    <text>Best</text>
+    <text>Лучшее</text>
   </string>
   <string id="st_idiots_weapon_pistol">
-    <text>Pistol</text>
+    <text>Пистолет</text>
   </string>
   <string id="st_idiots_weapon_shotgun">
-    <text>Shotgun</text>
+    <text>Дробовик</text>
   </string>
   <string id="st_idiots_weapon_smg">
-    <text>SMG</text>
+    <text>Пистолет-пулемет</text>
   </string>
   <string id="st_idiots_weapon_rifle">
-    <text>Rifle</text>
+    <text>Штурмовая винтовка</text>
   </string>
   <string id="st_idiots_weapon_sniper">
-    <text>Sniper</text>
+    <text>Снайперская винтовка</text>
   </string>
   <string id="st_idiots_weapon_rpg">
-    <text>RPG</text>
+    <text>РПГ</text>
   </string>
 
   <!-- Readiness -->
@@ -222,7 +222,7 @@
     <text>Собирать предметы</text>
   </string>
   <string id="st_idiots_jobs_loot_artifacts">
-    <text>И артефакты</text>
+    <text>Собирать артефакты</text>
   </string>
   <string id="st_idiots_jobs_loot_corpses">
     <text>Обыскивать трупы</text>
@@ -245,6 +245,6 @@
     <text>Колонна</text>
   </string>
   <string id="st_idiots_formation_covered">
-    <text>Закрытая</text>
+    <text>В укрытии</text>
   </string>
 </string_table>
