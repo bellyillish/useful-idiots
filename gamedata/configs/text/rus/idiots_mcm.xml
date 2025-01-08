@@ -187,10 +187,10 @@
       игнорировать бой и держаться близко).</text>
   </string>
   <string id="ui_mcm_idiots_ui_showUnstick">
-    <text>Показывать кнопку "Телепорт"</text>
+    <text>Показывать кнопку "Освободить"</text>
   </string>
   <string id="ui_mcm_idiots_ui_showUnstick_desc">
-    <text>Добавить в интерфейс кнопку для телепорта компаньонов.</text>
+    <text>Добавить в интерфейс кнопку, которая поможет освободить компаньонов если они застряли.</text>
   </string>
   <string id="ui_mcm_idiots_ui_showTooltips">
     <text>Показывать всплывающие подсказки для кнопок</text>
