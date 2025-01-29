@@ -64,13 +64,11 @@ local NPC = {}
       name = "weapon",
       cycle = true,
       actions = {
-        {name = "best",      next = "pistol",    default = true},
-        {name = "pistol",    next = "shotgun",   info = "npcx_beh_weapon_pistol"},
-        {name = "shotgun",   next = "smg",       info = "npcx_beh_weapon_shotgun"},
-        -- {name = "smg",       next = "rifle",     info = "npcx_beh_weapon_smg"},
-        {name = "rifle",     next = "sniper",    info = "npcx_beh_weapon_rifle"},
-        {name = "sniper",    next = "rpg",       info = "npcx_beh_weapon_sniper"},
-        -- {name = "rpg",       next = "best",      info = "npcx_beh_weapon_rpg"},
+        {name = "best",    next = "pistol",  default = true},
+        {name = "pistol",  next = "shotgun", info = "npcx_beh_weapon_pistol"},
+        {name = "shotgun", next = "rifle",   info = "npcx_beh_weapon_shotgun"},
+        {name = "rifle",   next = "sniper",  info = "npcx_beh_weapon_rifle"},
+        {name = "sniper",  next = "best",    info = "npcx_beh_weapon_sniper"},
       }
     },
     {

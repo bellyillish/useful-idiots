@@ -76,19 +76,21 @@ function CompanionManager:InitDialog()
 
   self.dialog = self.xml:InitStatic("dialog", self)
 
+  local r = self.xml:ReadAttribute("dialog", 0, "r") or 0
+  local g = self.xml:ReadAttribute("dialog", 0, "g") or 0
+  local b = self.xml:ReadAttribute("dialog", 0, "b") or 0
+  local a = self.xml:ReadAttribute("dialog", 0, "a") or 255
+
+  self.dialog:SetTextureColor(GetARGB(a, r, g, b))
+
   if not self.xml:NodeExist("dialog:fade") then
     return
   end
 
-  self.fade = self.xml:InitStatic("dialog:fade", self.dialog)
-
-  local r = self.xml:ReadAttribute("dialog", 0, "r") or 0
-  local g = self.xml:ReadAttribute("dialog", 0, "g") or 0
-  local b = self.xml:ReadAttribute("dialog", 0, "b") or 0
-  local a = self.xml:ReadAttribute("dialog:fade", 0, "a") or 255
-
-  local w = self.fade:GetWidth() or self.dialog:GetWidth() / 2
-  local h = self.dialog:GetHeight()
+  self.fade   = self.xml:InitStatic("dialog:fade", self.dialog)
+  local aFade = self.xml:ReadAttribute("dialog:fade", 0, "a") or 255
+  local w     = self.fade:GetWidth() or self.dialog:GetWidth() / 2
+  local h     = self.dialog:GetHeight()
 
   self.fade:SetWndPos(vector2():set(0, 0))
   self.fade:SetWndSize(vector2():set(w, h))
@@ -672,11 +674,15 @@ function CompanionManager:OnClickButton(group, action)
   end
 
   if action == "reload" then
+    local wmode = ui_mcm.get("idiots/options/manualReloadAll")
+      and WPN.RELOAD_ALL
+      or  WPN.RELOAD_ACTIVE
+
     if self.ID then
-      NPC.setReloadModes(NPC.get(self.ID), WPN.RELOAD_ALL, WPN.NOT_FULL)
+      NPC.setReloadModes(NPC.get(self.ID), wmode, WPN.NOT_FULL)
     else
       for _, npc in ipairs(NPC.getCompanions()) do
-        NPC.setReloadModes(npc, WPN.RELOAD_ALL, WPN.NOT_FULL)
+        NPC.setReloadModes(npc, wmode, WPN.NOT_FULL)
       end
     end
   end

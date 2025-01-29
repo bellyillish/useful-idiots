@@ -78,7 +78,7 @@ LOOT_SHARING_NPCS = {}
   function axr_beh.action_beh:initialize()
     __initialize(self)
 
-    local wmode = ui_mcm.get("idiots/options/autoReload")
+    local wmode = ui_mcm.get("idiots/options/autoReloadAll")
       and WPN.RELOAD_ALL
       or  WPN.RELOAD_ACTIVE
 
@@ -223,7 +223,7 @@ LOOT_SHARING_NPCS = {}
 
   -- allow companions to be in "zombied" combat
   function xr_combat_zombied.evaluator_combat_zombied:evaluate()
-    local enabled = ui_mcm.get("idiots/options/oldCombat")
+    local enabled = ui_mcm.get("idiots/options/zombiedCombat")
     local npc = self.object
 
     if enabled and NPC.isCompanion(npc) and NPC.getState(npc, "combat", "zombied") then
@@ -238,55 +238,65 @@ LOOT_SHARING_NPCS = {}
 -- XR_COMBAT_IGNORE --
   local __is_enemy = xr_combat_ignore.is_enemy
 
-  -- fix bug where companions and enemies to ignore each other when sneaking,
-  -- within 30m, and not fighting with the player
+  -- 1. fix bug with companions vs. enemies when either is sneaking
+  -- 2. fix bug with xr_conditions.surge_started() check
   function xr_combat_ignore.is_enemy(npc, enemy, no_memory)
-    if not (NPC.isCompanion(npc) or NPC.isCompanion(enemy)) then
-      return __is_enemy(npc, enemy, no_memory)
-    end
+    local eitherIsCompanion = npc:has_info("npcx_is_companion") or enemy:has_info("npcx_is_companion")
+    local eitherIsSneaking  = npc:has_info("npcx_beh_substate_stealth") or enemy:has_info("npcx_beh_substate_stealth")
+    local surgeStarted      = xr_conditions.surge_started()
 
-    -- temporary patches
-    local __send      = _G.SendScriptCallback
-    local __fighting  = xr_combat_ignore.fighting_with_actor_npcs
-    local __overrides = xr_combat_ignore.ignore_enemy_by_overrides
+    local shouldFixStealthBug = eitherIsCompanion and eitherIsSneaking
+    local shouldFixSurgeBug   = surgeStarted and not eitherIsCompanion
 
-    -- proxy for fighting_with_actor_npcs
-    local meta = {}
+    local __SendScriptCallback = _G.SendScriptCallback
+    local __fighting_with_actor_npcs = xr_combat_ignore.fighting_with_actor_npcs
+    local __surge_started = xr_conditions.surge_started
+    local __get_npc_smart = xr_gulag.get_npc_smart
 
-    function meta:__index(id)
-      if not self.called and (id == npc:id() or id == enemy:id()) then
-        self.called = true
-        return true
+    local fightingMetatable = {
+      __index = function(self, id)
+        if id == npc:id() then
+          return true
+        end
+        if id == enemy:id() then
+          xr_combat_ignore.fighting_with_actor_npcs = __fighting_with_actor_npcs
+          return true
+        end
+        return __fighting_with_actor_npcs[id]
+      end,
+      __newindex = function(self, id, value)
+        __fighting_with_actor_npcs[id] = value
       end
-      return __fighting[id]
-    end
+    }
 
-    function meta:__newindex(id, value)
-      __fighting[id] = value
-    end
-
-    -- add proxy after "on_enemy_eval" is done
     function _G.SendScriptCallback(name, ...)
-      __send(name, ...)
-      if name == "on_enemy_eval" then
-        _G.SendScriptCallback = __send
-        xr_combat_ignore.fighting_with_actor_npcs = setmetatable({called = false}, meta)
-      end
-    end
+      __SendScriptCallback(name, ...)
 
-    -- cleanup before ignore_enemy_by_overrides() is called
-    function xr_combat_ignore.ignore_enemy_by_overrides(...)
-      xr_combat_ignore.fighting_with_actor_npcs  = __fighting
-      xr_combat_ignore.ignore_enemy_by_overrides = __overrides
-      return __overrides(...)
+      if name == "on_enemy_eval" then
+        _G.SendScriptCallback = __SendScriptCallback
+
+        if shouldFixStealthBug then
+          xr_combat_ignore.fighting_with_actor_npcs = setmetatable({}, fightingMetatable)
+        end
+
+        if shouldFixSurgeBug then
+          xr_conditions.surge_started = surgeStarted
+
+          function xr_gulag.get_npc_smart(obj)
+            xr_conditions.surge_started = __surge_started
+            xr_gulag.get_npc_smart = __get_npc_smart
+            return __get_npc_smart(obj)
+          end
+        end
+      end
     end
 
     local isEnemy = __is_enemy(npc, enemy, no_memory)
 
-    -- cleanup again in case is_enemy() returns early
-    _G.SendScriptCallback = __send
-    xr_combat_ignore.fighting_with_actor_npcs  = __fighting
-    xr_combat_ignore.ignore_enemy_by_overrides = __overrides
+    _G.SendScriptCallback                     = __SendScriptCallback
+    xr_combat_ignore.fighting_with_actor_npcs = __fighting_with_actor_npcs
+    xr_conditions.surge_started               = __surge_started
+    xr_gulag.get_npc_smart                    = __get_npc_smart
 
     return isEnemy
   end
@@ -654,6 +664,30 @@ LOOT_SHARING_NPCS = {}
 
 
 -- CALLBACKS --
+  -- prevent npcs from entering invalid "cover" combat type
+  if schemes_ai_gamma and schemes_ai_gamma.scheme_cover then
+    function schemes_ai_gamma.scheme_cover()
+      return false
+    end
+  end
+
+  -- "He is with me" replacement
+  function onEvalEnemy(npc, enemy, flags)
+    if npc:has_info("npcx_is_companion") and enemy:has_info("npcx_is_companion") then
+      flags.override, flags.result = true, false
+
+    elseif npc:has_info("npcx_is_companion") and enemy:relation(db.actor) < game_object.enemy then
+      flags.override, flags.result = true, false
+
+    elseif enemy:has_info("npcx_is_companion") and npc:relation(db.actor) < game_object.enemy then
+      flags.override, flags.result = true, false
+    end
+  end
+
+  if he_is_with_me and he_is_with_me.escorteval then
+    he_is_with_me.escorteval = onEvalEnemy
+  end
+
   -- switch weapons
   function onChooseWeapon(npc, wpn, flags)
     if not NPC.isCompanion(npc) then
@@ -691,6 +725,13 @@ LOOT_SHARING_NPCS = {}
       local t1 = WPN.getType(w1)
       local t2 = WPN.getType(w2)
 
+      if t1 == "smg" then
+        t1 = "rifle"
+      end
+      if t2 == "smg" then
+        t2 = "rifle"
+      end
+
       if t1 ~= t2 and t1 == selected then
         return true
       elseif t1 ~= t2 and t2 == selected then
@@ -724,6 +765,11 @@ LOOT_SHARING_NPCS = {}
     end
   end
 
+  -- clear shared item once actor takes it
+  function onActorTakeItem(item)
+    LOOT_SHARED_ITEMS[item:id()] = nil
+  end
+
   -- cleanup gathered/looted item
   function onEntityUnregister(entity)
     LOOT_SHARED_ITEMS[entity.id] = nil
@@ -731,18 +777,30 @@ LOOT_SHARING_NPCS = {}
 
   -- reconfigure on MCM changes
   function reconfigureStates()
-    -- old combat disabled
-    if not ui_mcm.get("idiots/options/oldCombat") then
-      local gstate = NPC.getActiveState(nil, "combat")
-      if gstate == "monolith" or gstate == "camper" or gstate == "zombied" then
-        NPC.setState(nil, "combat", "default", true)
-      end
+    -- legacy combat disabled
+    local camperCombat   = ui_mcm.get("idiots/options/camperCombat")
+    local monolithCombat = ui_mcm.get("idiots/options/monolithCombat")
+    local zombiedCombat  = ui_mcm.get("idiots/options/zombiedCombat")
 
-      for i, npc in ipairs(NPC.getCompanions()) do
-        local state = NPC.getActiveState(npc, "combat")
-        if state == "monolith" or state == "camper" or state == "zombied" then
-          NPC.setState(npc, "combat", "default", true)
-        end
+    local gstate = NPC.getActiveState(nil, "combat")
+
+    if false
+      or not camperCombat   and gstate == "camper"
+      or not monolithCombat and gstate == "monolith"
+      or not zombiedCombat  and gstate == "zombied"
+    then
+      NPC.setState(nil, "combat", "default", true)
+    end
+
+    for i, npc in ipairs(NPC.getCompanions()) do
+      local state = NPC.getActiveState(npc, "combat")
+
+      if false
+        or not camperCombat   and state == "camper"
+        or not monolithCombat and state == "monolith"
+        or not zombiedCombat  and state == "zombied"
+      then
+        NPC.setState(npc, "combat", "default", true)
       end
     end
 
@@ -809,13 +867,19 @@ LOOT_SHARING_NPCS = {}
       NPC.GLOBAL_STATE = dup_table(NPC.DEFAULT_STATE)
     end
 
-    -- old combat disabled
-    if not ui_mcm.get("idiots/options/oldCombat") then
-      local gstate = NPC.getActiveState(nil, "combat")
+    -- legacy combat disabled
+    local camperCombat   = ui_mcm.get("idiots/options/camperCombat")
+    local monolithCombat = ui_mcm.get("idiots/options/monolithCombat")
+    local zombiedCombat  = ui_mcm.get("idiots/options/zombiedCombat")
 
-      if gstate == "monolith" or gstate == "camper" or gstate == "zombied" then
-        NPC.setState(nil, "combat", "default", true)
-      end
+    local gstate = NPC.getActiveState(nil, "combat")
+
+    if false
+      or not camperCombat   and gstate == "camper"
+      or not monolithCombat and gstate == "monolith"
+      or not zombiedCombat  and gstate == "zombied"
+    then
+      NPC.setState(nil, "combat", "default", true)
     end
 
     -- artifact gathering disabled
@@ -857,13 +921,19 @@ LOOT_SHARING_NPCS = {}
       NPC.setStates(npc, NPC.GLOBAL_STATE)
     end
 
-    -- old combat disabled
-    if not ui_mcm.get("idiots/options/oldCombat") then
-      local state = NPC.getActiveState(npc, "combat")
+    -- legacy combat disabled
+    local camperCombat   = ui_mcm.get("idiots/options/camperCombat")
+    local monolithCombat = ui_mcm.get("idiots/options/monolithCombat")
+    local zombiedCombat  = ui_mcm.get("idiots/options/zombiedCombat")
 
-      if state == "monolith" or state == "camper" or state == "zombied" then
-        NPC.setState(npc, "combat", "default", true)
-      end
+    local state = NPC.getActiveState(npc, "combat")
+
+    if false
+      or not camperCombat   and state == "camper"
+      or not monolithCombat and state == "monolith"
+      or not zombiedCombat  and state == "zombied"
+    then
+      NPC.setState(npc, "combat", "default", true)
     end
 
     -- artifact gathering disabled
@@ -892,5 +962,10 @@ LOOT_SHARING_NPCS = {}
     RegisterScriptCallback("mcm_option_change", reconfigureStates)
     RegisterScriptCallback("npc_on_choose_weapon", onChooseWeapon)
     RegisterScriptCallback("npc_on_item_take", onTakeItem)
+    RegisterScriptCallback("actor_on_item_take", onActorTakeItem)
+
+    if not (he_is_with_me and he_is_with_me.escorteval) then
+      RegisterScriptCallback("on_enemy_eval", onEvalEnemy)
+    end
   end
 --

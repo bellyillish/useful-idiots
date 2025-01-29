@@ -86,6 +86,20 @@ function MCM.getOffsetYField(overrides)
 end
 
 
+function MCM.getAlphaField(overrides)
+  return TABLE.merge({
+    id   = "alpha",
+    type = "track",
+    val  = 2,
+    def  = 255,
+    min  = 0,
+    max  = 255,
+    step = 1,
+    prec = 0,
+  }, overrides or {})
+end
+
+
 function MCM.getCheckboxField(overrides)
   return TABLE.merge({
     id   = "checkbox",

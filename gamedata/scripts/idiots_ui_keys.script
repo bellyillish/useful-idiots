@@ -120,7 +120,9 @@ function onKeybindEvent(event, dik)
   end
 
   if checkKeybind(event, dik, "point", "move") then
-    local autoSwitch = ui_mcm.get("idiots/options/autoSwitch")
+    local autoWait  = ui_mcm.get("idiots/options/autoWait")
+    local autoGuard = ui_mcm.get("idiots/options/autoGuard")
+
     local npcs = #selected > 0 and selected or companions
     local pos  = level.get_target_pos()
 
@@ -128,17 +130,22 @@ function onKeybindEvent(event, dik)
       if type(npc) == "number" then
         npc = NPC.getCompanion(npc)
       end
+
       if npc then
         NPC.moveToPoint(npc, pos)
-        if autoSwitch and #selected > 0 then
+        if autoWait and #selected > 0 then
           NPC.setState(npc, "movement", "wait", true)
+        end
+        if autoGuard and #selected > 0 then
           NPC.setState(npc, "combat", "guard", true)
         end
       end
     end
 
-    if autoSwitch and #selected == 0 then
+    if autoWait and #selected == 0 then
       NPC.setState(nil, "movement", "wait", true)
+    end
+    if autoGuard and #selected == 0 then
       NPC.setState(nil, "combat", "guard", true)
     end
 
@@ -240,9 +247,13 @@ function onKeybindEvent(event, dik)
   if checkKeybind(event, dik, "point", "reload") then
     local npcs = #selected > 0 and selected or companions
 
+    local wmode = ui_mcm.get("idiots/options/manualReloadAll")
+      and WPN.RELOAD_ALL
+      or  WPN.RELOAD_ACTIVE
+
     for i, npc in ipairs(npcs) do
       if NPC.isCompanion(npc) then
-        NPC.setReloadModes(npc, WPN.RELOAD_ALL, WPN.NOT_FULL)
+        NPC.setReloadModes(npc, wmode, WPN.NOT_FULL)
       end
     end
   end

@@ -74,39 +74,63 @@
     <text>Disable to prevent companions from automatically sprinting when you sprint.</text>
   </string>
   <string id="ui_mcm_idiots_options_autoLight">
-    <text>Enable Auto Light Switching</text>
+    <text>Enable Auto Headlamps</text>
   </string>
   <string id="ui_mcm_idiots_options_autoLight_desc">
     <text>Disable to prevent companions from from turning their headlamps on or off when you do.</text>
   </string>
+  <string id="ui_mcm_idiots_options_autoWait">
+    <text>Switch to "Wait" after "Move to Point"</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoWait_desc">
+    <text>When using the "Move to Point" command, automatically switch companions to "Wait" so that they stay until instructed otherwise. When disabled, companions still respect the "Move to Point" command but will resume whatever behavior they are assigned to upon reaching it.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoGuard">
+    <text>Switch to "Guard" Combat after "Move to Point"</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoGuard_desc">
+    <text>When using the "Move to Point" command, automatically switch companions to "Guard" Combat so that they stay until instructed otherwise. When disabled, companions still respect the "Move to Point" command but will resume whatever combat style they are assigned to upon reaching it.</text>
+  </string>
   <string id="ui_mcm_idiots_options_autoDeselect">
-    <text>Deselect Companions after Move to Point/Look at Point</text>
+    <text>Deselect Companions after "Move to Point" or "Look at Point"</text>
   </string>
   <string id="ui_mcm_idiots_options_autoDeselect_desc">
     <text>Automatically clear all selected companions after using the "Move to Point" or "Look at Point" commands.</text>
   </string>
-  <string id="ui_mcm_idiots_options_autoReload">
-    <text>Make Companions Reload All Weapons When Idle</text>
+  <string id="ui_mcm_idiots_options_autoReloadAll">
+    <text>Reload All Weapons when Idle</text>
   </string>
-  <string id="ui_mcm_idiots_options_autoReload_desc">
-    <text>Forces companions to reload all weapons in their inventory after loading a save, joining the player, or post combat. If disabled they will only reload their active weapon.</text>
+  <string id="ui_mcm_idiots_options_autoReloadAll_desc">
+    <text>When enabled, companions will reload all weapons in their inventory after loading a save, joining the player, or post combat. When disabled they will only reload their active weapon.</text>
   </string>
-  <string id="ui_mcm_idiots_options_autoSwitch">
-    <text>Switch to Wait and Guard Combat after Move to Point</text>
+  <string id="ui_mcm_idiots_options_manualReloadAll">
+    <text>Reload All Weapons when Using Button or Keybind</text>
   </string>
-  <string id="ui_mcm_idiots_options_autoSwitch_desc">
-    <text>When using the "Move to Point" command, automatically switch companions to both "Wait" and "Guard Combat" so that they stay until instructed otherwise. When disabled, companions still respect the "Move to Point" command but will resume whatever behavior or combat style they are assigned to upon reaching it.</text>
+  <string id="ui_mcm_idiots_options_manualReloadAll_desc">
+    <text>When enabled, companions will reload all weapons in their inventory when using the Reload button or keybind. When disabled they will only reload their active weapon.</text>
   </string>
 
   <!-- Combat Options -->
   <string id="ui_mcm_idiots_subtitle_options_combat">
     <text>Combat Options</text>
   </string>
-  <string id="ui_mcm_idiots_options_oldCombat">
-    <text>Enable Legacy Camper, Monolith and Zombied Combat Commands</text>
+  <string id="ui_mcm_idiots_options_camperCombat">
+    <text>Enable Legacy "Camper" Combat Command</text>
   </string>
-  <string id="ui_mcm_idiots_options_oldCombat_desc">
-    <text>Enables/disables commands to put companions into "Camper", "Monolith", and "Zombied" combat schemes. These schemes came with Anomaly but were disabled. Note that they can be buggy and are thus unsupported. You can assign keybinds to them but they can't be activated by the "Cycle Combat" keybind.</text>
+  <string id="ui_mcm_idiots_options_camperCombat_desc">
+    <text>Adds a command to put companions into the "Camper" combat scheme. This scheme comes with Anomaly but is disabled for companions. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_monolithCombat">
+    <text>Enable Legacy "Monolith" Combat Command</text>
+  </string>
+  <string id="ui_mcm_idiots_options_monolithCombat_desc">
+    <text>Adds a command to put companions into the "Monolith" combat scheme. This scheme comes with Anomaly but is disabled for companions. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_zombiedCombat">
+    <text>Enable "Zombied" Combat Command</text>
+  </string>
+  <string id="ui_mcm_idiots_options_zombiedCombat_desc">
+    <text>Adds a command to put companions into the "Zombied" combat scheme. This scheme comes with Anomaly but is not meant for companions or human NPCs. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
   </string>
 
   <!-- Jobs Options -->
@@ -114,7 +138,7 @@
     <text>Looting and Gathering Options</text>
   </string>
   <string id="ui_mcm_idiots_options_noNpcLooting">
-    <text>Only Companions Can Loot and Gather Items</text>
+    <text>Only Companions Can Loot or Gather Items</text>
   </string>
   <string id="ui_mcm_idiots_options_noNpcLooting_desc">
     <text>Enables/disables the ability for non-companion NPCs to loot and gather items. To preserve existing behavior, this would be ticked for GAMMA and unticked for Anomaly.</text>
@@ -177,14 +201,10 @@
   <string id="ui_mcm_idiots_ui_showTooltips_desc">
     <text>Show tooltips when hovering over icon-only buttons in the companion UI.</text>
   </string>
+
+  <!-- UI Customization -->
   <string id="ui_mcm_idiots_subtitle_ui_customization">
     <text>UI Customization</text>
-  </string>
-  <string id="ui_mcm_idiots_scheme">
-    <text>Color Scheme</text>
-  </string>
-  <string id="ui_mcm_idiots_scheme_desc">
-    <text>Sets the accent color for the companion UI.</text>
   </string>
   <string id="ui_mcm_idiots_ui_scaleX">
     <text>X Scale</text>
@@ -197,6 +217,15 @@
   </string>
   <string id="ui_mcm_idiots_ui_offsetY">
     <text>Y Offset From Bottom</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_alpha">
+    <text>Background Transparency</text>
+  </string>
+  <string id="ui_mcm_idiots_scheme">
+    <text>Color Scheme</text>
+  </string>
+  <string id="ui_mcm_idiots_scheme_desc">
+    <text>Sets the accent color for the companion UI.</text>
   </string>
   <string id="ui_mcm_idiots_ui_font">
     <text>Font Size</text>
@@ -364,17 +393,11 @@
   <string id="ui_mcm_idiots_subtitle_shotgun">
     <text>Shotgun</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_smg">
-    <text>SMG</text>
-  </string>
   <string id="ui_mcm_idiots_subtitle_rifle">
-    <text>Rifle</text>
+    <text>Rifle/SMG</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_sniper">
     <text>Sniper</text>
-  </string>
-  <string id="ui_mcm_idiots_subtitle_rpg">
-    <text>RPG</text>
   </string>
 
   <!-- Readiness Keys -->

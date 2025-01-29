@@ -187,17 +187,11 @@
   <string id="st_idiots_weapon_shotgun">
     <text>Дробовик</text>
   </string>
-  <string id="st_idiots_weapon_smg">
-    <text>Пистолет-пулемет</text>
-  </string>
   <string id="st_idiots_weapon_rifle">
-    <text>Штурмовая винтовка</text>
+    <text>Штурмовая винтовка/Пистолет-пулемет</text>
   </string>
   <string id="st_idiots_weapon_sniper">
     <text>Снайперская винтовка</text>
-  </string>
-  <string id="st_idiots_weapon_rpg">
-    <text>РПГ</text>
   </string>
 
   <!-- Readiness -->

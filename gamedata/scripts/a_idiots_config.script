@@ -25,7 +25,7 @@ _G.lvsnap         = POS.snap
 
 
 -- STORAGE --
-DATA_VER = "0.1-beta.10"
+DATA_VER = "1.0"
 DATA_KEY = "USEFUL_IDIOTS"
 
 DATA_STALE_KEYS = {

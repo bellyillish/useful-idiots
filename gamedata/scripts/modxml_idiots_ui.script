@@ -400,6 +400,7 @@ function PARSERS.pre.dialog(XML, el, config)
   XML:setElementAttr(el, {
     xoff = config.offsetX or XML:getElementAttr(el).xoff,
     yoff = config.offsetY or XML:getElementAttr(el).yoff,
+    a    = config.alpha   or XML:getElementAttr(el).a,
   })
 end
 
@@ -432,19 +433,24 @@ function PARSERS.pre.w(XML, el, config)
     end
   end
 
-  if not config.oldCombat then
-    local monolith = XML:queryOne("action[name=monolith]")
-    local zombied  = XML:queryOne("action[name=zombied]")
-    local camper   = XML:queryOne("action[name=camper]")
+  if not config.camperCombat then
+    local camper = XML:queryOne("action[name=camper]")
+    if camper then
+      XML:removeElement(camper)
+    end
+  end
 
+  if not config.monolithCombat then
+    local monolith = XML:queryOne("action[name=monolith]")
     if monolith then
       XML:removeElement(monolith)
     end
+  end
+
+  if not config.zombiedCombat then
+    local zombied  = XML:queryOne("action[name=zombied]")
     if zombied then
       XML:removeElement(zombied)
-    end
-    if camper then
-      XML:removeElement(camper)
     end
   end
 
@@ -617,16 +623,19 @@ function onReadHUDXML(name, XML)
   end
 
   local config = {
-    oldCombat = ui_mcm.get("idiots/options/oldCombat"),
-    artifacts = ui_mcm.get("idiots/options/artifacts"),
-    unstick   = ui_mcm.get("idiots/ui/showUnstick"),
-    reload    = ui_mcm.get("idiots/ui/showReload"),
-    retreat   = ui_mcm.get("idiots/ui/showRetreat"),
-    scaleX    = ui_mcm.get("idiots/ui/scaleX"),
-    scaleY    = ui_mcm.get("idiots/ui/scaleY"),
-    offsetX   = ui_mcm.get("idiots/ui/offsetX"),
-    offsetY   = ui_mcm.get("idiots/ui/offsetY"),
-    font      = ui_mcm.get("idiots/ui/font"),
+    camperCombat   = ui_mcm.get("idiots/options/camperCombat"),
+    monolithCombat = ui_mcm.get("idiots/options/monolithCombat"),
+    zombiedCombat  = ui_mcm.get("idiots/options/zombiedCombat"),
+    artifacts      = ui_mcm.get("idiots/options/artifacts"),
+    unstick        = ui_mcm.get("idiots/ui/showUnstick"),
+    reload         = ui_mcm.get("idiots/ui/showReload"),
+    retreat        = ui_mcm.get("idiots/ui/showRetreat"),
+    scaleX         = ui_mcm.get("idiots/ui/scaleX"),
+    scaleY         = ui_mcm.get("idiots/ui/scaleY"),
+    offsetX        = ui_mcm.get("idiots/ui/offsetX"),
+    offsetY        = ui_mcm.get("idiots/ui/offsetY"),
+    alpha          = ui_mcm.get("idiots/ui/alpha"),
+    font           = ui_mcm.get("idiots/ui/font"),
   }
 
   DXML.extendXMLObject(XML)

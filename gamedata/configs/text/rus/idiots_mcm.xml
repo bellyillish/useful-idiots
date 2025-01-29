@@ -79,46 +79,58 @@
   <string id="ui_mcm_idiots_options_autoLight_desc">
     <text>Выключите, чтобы компаньоны не включали/выключали фонарики одновременно с вами.</text>
   </string>
+  <string id="ui_mcm_idiots_options_autoWait">
+    <text>Переключиться на "Ждать" после команды "Переместиться на точку"</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoWait_desc">
+    <text>При использовании команды "Переместиться на точку" автоматически переключает компаньонов на "Ждать", чтобы они оставались на точке до тех пор, пока не будет получено иное указание. Если выключено - компаньоны по-прежнему будут соблюдать приказ "Переместиться на точку", но по ее достижении продолжат то поведение или стиль боя, на которые они обычно назначены.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoGuard">
+    <text>Переключиться на "Оборонительный бой" после команды "Переместиться на точку"</text>
+  </string>
+  <string id="ui_mcm_idiots_options_autoGuard_desc">
+    <text>При использовании команды "Переместиться на точку" автоматически переключает компаньонов на "Оборонительный бой", чтобы они оставались на точке до тех пор, пока не будет получено иное указание. Если выключено - компаньоны по-прежнему будут соблюдать приказ "Переместиться на точку", но по ее достижении продолжат то поведение или стиль боя, на которые они обычно назначены.</text>
+  </string>
   <string id="ui_mcm_idiots_options_autoDeselect">
     <text>Снять выбор с компаньонов после "Переместиться на точку"/"Смотреть на точку"</text>
   </string>
   <string id="ui_mcm_idiots_options_autoDeselect_desc">
-    <text>Автоматически снять выбор со всех компаньонов после использования команд
-      "Переместиться на точку" или "Смотреть на точку".</text>
+    <text>Автоматически снять выбор со всех компаньонов после использования команд "Переместиться на точку" или "Смотреть на точку".</text>
   </string>
   <string id="ui_mcm_idiots_options_autoReload">
     <text>Позволить компаньонам перезаряжать все оружие во время бездействия</text>
   </string>
   <string id="ui_mcm_idiots_options_autoReload_desc">
-    <text>Заставляет компаньонов перезаряжать ВСЕ оружие в их инвентаре после загрузки сохранения,
-      присоединения к отряду игрока, или после боя.
-      Если выключено - они будут перезаряжать только свое активное оружие.</text>
+    <text>Заставляет компаньонов перезаряжать ВСЕ оружие в их инвентаре после загрузки сохранения, присоединения к отряду игрока, или после боя. Если выключено - они будут перезаряжать только свое активное оружие.</text>
   </string>
-  <string id="ui_mcm_idiots_options_autoSwitch">
-    <text>Переключиться на "Ждать" и "Оборонительный бой" после команды "Переместиться на точку"</text>
+  <string id="ui_mcm_idiots_options_manualReloadAll">
+    <text>Make Companions Reload All Weapons in Inventory When Using the Reload Button or Keybind</text>
   </string>
-  <string id="ui_mcm_idiots_options_autoSwitch_desc">
-    <text>При использовании команды "Переместиться на точку" автоматически переключает компаньонов
-      на "Ждать" и "Оборонительный бой", чтобы они оставались на точке до тех пор, пока не будет
-      получено иное указание.
-      Если выключено - компаньоны по-прежнему будут соблюдать приказ
-      "Переместиться на точку", но по ее достижении продолжат то поведение или стиль боя,
-      на которые они обычно назначены.</text>
+  <string id="ui_mcm_idiots_options_manualReloadAll_desc">
+    <text>When enabled, companions will reload all weapons in their inventory when using the Reload button or keybind. When disabled they will only reload their active weapon.</text>
   </string>
 
   <!-- Combat Options -->
   <string id="ui_mcm_idiots_subtitle_options_combat">
     <text>Настройки боя</text>
   </string>
-  <string id="ui_mcm_idiots_options_oldCombat">
-    <text>Включить режимы боя "Меткий стрелок", "Монолит" и "Зомби"</text>
+  <string id="ui_mcm_idiots_options_camperCombat">
+    <text>Enable Legacy "Camper" Combat Command</text>
   </string>
-  <string id="ui_mcm_idiots_options_oldCombat_desc">
-    <text>Включает/выключает режимы боя "Меткий стрелок", "Монолит" и "Зомби". Они появились в
-      Anomaly, но были отключены.
-      Обратите внимание, что они могут быть багнутыми и НЕ поддерживаются.
-      Вы можете назначить им бинды клавиш, но они не могут быть активированы горячей клавишей
-      "Переключить режим боя".</text>
+  <string id="ui_mcm_idiots_options_camperCombat_desc">
+    <text>Adds a command to put companions into the "Camper" combat scheme. This scheme comes with Anomaly but is disabled for companions. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_monolithCombat">
+    <text>Enable Legacy "Monolith" Combat Command</text>
+  </string>
+  <string id="ui_mcm_idiots_options_monolithCombat_desc">
+    <text>Adds a command to put companions into the "Monolith" combat scheme. This scheme comes with Anomaly but is disabled for companions. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_zombiedCombat">
+    <text>Enable "Zombied" Combat Command</text>
+  </string>
+  <string id="ui_mcm_idiots_options_zombiedCombat_desc">
+    <text>Adds a command to put companions into the "Zombied" combat scheme. This scheme comes with Anomaly but is not meant for companions or human NPCs. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
   </string>
 
   <!-- Jobs Options -->
@@ -129,12 +141,10 @@
     <text>Только спутники могут собирать и обыскивать</text>
   </string>
   <string id="ui_mcm_idiots_options_noNpcLooting_desc">
-    <text>Включает\выключает возможность не-спутникам собирать и обыскивать. По-умолчанию выключено
-      для Anomaly и включено для GAMMA.</text>
+    <text>Включает\выключает возможность не-спутникам собирать и обыскивать. По-умолчанию выключено для Anomaly и включено для GAMMA.</text>
   </string>
   <string id="ui_mcm_idiots_options_jobs_note">
-    <text>ПРИМЕЧАНИЕ: Для работы этой задачи в GAMMA выключите мод "311 NPC Stop Looting Dead
-      Bodies".</text>
+    <text>ПРИМЕЧАНИЕ: Для работы этой задачи в GAMMA выключите мод "311 NPC Stop Looting Dead Bodies".</text>
   </string>
 
   <!-- Cheats -->
@@ -142,27 +152,19 @@
     <text>Читы (почти)</text>
   </string>
   <string id="ui_mcm_idiots_options_cheats_note">
-    <text>ПРИМЕЧАНИЕ: Эти опции могут сломать баланс игры!
-      Внимательно читайте описание прежде чем включать их.</text>
+    <text>ПРИМЕЧАНИЕ: Эти опции могут сломать баланс игры! Внимательно читайте описание прежде чем включать их.</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts">
     <text>Включить задачу для компаньонов "Собирать артефакты"</text>
   </string>
   <string id="ui_mcm_idiots_options_artifacts_desc">
-    <text>Включает\выключает возможность компаньонов собирать артефакты.
-      ПРИМЕЧАНИЕ: Это читерство если у вас не стоит мод, который включает компаньонам урон от
-      аномалий.</text>
+    <text>Включает\выключает возможность компаньонов собирать артефакты. ПРИМЕЧАНИЕ: Это читерство если у вас не стоит мод, который включает компаньонам урон от аномалий.</text>
   </string>
   <string id="ui_mcm_idiots_options_showAllItems">
     <text>Показать ВСЕ предметы в инвентаре компаньонов</text>
   </string>
   <string id="ui_mcm_idiots_options_showAllItems_desc">
-    <text>Показывать все в инвентаре компаньонов, а не только предметы, которые они добыли/собрали
-      для вас.
-      ПРИМЕЧАНИЕ: включение этой может быть читерским, поскольку позволяет вам
-      забирать у компаньонов их изначальное снаряжение. Используйте это только для очистки мусора
-      или в случае,
-      если проблема с модом не позволяет вам получить доступ к добытому/собранному предмету.</text>
+    <text>Показывать все в инвентаре компаньонов, а не только предметы, которые они добыли/собрали для вас. ПРИМЕЧАНИЕ: включение этой может быть читерским, поскольку позволяет вам забирать у компаньонов их изначальное снаряжение. Используйте это только для очистки мусора или в случае, если проблема с модом не позволяет вам получить доступ к добытому/собранному предмету.</text>
   </string>
 
   <!-- UI Options -->
@@ -179,15 +181,13 @@
     <text>Показывать кнопку "Перезарядка"</text>
   </string>
   <string id="ui_mcm_idiots_ui_showReload_desc">
-    <text>Добавить в интерфейс кнопку, позволяющую вручную заставить компаньонов перезарядить все
-      оружие в их инвентаре.</text>
+    <text>Добавить в интерфейс кнопку, позволяющую вручную заставить компаньонов перезарядить все оружие в их инвентаре.</text>
   </string>
   <string id="ui_mcm_idiots_ui_showRetreat">
     <text>Показывать кнопку "Отступление"</text>
   </string>
   <string id="ui_mcm_idiots_ui_showRetreat_desc">
-    <text>Добавить в интерфейс кнопку, позволяющую вручную заставить компаньонов отступать (следовать, спешить,
-      игнорировать бой и держаться близко).</text>
+    <text>Добавить в интерфейс кнопку, позволяющую вручную заставить компаньонов отступать (следовать, спешить, игнорировать бой и держаться близко).</text>
   </string>
   <string id="ui_mcm_idiots_ui_showUnstick">
     <text>Показывать кнопку "Освободить"</text>
@@ -199,17 +199,12 @@
     <text>Показывать всплывающие подсказки для кнопок</text>
   </string>
   <string id="ui_mcm_idiots_ui_showTooltips_desc">
-    <text>Показывать всплывающие подсказки при наведении курсора на кнопки интерфейса,
-      состоящие только из значков.</text>
+    <text>Показывать всплывающие подсказки при наведении курсора на кнопки интерфейса, состоящие только из значков.</text>
   </string>
+
+  <!-- UI Customization -->
   <string id="ui_mcm_idiots_subtitle_ui_customization">
     <text>Внешний вид интерфейса</text>
-  </string>
-  <string id="ui_mcm_idiots_scheme">
-    <text>Цветовая палитра</text>
-  </string>
-  <string id="ui_mcm_idiots_scheme_desc">
-    <text>Выбор дополнительного цвета интерфейса компаньонов.</text>
   </string>
   <string id="ui_mcm_idiots_ui_scaleX">
     <text>Масштаб по X</text>
@@ -222,6 +217,15 @@
   </string>
   <string id="ui_mcm_idiots_ui_offsetY">
     <text>Положение по Y относительно низа</text>
+  </string>
+  <string id="ui_mcm_idiots_ui_alpha">
+    <text>Background Transparency</text>
+  </string>
+  <string id="ui_mcm_idiots_scheme">
+    <text>Цветовая палитра</text>
+  </string>
+  <string id="ui_mcm_idiots_scheme_desc">
+    <text>Выбор дополнительного цвета интерфейса компаньонов.</text>
   </string>
   <string id="ui_mcm_idiots_ui_font">
     <text>Размер шрифта</text>
@@ -253,8 +257,7 @@
     <text>Открыть инвентарь</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_inventory_note">
-    <text>П.С: Модификатор SHIFT не работает для этой привязки клавиш в GAMMA (если только вы не
-      отключили GAMMA UI).</text>
+    <text>П.С: Модификатор SHIFT не работает для этой привязки клавиш в GAMMA (если только вы не отключили GAMMA UI).</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_point_reset">
     <text>Ре-синхронизировать состояние</text>
@@ -390,17 +393,11 @@
   <string id="ui_mcm_idiots_subtitle_shotgun">
     <text>Дробовик</text>
   </string>
-  <string id="ui_mcm_idiots_subtitle_smg">
-    <text>Пистолет-пулемет</text>
-  </string>
   <string id="ui_mcm_idiots_subtitle_rifle">
-    <text>Штурмовая винтовка</text>
+    <text>Штурмовая винтовка/Пистолет-пулемет</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_sniper">
     <text>Снайперская винтовка</text>
-  </string>
-  <string id="ui_mcm_idiots_subtitle_rpg">
-    <text>РПГ</text>
   </string>
 
   <!-- Readiness Keys -->
