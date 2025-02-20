@@ -330,19 +330,19 @@ LOOT_SHARING_NPCS = {}
     local ini = ini_file("ai_tweaks\\xr_combat_ignore.ltx")
 
     this.config = {
-      enemyRange      = ini:r_string_to_condlist("settings", "enemy_range"),
-      enemyRangeMin   = ini:r_string_to_condlist("settings", "enemy_range_min"),
-      enemyRangeSurge = ini:r_string_to_condlist("settings", "enemy_range_surge"),
-      maxElevation    = ini:r_string_to_condlist("settings", "max_elevation"),
-      memoryExpires   = ini:r_string_to_condlist("settings", "memory_expires"),
-      safezoneExpires = ini:r_float_ex("settings", "safezone_expires"),
-      nightMinHour    = ini:r_float_ex("night_settings", "min_hour"),
-      nightMaxHour    = ini:r_float_ex("night_settings", "max_hour"),
-      nightMultiplier = ini:r_string_to_condlist("night_settings", "multiplier"),
-      rainMinFactor   = ini:r_float_ex("rain_settings", "min_factor"),
-      rainMaxFactor   = ini:r_float_ex("rain_settings", "max_factor"),
-      rainMultiplier  = ini:r_string_to_condlist("rain_settings", "multiplier"),
-      surgeMultiplier = ini:r_string_to_condlist("surge_settings", "multiplier"),
+      enemyRange      = ini:r_string_to_condlist("settings", "enemy_range", "nil"),
+      enemyRangeMin   = ini:r_string_to_condlist("settings", "enemy_range_min", "nil"),
+      enemyRangeSurge = ini:r_string_to_condlist("settings", "enemy_range_surge", "nil"),
+      maxElevation    = ini:r_string_to_condlist("settings", "max_elevation", "nil"),
+      memoryExpires   = ini:r_string_to_condlist("settings", "memory_expires", "nil"),
+      nightMultiplier = ini:r_string_to_condlist("night_settings", "multiplier", "1"),
+      rainMultiplier  = ini:r_string_to_condlist("rain_settings", "multiplier", "1"),
+      surgeMultiplier = ini:r_string_to_condlist("surge_settings", "multiplier", "1"),
+      safezoneExpires = ini:r_float_ex("settings", "safezone_expires", 0),
+      nightMinHour    = ini:r_float_ex("night_settings", "min_hour", 18),
+      nightMaxHour    = ini:r_float_ex("night_settings", "max_hour", 21),
+      rainMinFactor   = ini:r_float_ex("rain_settings", "min_factor", 0),
+      rainMaxFactor   = ini:r_float_ex("rain_settings", "max_factor", 1),
     }
   end
 
@@ -352,7 +352,7 @@ LOOT_SHARING_NPCS = {}
     for k, v in pairs(cfg) do
       if type(v) == "table" then
         local value = xr_logic.pick_section_from_condlist(enemy, npc, v)
-        cfg[k] = value and tonumber(value)
+        cfg[k] = value and value ~= "nil" and tonumber(value) or nil
       end
     end
 
@@ -360,10 +360,9 @@ LOOT_SHARING_NPCS = {}
     cfg.rainMultiplier  = getRainMultiplier(cfg.rainMinFactor, cfg.rainMaxFactor, cfg.rainMultiplier)
     cfg.surgeMultiplier = getSurgeMultiplier(cfg.surgeMultiplier)
 
-    cfg.enemyRange = math.max(
-      cfg.enemyRangeMin,
-      cfg.enemyRange * cfg.nightMultiplier * cfg.rainMultiplier * cfg.surgeMultiplier
-    )
+    if cfg.enemyRange and cfg.enemyRangeMin then
+      cfg.enemyRange = math.max(cfg.enemyRangeMin, cfg.enemyRange * cfg.nightMultiplier * cfg.rainMultiplier * cfg.surgeMultiplier)
+    end
 
     return cfg
   end
@@ -397,8 +396,6 @@ LOOT_SHARING_NPCS = {}
       return flags.result
     end
 
-    --
-
     local pos1 = npc:position()
     local pos2 = enemy:position()
     local dist = pos2:distance_to(pos1)
@@ -412,7 +409,7 @@ LOOT_SHARING_NPCS = {}
     end
 
     -- ignore stale enemies
-    if not noMemory and time_global() > npc:memory_time(enemy) + cfg.memoryExpires then
+    if not noMemory and cfg.memoryExpires and time_global() > npc:memory_time(enemy) + cfg.memoryExpires then
       return false
     end
 
@@ -428,7 +425,7 @@ LOOT_SHARING_NPCS = {}
     end
 
     -- ignore enemies when npc has far surge job
-    if xr_conditions.surge_started() then
+    if xr_conditions.surge_started() and cfg.enemyRangeSurge then
       local smart = xr_gulag.get_npc_smart(npc)
       local task = smart
          and smart.npc_info
@@ -493,7 +490,7 @@ LOOT_SHARING_NPCS = {}
     end
 
     -- ignore based on distance
-    if dist > cfg.enemyRange then
+    if cfg.enemyRange and dist > cfg.enemyRange then
       return false
     end
 
@@ -548,15 +545,12 @@ LOOT_SHARING_NPCS = {}
       return false
     end
 
-
     if axr_task_manager.hostages_by_id[npc:id()] then
       return false
     end
 
-
     local dangerObject = danger:object()
     local dangerType   = danger:type()
-
 
     if dangerType == danger_object.grenade then
       if danger:dependent_object() and character_community(npc) ~= "zombied" then
@@ -566,11 +560,9 @@ LOOT_SHARING_NPCS = {}
       return false
     end
 
-
     if xr_combat_ignore.npc_in_safe_zone(npc) then
       return false
     end
-
 
     if dangerType == danger_object.entity_corpse then
       if not (dangerObject and IsStalker(dangerObject) and character_community(dangerObject) == character_community(npc)) then
@@ -600,32 +592,26 @@ LOOT_SHARING_NPCS = {}
       return xr_danger.danger_in_radius(npc, danger, dangerType)
     end
 
-
     if danger:dependent_object() then
       dangerObject = danger:dependent_object()
     end
 
-
     if not (dangerObject and (IsMonster(dangerObject) or IsStalker(dangerObject)) and npc:relation(dangerObject) >= game_object.enemy) then
       return false
     end
-
 
     -- bypass combat ignore radius for attacked, entity_attacked, ricochet
     if danger:perceive_type() == danger_object.hit then
       return xr_danger.danger_in_radius(npc, danger, dangerType)
     end
 
-
     if xr_corpse_detection.is_under_corpse_detection(npc) or xr_help_wounded.is_under_help_wounded(npc) or xrs_kill_wounded.is_under_kill_wounded(npc) then
       return false
     end
 
-
     if not dangerObject:alive() or not xr_combat_ignore.is_enemy(npc, dangerObject, true) then
       return false
     end
-
 
     return xr_danger.danger_in_radius(npc, danger, dangerType)
   end
@@ -908,14 +894,12 @@ LOOT_SHARING_NPCS = {}
     return IsMoveState("mcCrouch") and NPC.isFollower(npc)
   end
 
-
   function xr_conditions.follow_prone(actor, npc)
     if not ui_mcm.get("idiots/options/autoProne") then
       return false
     end
     return IsMoveState("mcCrouch") and IsMoveState("mcAccel") and NPC.isFollower(npc)
   end
-
 
   function xr_conditions.follow_sprint(actor, npc)
     if not ui_mcm.get("idiots/options/autoSprint") then
@@ -924,11 +908,9 @@ LOOT_SHARING_NPCS = {}
     return IsMoveState("mcSprint") and NPC.isFollower(npc)
   end
 
-
-  function xr_conditions.is_enemy_monster(enemy, npc)
+  function xr_conditions.enemy_monster(enemy, npc)
     return IsMonster(enemy) or character_community(enemy) == "zombied"
   end
-
 
   function xr_conditions.story_related(enemy, npc)
     if enemy:id() == 0 then
@@ -949,9 +931,12 @@ LOOT_SHARING_NPCS = {}
     return false
   end
 
-
   function xr_conditions.cordon_army_vs_stalker(enemy, npc)
-    if enemy:id() == 0 then
+    if alife():has_info(npc:id(), "npcx_is_companion") then
+      return false
+    end
+
+    if enemy:id() == 0 or alife():has_info(enemy:id(), "npcx_is_companion") then
       return false
     end
 
@@ -964,6 +949,12 @@ LOOT_SHARING_NPCS = {}
 
     return ncomm == "army"    and ecomm == "stalker"
         or ncomm == "stalker" and ecomm == "army"
+  end
+
+  function xr_conditions.npc_companion(enemy, npc)
+    return alife():has_info(npc:id(), "npcx_is_companion")
+      and true
+      or  false
   end
 --
 
