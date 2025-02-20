@@ -48,6 +48,58 @@ LOOT_SHARING_NPCS = {}
 
     return vec(obj:position()):add(0, 0.5, 0)
   end
+
+  --[[ TODO
+    function utils_obj.try_go_aside_object(npc,friend,pos,old_vid)
+      if not (friend) then
+        return
+      end
+
+      local mypos = npc:position()
+
+      if (mypos:distance_to_sqr(friend:position()) < 3) then
+        return
+      end
+
+      local _dir = vec_sub(mypos,pos)
+      local dir = {}
+      dir[1] = vector_rotate_y(vec_set(_dir),-90)
+      dir[2] = vector_rotate_y(vec_set(_dir),90)
+      local vid
+      local radius = 12
+      local base_point = friend:level_vertex_id()
+
+      for i=1,2 do
+        while (radius > 0) do
+          vid = level.vertex_in_direction(base_point,dir[i],radius)
+          if (utils_obj.validate(npc,vid)) then
+            return utils_obj.lmove(npc,vid,old_vid)
+          end
+          radius = radius - 2
+        end
+      end
+    end
+
+    function utils_obj.try_to_strafe(npc,old_vid)
+      local _dir = npc:direction()
+      local dir = {}
+      dir[1] = vector_rotate_y(vec_set(_dir),-90)
+      dir[2] = vector_rotate_y(vec_set(_dir),90)
+      local vid
+      local radius = 10
+      local base_point = npc:level_vertex_id()
+
+      for i=1,2 do
+        while (radius > 0) do
+          vid = level.vertex_in_direction(base_point,dir[i],radius)
+          if (utils_obj.validate(npc,vid)) then
+            return utils_obj.lmove(npc,vid,old_vid)
+          end
+          radius = radius - 2
+        end
+      end
+    end
+  --]]
 --
 
 
@@ -236,69 +288,346 @@ LOOT_SHARING_NPCS = {}
 
 
 -- XR_COMBAT_IGNORE --
-  local __is_enemy = xr_combat_ignore.is_enemy
+  function getNightMultiplier(hr1, hr2, multiplier)
+    if hr1 > hr2 or multiplier < 0 or multiplier > 1 then
+      return 1
+    end
 
-  -- 1. fix bug with companions vs. enemies when either is sneaking
-  -- 2. fix bug with xr_conditions.surge_started() check
-  function xr_combat_ignore.is_enemy(npc, enemy, no_memory)
-    local eitherIsCompanion = npc:has_info("npcx_is_companion") or enemy:has_info("npcx_is_companion")
-    local eitherIsSneaking  = npc:has_info("npcx_beh_substate_stealth") or enemy:has_info("npcx_beh_substate_stealth")
-    local surgeStarted      = xr_conditions.surge_started()
+    local hour  = level.get_time_hours()
+    local mins  = level.get_time_minutes()
+    local diff1 = math.abs(hr1 - 12)
+    local diff2 = math.abs(hr2 - 12)
 
-    local shouldFixStealthBug = eitherIsCompanion and eitherIsSneaking
-    local shouldFixSurgeBug   = surgeStarted and not eitherIsCompanion
+    local modifier = hour + (mins / 60)
+          modifier = math.abs(modifier - 12)
+          modifier = math.min(math.max(modifier, diff1), diff2)
+          modifier = 1 - (modifier - diff1) / (hr2 - hr1) * (1 - multiplier)
 
-    local __SendScriptCallback = _G.SendScriptCallback
-    local __fighting_with_actor_npcs = xr_combat_ignore.fighting_with_actor_npcs
-    local __surge_started = xr_conditions.surge_started
-    local __get_npc_smart = xr_gulag.get_npc_smart
+    return math.min(1, math.max(1 - multiplier, modifier))
+  end
 
-    local fightingMetatable = {
-      __index = function(self, id)
-        if id == npc:id() then
-          return true
-        end
-        if id == enemy:id() then
-          xr_combat_ignore.fighting_with_actor_npcs = __fighting_with_actor_npcs
-          return true
-        end
-        return __fighting_with_actor_npcs[id]
-      end,
-      __newindex = function(self, id, value)
-        __fighting_with_actor_npcs[id] = value
+  function getRainMultiplier(low, high, multiplier)
+    local rain = level.rain_factor()
+
+    if low > high or multiplier < 0 or multiplier > 1 or rain < 0 then
+      return 1
+    end
+
+    local modifier = 1 - (rain / (high - low) - low) * (1 - multiplier)
+          modifier = math.min(modifier, 1)
+          modifier = math.max(modifier, 1 - multiplier)
+
+    return math.min(1, math.max(1 - multiplier, modifier))
+  end
+
+  function getSurgeMultiplier(multiplier)
+    return xr_conditions.surge_started()
+      and multiplier
+      or  1
+  end
+
+  function initCombatIgnoreConfig()
+    local ini = ini_file("ai_tweaks\\xr_combat_ignore.ltx")
+
+    this.config = {
+      enemyRange      = ini:r_string_to_condlist("settings", "enemy_range"),
+      enemyRangeMin   = ini:r_string_to_condlist("settings", "enemy_range_min"),
+      enemyRangeSurge = ini:r_string_to_condlist("settings", "enemy_range_surge"),
+      maxElevation    = ini:r_string_to_condlist("settings", "max_elevation"),
+      memoryExpires   = ini:r_string_to_condlist("settings", "memory_expires"),
+      safezoneExpires = ini:r_float_ex("settings", "safezone_expires"),
+      nightMinHour    = ini:r_float_ex("night_settings", "min_hour"),
+      nightMaxHour    = ini:r_float_ex("night_settings", "max_hour"),
+      nightMultiplier = ini:r_string_to_condlist("night_settings", "multiplier"),
+      rainMinFactor   = ini:r_float_ex("rain_settings", "min_factor"),
+      rainMaxFactor   = ini:r_float_ex("rain_settings", "max_factor"),
+      rainMultiplier  = ini:r_string_to_condlist("rain_settings", "multiplier"),
+      surgeMultiplier = ini:r_string_to_condlist("surge_settings", "multiplier"),
+    }
+  end
+
+  function getCombatIgnoreConfig(enemy, npc)
+    local cfg = dup_table(this.config)
+
+    for k, v in pairs(cfg) do
+      if type(v) == "table" then
+        local value = xr_logic.pick_section_from_condlist(enemy, npc, v)
+        cfg[k] = value and tonumber(value)
       end
+    end
+
+    cfg.nightMultiplier = getNightMultiplier(cfg.nightMinHour, cfg.nightMaxHour, cfg.nightMultiplier)
+    cfg.rainMultiplier  = getRainMultiplier(cfg.rainMinFactor, cfg.rainMaxFactor, cfg.rainMultiplier)
+    cfg.surgeMultiplier = getSurgeMultiplier(cfg.surgeMultiplier)
+
+    cfg.enemyRange = math.max(
+      cfg.enemyRangeMin,
+      cfg.enemyRange * cfg.nightMultiplier * cfg.rainMultiplier * cfg.surgeMultiplier
+    )
+
+    return cfg
+  end
+
+  function xr_combat_ignore.is_enemy(npc, enemy, noMemory)
+    if device().precache_frame > 1 then
+      return false
+    end
+
+    if not npc:alive() or not enemy:alive() then
+      return false
+    end
+
+    if npc:clsid() == clsid.crow or enemy:clsid() == clsid.crow then
+      return false
+    end
+
+    if DEV_DEBUG and xrs_debug_tools.debug_invis and enemy:id() == 0 then
+      return false
+    end
+
+    -- callback override
+    local flags = {
+      override = false,
+      result   = false
     }
 
-    function _G.SendScriptCallback(name, ...)
-      __SendScriptCallback(name, ...)
+    SendScriptCallback("on_enemy_eval", npc, enemy, flags)
 
-      if name == "on_enemy_eval" then
-        _G.SendScriptCallback = __SendScriptCallback
+    if flags.override then
+      return flags.result
+    end
 
-        if shouldFixStealthBug then
-          xr_combat_ignore.fighting_with_actor_npcs = setmetatable({}, fightingMetatable)
+    --
+
+    local pos1 = npc:position()
+    local pos2 = enemy:position()
+    local dist = pos2:distance_to(pos1)
+    local fac1 = character_community(npc)
+    local fac2 = character_community(enemy)
+    local cfg  = getCombatIgnoreConfig(enemy, npc)
+
+    -- ignore bribes
+    if enemy:id() == 0 and xr_bribe.at_peace(fac1, fac2, dist * dist) then
+      return false
+    end
+
+    -- ignore stale enemies
+    if not noMemory and time_global() > npc:memory_time(enemy) + cfg.memoryExpires then
+      return false
+    end
+
+    -- respect combat_ignore_keep_when_attacked
+    if enemy:id() == 0 and load_var(npc, "xr_combat_ignore_enabled") == false then
+      db.storage[npc:id()].enemy_id = enemy:id()
+      return true
+    end
+
+    -- ignore hostages
+    if axr_task_manager.hostages_by_id[enemy:id()] then
+      return false
+    end
+
+    -- ignore enemies when npc has far surge job
+    if xr_conditions.surge_started() then
+      local smart = xr_gulag.get_npc_smart(npc)
+      local task = smart
+         and smart.npc_info
+         and smart.npc_info[npc:id()]
+         and smart.npc_info[npc:id()].job
+         and smart.npc_info[npc:id()].job.job_type_id == 2
+         and smart.npc_info[npc:id()].job.alife_task
+
+      if task and pos2:distance_to(task:position()) > cfg.enemyRangeSurge then
+        return false
+      end
+    end
+
+    -- ignore enemies in safe zones
+    if enemy:id() ~= 0 and IsStalker(npc) and fac2 ~= "zombied" then
+      local safeTimes    = xr_combat_ignore.safe_zone_npcs
+      local ignoredZones = xr_combat_ignore.ignored_zone
+
+      local se = alife():object(npc:id())
+      local id = se and se.group_id ~= 65535 and se.group_id or npc:id()
+
+      if safeTimes[id] then
+        db.storage[npc:id()].heli_enemy_flag = nil
+
+        if time_global() - safeTimes[id] < cfg.safezoneExpires then
+          return false
+        else
+          safeTimes[id] = nil
         end
 
-        if shouldFixSurgeBug then
-          xr_conditions.surge_started = surgeStarted
+      elseif id then
+        for i, zone in ipairs(ignoredZones) do
+          if utils_obj.npc_in_zone(npc, zone) then
+            safeTimes[id] = time_global()
+            return false
+          end
+        end
+      end
 
-          function xr_gulag.get_npc_smart(obj)
-            xr_conditions.surge_started = __surge_started
-            xr_gulag.get_npc_smart = __get_npc_smart
-            return __get_npc_smart(obj)
+      local squad = get_object_squad(enemy)
+      id = squad and squad.id or enemy:id()
+
+      if safeTimes[id] then
+        return false
+      else
+        for i, zone in ipairs(ignoredZones) do
+          if utils_obj.npc_in_zone(enemy, zone) then
+            safeTimes[id] = time_global()
+            return false
           end
         end
       end
     end
 
-    local isEnemy = __is_enemy(npc, enemy, no_memory)
+    -- ignore underground vs. above-ground fights
+    if cfg.maxElevation
+      and math.abs(pos1.y - pos2.y) > cfg.maxElevation
+      and not npc:see(enemy)
+      and not enemy:see(npc)
+    then
+      return false
+    end
 
-    _G.SendScriptCallback                     = __SendScriptCallback
-    xr_combat_ignore.fighting_with_actor_npcs = __fighting_with_actor_npcs
-    xr_conditions.surge_started               = __surge_started
-    xr_gulag.get_npc_smart                    = __get_npc_smart
+    -- ignore based on distance
+    if dist > cfg.enemyRange then
+      return false
+    end
 
-    return isEnemy
+    -- save enemy before overriding
+    if npc:relation(enemy) >= game_object.enemy then
+      db.storage[npc:id()].enemy_id = enemy:id()
+    end
+
+    -- ignore based on overrides
+    if xr_combat_ignore.ignore_enemy_by_overrides(npc, enemy) then
+      return false
+    end
+
+    return true
+  end
+--
+
+
+-- XR_DANGER
+  local __npc_on_hear_callback = xr_danger.npc_on_hear_callback
+
+  -- fix incorrectly overwritten values (for Anomaly)
+  xr_danger.bd_types[danger_object.entity_attacked] = "entity_attacked"
+  xr_danger.bd_types[danger_object.bullet_ricochet] = "bullet_ricochet"
+  xr_danger.bd_types[danger_object.attack_sound]	  = "attack_sound"
+
+  -- add IsStalker() corpse check (for Anomaly)
+  function xr_danger.get_danger_time(danger)
+    if danger:type() ~= danger_object.entity_corpse then
+      return danger:time()
+    end
+
+    local corpse = danger:object()
+    return IsStalker(corpse) and corpse:death_time() or 0
+  end
+
+  -- add check (for Anomaly)
+  function xr_danger.npc_on_hear_callback(npc, ...)
+    if not xr_danger.has_danger(npc) then
+      __npc_on_hear_callback(npc, ...)
+    end
+  end
+
+  -- disable hit callback (for Anomaly)
+  function xr_danger.npc_on_hit_callback()
+    --noop
+  end
+
+  -- restructure and fix a few bugs in xr_danger
+  function xr_danger.is_danger(npc, danger)
+    if xr_wounded.is_heavy_wounded_by_id(npc:id()) then
+      return false
+    end
+
+
+    if axr_task_manager.hostages_by_id[npc:id()] then
+      return false
+    end
+
+
+    local dangerObject = danger:object()
+    local dangerType   = danger:type()
+
+
+    if dangerType == danger_object.grenade then
+      if danger:dependent_object() and character_community(npc) ~= "zombied" then
+        return xr_danger.danger_in_radius(npc, danger, dangerType)
+      end
+
+      return false
+    end
+
+
+    if xr_combat_ignore.npc_in_safe_zone(npc) then
+      return false
+    end
+
+
+    if dangerType == danger_object.entity_corpse then
+      if not (dangerObject and IsStalker(dangerObject) and character_community(dangerObject) == character_community(npc)) then
+        return false
+      end
+
+      local corpse = db.storage[dangerObject:id()]
+
+      if not (corpse and corpse.death_time and corpse.death_by_id) then
+        return false
+      end
+
+      local killer = db.storage[corpse.death_by_id] and db.storage[corpse.death_by_id].object
+
+      if not (killer and (IsMonster(killer) or IsStalker(killer)) and killer:alive() and npc:relation(killer) > 0 and character_community(killer) ~= character_community(npc)) then
+        return false
+      end
+
+      if xr_combat_ignore.ignore_enemy_by_overrides(npc, killer) then
+        return false
+      end
+
+      if game.get_game_time():diffSec(corpse.death_time) > 120000 then
+        return false
+      end
+
+      return xr_danger.danger_in_radius(npc, danger, dangerType)
+    end
+
+
+    if danger:dependent_object() then
+      dangerObject = danger:dependent_object()
+    end
+
+
+    if not (dangerObject and (IsMonster(dangerObject) or IsStalker(dangerObject)) and npc:relation(dangerObject) >= game_object.enemy) then
+      return false
+    end
+
+
+    -- bypass combat ignore radius for attacked, entity_attacked, ricochet
+    if danger:perceive_type() == danger_object.hit then
+      return xr_danger.danger_in_radius(npc, danger, dangerType)
+    end
+
+
+    if xr_corpse_detection.is_under_corpse_detection(npc) or xr_help_wounded.is_under_help_wounded(npc) or xrs_kill_wounded.is_under_kill_wounded(npc) then
+      return false
+    end
+
+
+    if not dangerObject:alive() or not xr_combat_ignore.is_enemy(npc, dangerObject, true) then
+      return false
+    end
+
+
+    return xr_danger.danger_in_radius(npc, danger, dangerType)
   end
 --
 
@@ -526,6 +855,12 @@ LOOT_SHARING_NPCS = {}
 
     local eval = __ff_eval(self)
 
+    -- custom combat handles friendly fire
+    local combat = db.storage[npc:id()].script_combat_type
+    if combat == "assault" or combat == "guard" or combat == "snipe" or combat == "support" then
+      return false
+    end
+
     if not eval then
       st.__wait_until = nil
     elseif not time_expired(st.__wait_until) then
@@ -587,6 +922,48 @@ LOOT_SHARING_NPCS = {}
       return false
     end
     return IsMoveState("mcSprint") and NPC.isFollower(npc)
+  end
+
+
+  function xr_conditions.is_enemy_monster(enemy, npc)
+    return IsMonster(enemy) or character_community(enemy) == "zombied"
+  end
+
+
+  function xr_conditions.story_related(enemy, npc)
+    if enemy:id() == 0 then
+      return false
+    end
+
+    if get_object_story_id(npc:id()) or get_object_story_id(enemy:id()) then
+      return true
+    end
+
+    local nsquad = get_object_squad(npc)
+    local esquad = get_object_squad(enemy)
+
+    if nsquad and get_object_story_id(nsquad.id) or esquad and get_object_story_id(esquad.id) then
+      return true
+    end
+
+    return false
+  end
+
+
+  function xr_conditions.cordon_army_vs_stalker(enemy, npc)
+    if enemy:id() == 0 then
+      return false
+    end
+
+    if level.name() ~= "l01_escape" then
+      return false
+    end
+
+    local ncomm = character_community(npc)
+    local ecomm = character_community(enemy)
+
+    return ncomm == "army"    and ecomm == "stalker"
+        or ncomm == "stalker" and ecomm == "army"
   end
 --
 
@@ -663,6 +1040,14 @@ LOOT_SHARING_NPCS = {}
 --
 
 
+-- COMPANION ANTI AWOL --
+  -- prevent it from using this variable before it is defined
+  if companion_anti_awol then
+    companion_anti_awol.companion_retreat = {}
+  end
+--
+
+
 -- CALLBACKS --
   -- prevent npcs from entering invalid "cover" combat type
   if schemes_ai_gamma and schemes_ai_gamma.scheme_cover then
@@ -686,6 +1071,17 @@ LOOT_SHARING_NPCS = {}
 
   if he_is_with_me and he_is_with_me.escorteval then
     he_is_with_me.escorteval = onEvalEnemy
+  end
+
+  -- no danger state for companions
+  function onEvalDanger(npc, flags)
+    if NPC.isCompanion(npc) then
+      local bd = npc:best_danger()
+
+      if bd and bd:type() ~= danger_object.grenade then
+        flags.ret_value = false
+      end
+    end
   end
 
   -- switch weapons
@@ -951,9 +1347,13 @@ LOOT_SHARING_NPCS = {}
     data.sharingNPCs     = nil
     data.sharedItems     = nil
   end
+--
 
 
+-- ON_GAME_START
   function on_game_start()
+    initCombatIgnoreConfig()
+
     RegisterScriptCallback("load_state", onLoadState)
     RegisterScriptCallback("save_state", onSaveState)
     RegisterScriptCallback("npc_on_net_spawn", onNpcSpawn)
@@ -963,6 +1363,7 @@ LOOT_SHARING_NPCS = {}
     RegisterScriptCallback("npc_on_choose_weapon", onChooseWeapon)
     RegisterScriptCallback("npc_on_item_take", onTakeItem)
     RegisterScriptCallback("actor_on_item_take", onActorTakeItem)
+    RegisterScriptCallback("npc_on_eval_danger", onEvalDanger)
 
     if not (he_is_with_me and he_is_with_me.escorteval) then
       RegisterScriptCallback("on_enemy_eval", onEvalEnemy)

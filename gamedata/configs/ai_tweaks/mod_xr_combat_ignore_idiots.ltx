@@ -1,0 +1,40 @@
+![settings]
+
+; max combat range for NPCs
+enemy_range = {=is_enemy_actor} 160, {=is_enemy_monster} 84, {=story_related} 60, {=cordon_army_vs_stalker} 60, 108
+; combat range cannot fall below this regardless of night/rain/surge
+enemy_range_min = {=is_enemy_actor} 90,  60
+; max combat range from surge cover if NPC has a surge job
+; night/rain/surge does not affect this value
+enemy_range_surge = {=is_enemy_actor} 108, 32
+; max +/- combat elevation difference vs. monsters
+; keeps surface NPCs from fighting underground enemies and vice versa
+; night/rain/surge does not affect this value
+max_elevation = {=is_enemy_monster} 32
+; time until unseen/unheard enemies are ignored
+memory_expires = 120000
+; grace period when NPC or enemy enters/leaves a safe zone
+safezone_expires = 8000
+
+
+@[night_settings]
+; hour (12-23) where multipler starts to take effect (mirrored in morning)
+min_hour = 18
+; hour (12-23) where multiplier has full effect (mirrored in morning)
+max_hour = 21
+; combat range multiplier when at full effect (0-1)
+multiplier = {=is_enemy_monster} 0.85, {=story_related} 1, {=cordon_army_vs_stalker} 1, 0.75
+
+
+@[rain_settings]
+; rain strength (0-1) where multiplier starts to take effect
+min_factor = 0
+; rain strength (0-1) where multiplier has full effect
+max_factor = 0.5
+; combat range multiplier when at full effect (0-1)
+multiplier = {=is_enemy_monster} 0.85, {=story_related} 1, {=cordon_army_vs_stalker} 1, 0.75
+
+
+@[surge_settings]
+; combat range multiplier when at full effect (0-1)
+multiplier = {=is_enemy_monster} 0.85, {=story_related} 1, {=cordon_army_vs_stalker} 1, 0.75

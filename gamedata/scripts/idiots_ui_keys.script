@@ -260,9 +260,6 @@ function onKeybindEvent(event, dik)
 
   if checkKeybind(event, dik, "point", "retreat") then
     if #selected > 0 then
-      printf("TESTING selected")
-      print_r(selected)
-
       for i, npc in ipairs(selected) do
         if NPC.isCompanion(npc) then
           NPC.setState(npc, "movement",  "follow", true)

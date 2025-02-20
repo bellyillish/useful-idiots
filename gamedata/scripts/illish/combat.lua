@@ -13,7 +13,7 @@ local COMBAT = {}
       idle = {
         snipe  = "threat_sniper_fire",
         fire   = "threat_fire",
-        reload = "hide_fire",
+        reload = "threat_fire",
         hold   = "threat_na",
       },
       move = {
@@ -103,8 +103,9 @@ local COMBAT = {}
       return COMBAT.squadSeesEnemy(npc, enemy)
     end
 
+    -- TODO: eval if this is better on or off
     if db.actor:see(enemy) and COMBAT.hasLineOfSight(db.actor, enemy) then
-      return true
+      -- return true
     end
 
     for i, companion in ipairs(NPC.getCompanions()) do

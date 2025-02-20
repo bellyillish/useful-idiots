@@ -5,12 +5,13 @@ local POS    = require "illish.pos"
 local NPC    = require "illish.npc"
 local COMBAT = require "illish.combat"
 
-EVAL_FF    = rx_ff.evaid
-EVAL_FACER = xrs_facer.evid_facer
-EVAL_ENEMY = stalker_ids.property_enemy
-EVAL_LOGIC = xr_evaluators_id.state_mgr + 4
-EVAL_ID    = stalker_ids.property_script  + 3180
-ACTION_ID  = xr_actions_id.chugai_actions + 180
+EVAL_FF       = rx_ff.evaid
+EVAL_FACER    = xrs_facer.evid_facer
+EVAL_STEAL_UP = xrs_facer.evid_steal_up_facer
+EVAL_ENEMY    = stalker_ids.property_enemy
+EVAL_LOGIC    = xr_evaluators_id.state_mgr + 4
+EVAL_ID       = stalker_ids.property_script  + 3180
+ACTION_ID     = xr_actions_id.chugai_actions + 180
 
 
 -- EVALUATOR --
@@ -24,7 +25,7 @@ ACTION_ID  = xr_actions_id.chugai_actions + 180
 
 
   function evaluator_combat_type:evaluate()
-    local npc  = self.object
+    local npc = self.object
     return db.storage[npc:id()].script_combat_type == self.type
   end
 --
@@ -452,20 +453,13 @@ ACTION_ID  = xr_actions_id.chugai_actions + 180
       action:add_precondition(WP(EVAL_ENEMY, true))
       action:add_precondition(WP(EVAL_ID, true))
       action:add_precondition(WP(EVAL_FACER, false))
+      action:add_precondition(WP(EVAL_STEAL_UP, false))
 
       action:add_effect(WP(EVAL_LOGIC, false))
       action:add_effect(WP(EVAL_ENEMY, false))
       action:add_effect(WP(EVAL_ID, false))
 
       planner:add_action(ACTION_ID, action)
-
-      if (schemes.rx_ff) then
-        local ffAction = planner:action(rx_ff.evaid)
-
-        if ffAction then
-          ffAction:add_precondition(WP(EVAL_ID, false))
-        end
-      end
     end
   end
 --
