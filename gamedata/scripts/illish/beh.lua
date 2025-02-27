@@ -387,7 +387,7 @@ local BEH = {}
     pos = POS.position(vid)
 
     if reached and not st.lookTimer then
-      st.lookTimer = UTIL.timePlusRandom(4000, 6000)
+      st.lookTimer = UTIL.timePlusRandom(2200, 3600)
     end
 
     if not UTIL.timeExpired(st.lookTimer) then
@@ -463,7 +463,7 @@ local BEH = {}
     pos = POS.position(vid)
 
     if reached and not st.lookTimer then
-      st.lookTimer = UTIL.timePlusRandom(4000, 6000)
+      st.lookTimer = UTIL.timePlusRandom(2200, 3600)
     end
 
     if not UTIL.timeExpired(st.lookTimer) then
@@ -669,6 +669,12 @@ local BEH = {}
     if dt.reached then
       anim = st.wait_animation
       st.moveState = nil
+    end
+
+    if st.lookPoint then
+      anim = NPC.getActiveState(npc, "stance") == "stand"
+        and "threat"
+        or  "hide"
     end
 
     if not anim then

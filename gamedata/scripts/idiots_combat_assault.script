@@ -413,8 +413,6 @@ ACTION_ID     = xr_actions_id.chugai_actions + 140
     end
 
     if not state.vid then
-      NPC.setReloadModes(npc, WPN.RELOAD_ACTIVE, WPN.HALF_EMPTY)
-
       state.vid = POS.getStrafePos(npc, {
         distance = UTIL.random(6, 10, 1),
         enemyPos = enemy.pos,

@@ -1,0 +1,29 @@
+; chance = TOTAL_SHOTS_FIRED * BASE_CH / CLIP_SIZE ^ CLIP_SIZE_FACTOR
+; resets after each jam
+; caps at MAX_CH
+
+![settings]
+enabled = true
+
+; clip size influence on jam chance (0 = not at all)
+clip_size_factor = 0.8
+
+; how much each fired bullet adds to jam chance
+base_ch_novice       = 2.00
+base_ch_trainee      = 1.25
+base_ch_experienced  = 1.00
+base_ch_professional = 0.75
+base_ch_veteran      = 0.50
+base_ch_expert       = 0.25
+base_ch_master       = 0.20
+base_ch_legend       = 0.15
+
+; max that jam chance can ever be
+max_ch_novice        = 12.0
+max_ch_trainee       = 8.0
+max_ch_experienced   = 6.0
+max_ch_professional  = 4.0
+max_ch_veteran       = 3.0
+max_ch_expert        = 2.5
+max_ch_master        = 2.0
+max_ch_legend        = 1.5

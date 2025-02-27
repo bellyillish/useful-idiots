@@ -354,14 +354,18 @@ local POS = {}
 
 
   function POS.assessCover(coverPos, enemyPos, flags)
-    local wpnPos = VEC.set(enemyPos):add(0, POS.AIM.HIGH, 0)
-    local score  = 0
+    local pos   = VEC.set(enemyPos):add(0, POS.AIM.HIGH, 0)
+    local score = 0
+
+    local __debug  = {}
 
     for index, height in ipairs(POS.COVER) do
-      local pos  = VEC.set(coverPos):add(0, height, 0)
-      local dist = VEC.distance(wpnPos, pos)
-      local dir  = VEC.direction(wpnPos,  pos)
-      local cast = RAY.distance(wpnPos, dir, dist, flags)
+      local epos = VEC.set(coverPos):add(0, height, 0)
+      local dist = VEC.distance(pos, epos)
+      local dir  = VEC.direction(pos, epos)
+      local cast = RAY.distance(pos, dir, dist, flags)
+
+      table.insert(__debug, {pos = pos, dir = dir, cast = cast})
 
       if math.floor(dist - cast) <= 0 then
         break
@@ -370,7 +374,7 @@ local POS = {}
       score = index
     end
 
-    return score
+    return score, __debug
   end
 
 

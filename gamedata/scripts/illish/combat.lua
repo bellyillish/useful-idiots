@@ -119,21 +119,22 @@ local COMBAT = {}
 
 
   function COMBAT.hasLineOfSight(npc, enemy)
-    local enemyDir   = VEC.direction(npc:position(), enemy:position())
-    local enemyAngle = VEC.dotProduct(npc:direction(), enemyDir)
+    local edir  = VEC.direction(npc:position(), enemy:position())
+    local angle = VEC.dotProduct(npc:direction(), edir)
 
-    if enemyAngle < 0 then
-      return false
+    if angle < 0 then
+      return false, {}
     end
 
-    local wpnBone = utils_obj.safe_bone_pos(npc, "bip01_r_finger02")
-    local aimBone = utils_obj.safe_bone_pos(enemy, "bip01_head")
+    local pos  = utils_obj.safe_bone_pos(npc, "bip01_r_finger02")
+    local epos = utils_obj.safe_bone_pos(enemy, "bip01_head")
 
-    local aimDir  = VEC.direction(wpnBone, aimBone)
-    local aimDist = VEC.distance(wpnBone, aimBone)
-    local cast    = RAY.distance(wpnBone, aimDir, aimDist)
+    local dir  = VEC.direction(pos, epos)
+    local dist = VEC.distance(pos, epos)
+    local cast = RAY.distance(pos, dir, dist)
 
-    return math.floor(aimDist - cast) <= 0
+    return math.floor(dist - cast) <= 0
+      , {pos = pos, dir = dir, cast = cast}
   end
 
 
