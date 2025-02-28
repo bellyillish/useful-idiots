@@ -386,22 +386,28 @@ local BEH = {}
     reached = vid == npc:level_vertex_id()
     pos = POS.position(vid)
 
-    if reached and not st.lookTimer then
-      st.lookTimer = UTIL.timePlusRandom(2200, 3600)
+    if not st.lookPoint then
+      st.lookTimer = nil
     end
 
-    if not UTIL.timeExpired(st.lookTimer) then
-      dir = st.lookPoint
-        and VEC.direction(npc:position(), st.lookPoint)
-        or  VEC.direction(pos, db.actor:position())
-    else
+    if time_expired(st.lookTimer) then
       st.lookPoint = nil
+    end
+
+    if st.lookPoint then
+      dir = VEC.direction(npc:position(), st.lookPoint)
+
+      if not st.lookTimer then
+        st.lookTimer = UTIL.timePlusRandom(2600, 4200)
+      end
+    else
+      dir = dir or VEC.direction(pos, db.actor:position())
     end
 
     POS.setLVID(npc, vid)
 
     st.desired_target = {
-      look_dir        = reached and dir or nil,
+      look_dir        = (reached or st.lookPoint) and dir or nil,
       reached         = reached,
       level_vertex_id = vid,
       position        = pos,
@@ -434,13 +440,12 @@ local BEH = {}
     end
 
     if not vid then
-      st.movePoint = nil
-      expires      = nil
-
       local coverPos  = st.movePoint and POS.position(st.movePoint) or npc:position()
       local coverDir  = VEC.direction(db.actor:position(), npc:position())
       local coverDist = st.movePoint and 0 or st.desired_distance
 
+      expires = nil
+      st.movePoint = nil
       coverDir.y = 0
 
       if coverDist > distance_between(npc, db.actor) then
@@ -462,22 +467,28 @@ local BEH = {}
     reached = vid == npc:level_vertex_id()
     pos = POS.position(vid)
 
-    if reached and not st.lookTimer then
-      st.lookTimer = UTIL.timePlusRandom(2200, 3600)
+    if not st.lookPoint then
+      st.lookTimer = nil
     end
 
-    if not UTIL.timeExpired(st.lookTimer) then
-      dir = st.lookPoint
-        and VEC.direction(npc:position(), st.lookPoint)
-        or  VEC.direction(pos, db.actor:position())
-    else
+    if time_expired(st.lookTimer) then
       st.lookPoint = nil
+    end
+
+    if st.lookPoint then
+      dir = VEC.direction(npc:position(), st.lookPoint)
+
+      if not st.lookTimer then
+        st.lookTimer = UTIL.timePlusRandom(2600, 4200)
+      end
+    else
+      dir = dir or VEC.direction(pos, db.actor:position())
     end
 
     POS.setLVID(npc, vid)
 
     st.desired_target = {
-      look_dir        = reached and dir or nil,
+      look_dir        = (reached or st.lookPoint) and dir or nil,
       reached         = reached,
       expires         = expires,
       level_vertex_id = vid,
@@ -568,10 +579,27 @@ local BEH = {}
 
     if moveDist >= 2 then
       st.lookPoint = nil
-    elseif st.lookPoint then
+      st.lookTimer = nil
+    end
+
+    if not st.lookPoint then
+      st.lookTimer = nil
+    end
+
+    if time_expired(st.lookTimer) then
+      savedActorPos = actorPos
+      st.lookPoint  = nil
+    end
+
+    if st.lookPoint then
       dir = VEC.direction(npc:position(), st.lookPoint)
+
+      if not st.lookTimer then
+        st.lookTimer = UTIL.timePlusRandom(2600, 4200)
+      end
     else
-      dir = VEC.direction(pos, actorPos)
+      dir = dir or VEC.direction(pos, actorPos)
+
       if math.abs(moveDist) >= 1 then
         dir = dir:average(VEC.direction(savedActorPos, actorPos))
       end
@@ -580,7 +608,7 @@ local BEH = {}
     POS.setLVID(npc, vid)
 
     st.desired_target = {
-      look_dir        = reached and dir or nil,
+      look_dir        = (reached or st.lookPoint) and dir or nil,
       actorPos        = savedActorPos,
       followCount     = followCount,
       formation       = formation,
@@ -671,10 +699,8 @@ local BEH = {}
       st.moveState = nil
     end
 
-    if st.lookPoint then
-      anim = NPC.getActiveState(npc, "stance") == "stand"
-        and "threat"
-        or  "hide"
+    if st.lookPoint and NPC.getState(npc, "stance", "stand") then
+      anim = "raid"
     end
 
     if not anim then
