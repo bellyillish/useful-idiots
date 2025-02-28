@@ -1,8 +1,8 @@
 package.path = package.path .. ".\\gamedata\\scripts\\?.lua;..\\gamedata\\scripts\\?.lua;"
 
-local UTIL = require "illish.util"
-local VEC  = require "illish.vector"
-local POS  = require "illish.pos"
+local UTIL = require "illish.lib.util"
+local VEC  = require "illish.lib.vector"
+local POS  = require "illish.lib.pos"
 
 
 -- GLOBALS --
@@ -35,7 +35,3 @@ DATA_STALE_KEYS = {
   "ZCDS_SHARING_NPCS",
   "CDHTS_STATES",
 }
-
-AddScriptCallback("idiots_on_load_state")
-AddScriptCallback("idiots_on_save_state")
-AddScriptCallback("idiots_on_version")

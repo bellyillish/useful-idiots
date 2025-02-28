@@ -1,9 +1,9 @@
 local WP     = world_property
-local UTIL   = require "illish.util"
-local VEC    = require "illish.vector"
-local POS    = require "illish.pos"
-local NPC    = require "illish.npc"
-local COMBAT = require "illish.combat"
+local UTIL   = require "illish.lib.util"
+local VEC    = require "illish.lib.vector"
+local POS    = require "illish.lib.pos"
+local NPC    = require "illish.lib.npc"
+local COMBAT = require "illish.lib.combat"
 
 EVAL_FF       = rx_ff.evaid
 EVAL_FACER    = xrs_facer.evid_facer

@@ -1,7 +1,7 @@
-local UTIL = require "illish.util"
-local NPC  = require "illish.npc"
-local WPN  = require "illish.weapon"
-local BEH  = require "illish.beh"
+local UTIL = require "illish.lib.util"
+local NPC  = require "illish.lib.npc"
+local WPN  = require "illish.lib.weapon"
+local BEH  = require "illish.lib.beh"
 
 
 GUI = nil

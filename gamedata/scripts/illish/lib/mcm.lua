@@ -1,4 +1,4 @@
-local TABLE = require "illish.table"
+local TABLE = require "illish.lib.table"
 
 
 local MCM = {}

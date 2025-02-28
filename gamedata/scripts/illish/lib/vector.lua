@@ -1,5 +1,5 @@
-local UTIL  = require "illish.util"
-local TABLE = require "illish.table"
+local UTIL  = require "illish.lib.util"
+local TABLE = require "illish.lib.table"
 
 
 local VEC = {}

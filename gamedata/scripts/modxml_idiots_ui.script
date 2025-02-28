@@ -1,6 +1,6 @@
 local CONFIG = a_idiots_config
-local DXML   = require "illish.dxml"
-local TABLE  = require "illish.table"
+local DXML   = require "illish.lib.dxml"
+local TABLE  = require "illish.lib.table"
 
 
 local LABEL_PREFIX = "st_idiots_"

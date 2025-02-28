@@ -1,0 +1,190 @@
+local CONFIG = a_idiots_config
+local TABLE  = require "illish.lib.table"
+local NPC    = require "illish.lib.npc"
+
+
+-- reconfigure on MCM changes
+function reconfigureStates()
+  -- legacy combat disabled
+  local camperCombat   = ui_mcm.get("idiots/options/camperCombat")
+  local monolithCombat = ui_mcm.get("idiots/options/monolithCombat")
+  local zombiedCombat  = ui_mcm.get("idiots/options/zombiedCombat")
+
+  local gstate = NPC.getActiveState(nil, "combat")
+
+  if false
+    or not camperCombat   and gstate == "camper"
+    or not monolithCombat and gstate == "monolith"
+    or not zombiedCombat  and gstate == "zombied"
+  then
+    NPC.setState(nil, "combat", "default", true)
+  end
+
+  for i, npc in ipairs(NPC.getCompanions()) do
+    local state = NPC.getActiveState(npc, "combat")
+
+    if false
+      or not camperCombat   and state == "camper"
+      or not monolithCombat and state == "monolith"
+      or not zombiedCombat  and state == "zombied"
+    then
+      NPC.setState(npc, "combat", "default", true)
+    end
+  end
+
+  -- artifact gathering disabled
+  if not ui_mcm.get("idiots/options/artifacts") then
+    NPC.setState(nil, "jobs", "loot_artifacts", false)
+
+    for i, npc in ipairs(NPC.getCompanions()) do
+      NPC.setState(npc, "jobs", "loot_artifacts", false)
+    end
+  end
+end
+
+-- prep storage
+function initStorage()
+  local mdata = alife_storage_manager.get_state()
+
+  if not mdata[CONFIG.DATA_KEY] then
+    mdata[CONFIG.DATA_KEY] = {}
+  end
+
+  return mdata[CONFIG.DATA_KEY]
+end
+
+-- load data
+function onLoadState(mdata)
+  local data = initStorage()
+
+  -- purge old mod keys
+  for i, k in ipairs(CONFIG.DATA_STALE_KEYS) do
+    mdata[k] = nil
+  end
+
+  -- migrate old jobs keys
+  if data.IDIOTS_SHARED_ITEMS then
+    data.sharedItems = data.IDIOTS_SHARED_ITEMS
+  end
+  if data.IDIOTS_SHARING_NPCS then
+    data.sharingNPCs = data.IDIOTS_SHARING_NPCS
+  end
+
+  data.IDIOTS_SHARED_ITEMS = nil
+  data.IDIOTS_SHARING_NPCS = nil
+
+  -- check version
+  if data.VER ~= CONFIG.DATA_VER then
+    data.VER = CONFIG.DATA_VER
+    data.companionStates = nil
+    data.globalState = nil
+  end
+
+  -- load jobs data
+  if data.sharedItems then
+    NPC.LOOT_SHARED_ITEMS = data.sharedItems
+  end
+  if data.sharingNPCs then
+    NPC.LOOT_SHARING_NPCS = data.sharingNPCs
+  end
+
+  -- load global state
+  if data.globalState then
+    NPC.GLOBAL_STATE = TABLE.merge(NPC.GLOBAL_STATE, data.globalState)
+  else
+    NPC.GLOBAL_STATE = dup_table(NPC.DEFAULT_STATE)
+  end
+
+  -- legacy combat disabled
+  local camperCombat   = ui_mcm.get("idiots/options/camperCombat")
+  local monolithCombat = ui_mcm.get("idiots/options/monolithCombat")
+  local zombiedCombat  = ui_mcm.get("idiots/options/zombiedCombat")
+
+  local gstate = NPC.getActiveState(nil, "combat")
+
+  if false
+    or not camperCombat   and gstate == "camper"
+    or not monolithCombat and gstate == "monolith"
+    or not zombiedCombat  and gstate == "zombied"
+  then
+    NPC.setState(nil, "combat", "default", true)
+  end
+
+  -- artifact gathering disabled
+  if not ui_mcm.get("idiots/options/artifacts") then
+    NPC.setState(nil, "jobs", "loot_artifacts", false)
+  end
+end
+
+-- save data
+function onSaveState()
+  local data = initStorage()
+
+  data.globalState = NPC.GLOBAL_STATE
+  data.sharedItems = NPC.LOOT_SHARED_ITEMS
+  data.sharingNPCs = NPC.LOOT_SHARING_NPCS
+
+  data.companionStates = {}
+
+  for i, npc in ipairs(NPC.getCompanions()) do
+    data.companionStates[npc:id()] = NPC.getAllStates(npc)
+  end
+end
+
+-- load npc states
+function onNpcSpawn(npc)
+  if not NPC.isCompanion(npc) then
+    return
+  end
+
+  local data = initStorage()
+
+  -- reset other flags
+  save_var(npc, "fight_from_point", nil)
+
+  -- load companion states
+  if data.companionStates and data.companionStates[npc:id()] then
+    NPC.setStates(npc, data.companionStates[npc:id()])
+  else
+    NPC.setStates(npc, NPC.GLOBAL_STATE)
+  end
+
+  -- legacy combat disabled
+  local camperCombat   = ui_mcm.get("idiots/options/camperCombat")
+  local monolithCombat = ui_mcm.get("idiots/options/monolithCombat")
+  local zombiedCombat  = ui_mcm.get("idiots/options/zombiedCombat")
+
+  local state = NPC.getActiveState(npc, "combat")
+
+  if false
+    or not camperCombat   and state == "camper"
+    or not monolithCombat and state == "monolith"
+    or not zombiedCombat  and state == "zombied"
+  then
+    NPC.setState(npc, "combat", "default", true)
+  end
+
+  -- artifact gathering disabled
+  if not ui_mcm.get("idiots/options/artifacts") then
+    NPC.setState(npc, "jobs", "loot_artifacts", false)
+  end
+end
+
+-- clear saved data
+function onFirstUpdate()
+  local data = initStorage()
+
+  data.companionStates = nil
+  data.globalState     = nil
+  data.sharingNPCs     = nil
+  data.sharedItems     = nil
+end
+
+
+function on_game_start()
+  RegisterScriptCallback("load_state", onLoadState)
+  RegisterScriptCallback("save_state", onSaveState)
+  RegisterScriptCallback("npc_on_net_spawn", onNpcSpawn)
+  RegisterScriptCallback("actor_on_first_update", onFirstUpdate)
+  RegisterScriptCallback("mcm_option_change", reconfigureStates)
+end

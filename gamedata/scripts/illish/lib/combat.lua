@@ -1,7 +1,7 @@
-local UTIL  = require "illish.util"
-local RAY   = require "illish.ray"
-local VEC   = require "illish.vector"
-local NPC   = require "illish.npc"
+local UTIL  = require "illish.lib.util"
+local RAY   = require "illish.lib.ray"
+local VEC   = require "illish.lib.vector"
+local NPC   = require "illish.lib.npc"
 
 
 local COMBAT = {}

@@ -1,8 +1,8 @@
-local TABLE = require "illish.table"
-local UTIL  = require "illish.util"
-local VEC   = require "illish.vector"
-local POS   = require "illish.pos"
-local NPC   = require "illish.npc"
+local TABLE = require "illish.lib.table"
+local UTIL  = require "illish.lib.util"
+local VEC   = require "illish.lib.vector"
+local POS   = require "illish.lib.pos"
+local NPC   = require "illish.lib.npc"
 
 
 local BEH = {}
