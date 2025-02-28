@@ -1,6 +1,6 @@
-local MCM   = require "illish.mcm"
-local TABLE = require "illish.table"
-local NPC   = require "illish.npc"
+local MCM   = require "illish.lib.mcm"
+local TABLE = require "illish.lib.table"
+local NPC   = require "illish.lib.npc"
 
 
 -- CONSTS --

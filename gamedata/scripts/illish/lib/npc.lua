@@ -1,11 +1,16 @@
-local UTIL  = require "illish.util"
-local TABLE = require "illish.table"
-local VEC   = require "illish.vector"
-local POS   = require "illish.pos"
-local WPN   = require "illish.weapon"
+local UTIL  = require "illish.lib.util"
+local TABLE = require "illish.lib.table"
+local VEC   = require "illish.lib.vector"
+local POS   = require "illish.lib.pos"
+local WPN   = require "illish.lib.weapon"
 
 
 local NPC = {}
+
+
+-- Tracks looted/gathered items
+NPC.LOOT_SHARED_ITEMS = {}
+NPC.LOOT_SHARING_NPCS = {}
 
 
 -- CONSTS --

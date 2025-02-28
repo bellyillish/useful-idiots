@@ -1,7 +1,7 @@
 local UI  = idiots_ui
-local WPN = require "illish.weapon"
-local NPC = require "illish.npc"
-local BEH = require "illish.beh"
+local WPN = require "illish.lib.weapon"
+local NPC = require "illish.lib.npc"
+local BEH = require "illish.lib.beh"
 
 
 local flash = particles_object("_samples_particles_\\flash_light")
