@@ -1,7 +1,7 @@
-local UTIL  = require "illish.util"
-local TABLE = require "illish.table"
-local VEC   = require "illish.vector"
-local RAY   = require "illish.ray"
+local UTIL  = require "illish.lib.util"
+local TABLE = require "illish.lib.table"
+local VEC   = require "illish.lib.vector"
+local RAY   = require "illish.lib.ray"
 
 
 local POS = {}

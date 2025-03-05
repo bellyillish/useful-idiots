@@ -1,11 +1,11 @@
 local WP     = world_property
-local UTIL   = require "illish.util"
-local TABLE  = require "illish.table"
-local VEC    = require "illish.vector"
-local POS    = require "illish.pos"
-local WPN    = require "illish.weapon"
-local NPC    = require "illish.npc"
-local COMBAT = require "illish.combat"
+local UTIL   = require "illish.lib.util"
+local TABLE  = require "illish.lib.table"
+local VEC    = require "illish.lib.vector"
+local POS    = require "illish.lib.pos"
+local WPN    = require "illish.lib.weapon"
+local NPC    = require "illish.lib.npc"
+local COMBAT = require "illish.lib.combat"
 
 EVAL_FF       = rx_ff.evaid
 EVAL_FACER    = xrs_facer.evid_facer
