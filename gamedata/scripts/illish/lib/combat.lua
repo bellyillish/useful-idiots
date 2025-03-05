@@ -13,13 +13,13 @@ local COMBAT = {}
       idle = {
         snipe  = "threat_sniper_fire",
         fire   = "threat_fire",
-        reload = "threat_fire",
+        reload = "hide_fire",
         hold   = "threat_na",
       },
       move = {
         snipe  = "assault_fire",
         fire   = "assault_fire",
-        reload = "assault_fire",
+        reload = "sneak_fire",
         hold   = "assault",
       }
     },
@@ -33,7 +33,7 @@ local COMBAT = {}
       move = {
         snipe  = "assault_fire",
         fire   = "assault_fire",
-        reload = "assault_fire",
+        reload = "sneak_fire",
         hold   = "assault",
       }
     },

@@ -1,53 +1,17 @@
 local WPN = {
+  -- wmode
+  RELOAD_ACTIVE = 0,
+  RELOAD_ALL    = 1,
+  -- emode
   EMPTY         = 0,
   HALF_EMPTY    = 1,
   NOT_FULL      = 2,
-
-  RELOAD_NONE   = 0,
-  RELOAD_ACTIVE = 1,
-  RELOAD_ALL    = 2,
 }
 
 
 function WPN.isGun(weapon)
   local type = WPN.getType(weapon)
   return type and type ~= "melee"
-end
-
-
-function WPN.isReloading(weapon)
-  if not (WPN.isGun(weapon) and weapon:parent()) then
-    return false
-  end
-
-  local store = db.storage[weapon:parent():id()]
-
-  return true
-    and store.reload_wmode and store.reload_wmode > 0
-    and store.reload_weapon == weapon:id()
-    or  false
-end
-
-
-function WPN.isUnloaded(weapon, emode)
-  if not (WPN.isGun(weapon) and weapon:parent()) then
-    return false
-  end
-
-  local ammo = WPN.getAmmoCount(weapon)
-
-  if ammo.current >= ammo.total then
-    return false
-  end
-
-  emode = emode or db.storage[weapon:parent():id()].reload_emode
-
-  local result = nil
-    or emode == WPN.EMPTY and ammo.current == 0
-    or emode == WPN.HALF_EMPTY and ammo.current * 2 < ammo.total
-    or emode == WPN.NOT_FULL
-
-  return result
 end
 
 

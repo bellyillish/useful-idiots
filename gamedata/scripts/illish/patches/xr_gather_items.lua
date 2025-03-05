@@ -1,6 +1,7 @@
 local NPC = require "illish.lib.npc"
 
--- NOTE: allbacks are in the xr_corpse_detection patch
+
+local PATCH = {}
 
 
 -- Enable/disable gathering items for non-companions
@@ -61,3 +62,28 @@ function xr_gather_items.eva_gather_itm:find_valid_item()
 
   return PATCH_gather_find_item(self)
 end
+
+
+-- Don't pickup weapons if disabled
+function PATCH.onItemBeforePickup(npc, item, flags)
+  if not IsWeapon(item) then
+    return
+  end
+
+  if NPC.isCompanion(npc) and not NPC.getState(npc, "jobs", "loot_items") then
+    flags.ret_value = false
+  end
+
+  if not NPC.isCompanion(npc) and ui_mcm.get("idiots/options/noNpcLooting") then
+    flags.ret_value = false
+  end
+end
+
+
+-- NOTE: Other callbacks are in the xr_corpse_detection patch
+function on_game_start()
+  RegisterScriptCallback("npc_on_item_before_pickup", PATCH.onItemBeforePickup)
+end
+
+
+return PATCH

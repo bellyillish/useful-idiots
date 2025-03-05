@@ -65,34 +65,41 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
     return
   end
 
-  local selected = NPC.getActiveState(npc, "weapon")
-  local wmode    = NPC.getReloadWeaponMode(npc)
-  local weapons  = NPC.getGuns(npc)
+  local preferred = NPC.getActiveState(npc, "weapon")
+  local reload    = NPC.getReloadModes(npc)
+  local item      = npc:active_item()
+  local weapons   = NPC.getGuns(npc)
 
-  -- unloaded
-  if wmode then
-    local id = NPC.setReloadWeapon(npc)
+  if WPN.isGun(item) then
+    local ammo = WPN.getAmmoCount(item)
 
-    if id then
-      flags.gun_id = id
-      return
-    end
-
-    if wmode == WPN.RELOAD_ALL then
-      for i, weapon in ipairs(weapons) do
-        if WPN.isUnloaded(weapon) then
-          flags.gun_id = weapon:id()
-          return
-        end
+    if item:get_state() == CWeapon.eReload then
+      -- don't switch weapon if reloading
+      if ammo.current < ammo.total then
+        flags.gun_id = item:id()
+        return
       end
+
+      -- else force out of reload animation
+      if ammo.current == ammo.total then
+        item:switch_state(0)
+      end
+
+    -- reload if needed
+    elseif
+      reload.emode    == WPN.EMPTY      and ammo.current == 0
+      or reload.emode == WPN.HALF_EMPTY and ammo.current < ammo.total / 2
+      or reload.emode == WPN.NOT_FULL   and ammo.current < ammo.total
+    then
+      flags.gun_id = item:id()
+      item:switch_state(7)
+      return
     end
   end
 
-  -- nothing to reload
-  NPC.setReloadModes(npc, 0, 0)
-
+  -- Sort weapons in inventory
   table.sort(weapons, function(w1, w2)
-    -- selected in UI
+    -- Selected in UI
     local t1 = WPN.getType(w1)
     local t2 = WPN.getType(w2)
 
@@ -103,13 +110,13 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
       t2 = "rifle"
     end
 
-    if t1 ~= t2 and t1 == selected then
+    if t1 ~= t2 and t1 == preferred then
       return true
-    elseif t1 ~= t2 and t2 == selected then
+    elseif t1 ~= t2 and t2 == preferred then
       return false
     end
 
-    -- repair kit type
+    -- Repair kit type
     local kits = {"pistol", "shotgun", "rifle_5", "rifle_7"}
     local p1 = TABLE.keyof(kits, WPN.getRepairType(w1)) or 5
     local p2 = TABLE.keyof(kits, WPN.getRepairType(w2)) or 5
@@ -120,12 +127,41 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
       return false
     end
 
-    -- cost
+    -- Cost
     return WPN.getCost(w2) < WPN.getCost(w1)
   end)
 
-  if weapons[1] then
+  -- Switch to next unloaded weapon if reloading all
+  if reload.wmode == WPN.RELOAD_ALL then
+    for i, weapon in ipairs(weapons) do
+      local ammo = WPN.getAmmoCount(weapon)
+
+      if false
+        or reload.emode == WPN.EMPTY      and ammo.current == 0
+        or reload.emode == WPN.HALF_EMPTY and ammo.current < ammo.total / 2
+        or reload.emode == WPN.NOT_FULL   and ammo.current < ammo.total
+      then
+        flags.gun_id = weapon:id()
+        weapon:switch_state(7)
+        return
+      end
+    end
+  end
+
+  -- Nothing left to reload
+  NPC.setReloadModes(npc, WPN.RELOAD_ACTIVE, WPN.EMPTY)
+
+  -- Don't force holding a weapon if there's an active item or no weapons
+  if item or not weapons[1] then
+    NPC.setForcingWeapon(npc, false)
+  else
     flags.gun_id = weapons[1]:id()
+
+    -- Force holding a weapon if no active item
+    if not NPC.getForcingWeapon(npc) then
+      NPC.setForcingWeapon(npc, true)
+      NPC.forceWeapon(npc)
+    end
   end
 end
 

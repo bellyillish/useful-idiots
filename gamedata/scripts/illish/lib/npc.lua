@@ -179,7 +179,9 @@ NPC.LOOT_SHARING_NPCS = {}
 
 
   function NPC.isReloading(npc)
-    return WPN.isReloading(npc:active_item())
+    return WPN.isGun(npc:active_item())
+      and npc:active_item():get_state() == CWeapon.eReload
+      or  false
   end
 
 
@@ -202,50 +204,42 @@ NPC.LOOT_SHARING_NPCS = {}
   end
 
 
-  function NPC.setReloadWeapon(npc, emode)
-    local store  = db.storage[npc:id()]
-    local active = npc:active_item()
-
-    emode = emode or store.reload_emode
-
-    if not WPN.isGun(active) then
-      store.reload_weapon = nil
-      return
-    end
-
-    if not WPN.isUnloaded(active, emode) then
-      store.reload_weapon = nil
-      return
-    end
-
-    if active:id() ~= store.reload_weapon then
-      active:set_ammo_elapsed(0)
-    end
-
-    store.reload_weapon = active:id()
-    return active:id()
-  end
-
-
-  function NPC.getReloadWeapon(npc)
-    return db.storage[npc:id()].reload_weapon
-  end
-
-
   function NPC.setReloadModes(npc, wmode, emode)
-    local store = db.storage[npc:id()]
-    store.reload_wmode = wmode and wmode > 0 and wmode or nil
-    store.reload_emode = emode and emode > 0 and emode or nil
+    db.storage[npc:id()].IDIOTS_RELOAD = {
+      wmode = wmode or WPN.RELOAD_ACTIVE,
+      emode = emode or WPN.EMPTY,
+    }
   end
 
 
-  function NPC.getReloadWeaponMode(npc)
-    return db.storage[npc:id()].reload_wmode
+  function NPC.getReloadModes(npc)
+    return db.storage[npc:id()].IDIOTS_RELOAD or {
+      wmode = WPN.RELOAD_ACTIVE,
+      emode = WPN.EMPTY,
+    }
   end
 
 
-  function NPC.getReloadEmptyMode(npc)
-    return db.storage[npc:id()].reload_emode
+  function NPC.setForcingWeapon(npc, force)
+    db.storage[npc:id()].IDIOTS_FORCE_WEAPON = force and true or nil
+  end
+
+
+  function NPC.getForcingWeapon(npc)
+    return db.storage[npc:id()].IDIOTS_FORCE_WEAPON or false
+  end
+
+
+  function NPC.forceWeapon(npc)
+    local stance = NPC.getActiveState(npc, "stance")
+    local state  = state_mgr.get_state(npc)
+
+    local anim = nil
+      or stance == "prone"       and (state == "sneak_fire" and "hide_fire" or "sneak_fire")
+      or stance == "sneak"       and (state == "sneak_fire" and "hide_fire" or "sneak_fire")
+      or state  == "threat_fire" and "guard_fire" or "threat_fire"
+
+    state_mgr.set_state(npc, anim, nil, nil, nil, {fast_set = true})
   end
 --
 

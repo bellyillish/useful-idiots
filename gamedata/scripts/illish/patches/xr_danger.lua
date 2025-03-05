@@ -49,6 +49,7 @@ function xr_danger.is_danger(npc, danger)
   local dangerObject = danger:object()
   local dangerType   = danger:type()
 
+  -- Grenade
   if dangerType == danger_object.grenade then
     if danger:dependent_object() and character_community(npc) ~= "zombied" then
       return xr_danger.danger_in_radius(npc, danger, dangerType)
@@ -61,6 +62,7 @@ function xr_danger.is_danger(npc, danger)
     return false
   end
 
+  -- Corpse
   if dangerType == danger_object.entity_corpse then
     if not (dangerObject and IsStalker(dangerObject) and character_community(dangerObject) == character_community(npc)) then
       return false
@@ -98,7 +100,7 @@ function xr_danger.is_danger(npc, danger)
     return false
   end
 
-  -- Bypass combat ignore radius for attacked, entity_attacked, ricochet
+  -- Attacked
   if danger:perceive_type() == danger_object.hit then
     return xr_danger.danger_in_radius(npc, danger, dangerType)
   end
@@ -107,11 +109,12 @@ function xr_danger.is_danger(npc, danger)
     return false
   end
 
-  if not dangerObject:alive() or not xr_combat_ignore.is_enemy(npc, dangerObject, true) then
-    return false
+  -- Other (e.g. sound)
+  if dangerObject:alive() and xr_combat_ignore.is_enemy(npc, dangerObject, true) then
+    return xr_danger.danger_in_radius(npc, danger, dangerType)
   end
 
-  return xr_danger.danger_in_radius(npc, danger, dangerType)
+  return false
 end
 
 
