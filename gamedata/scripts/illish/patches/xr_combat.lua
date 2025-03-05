@@ -156,17 +156,18 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
   -- Nothing left to reload
   NPC.setReloadModes(npc, WPN.RELOAD_ACTIVE, WPN.EMPTY)
 
-  -- Don't force holding a weapon if there's an active item or no weapons
+  -- Don't force if there's an active item or no weapons
   if item or not weapons[1] then
     NPC.setForcingWeapon(npc, false)
-  else
-    flags.gun_id = weapons[1]:id()
 
-    -- Force holding a weapon if no active item
-    if not NPC.getForcingWeapon(npc) then
-      NPC.setForcingWeapon(npc, true)
-      NPC.forceWeapon(npc)
-    end
+    -- Force if no active item
+  elseif not NPC.getForcingWeapon(npc) then
+    NPC.setForcingWeapon(npc, true)
+    NPC.forceWeapon(npc)
+  end
+
+  if weapons[1] then
+    flags.gun_id = weapons[1]:id()
   end
 end
 
