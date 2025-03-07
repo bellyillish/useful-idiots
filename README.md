@@ -36,8 +36,6 @@ It is included with GAMMA but is strongly enouraged either way. Priority doesn't
 
 - **Settings -> Gameplay -> General:** If "Only Companions Can Loot and Gather Items" is enabled in the mod settings, I'd suggest turning "Corpse Loot Distance" down to 0-2m. If disabled the Anomaly default is fine but GAMMA's is a bit high (I'd suggest 5-6m)
 
-<br>
-
 # Features
 
 ## Replacement UI
