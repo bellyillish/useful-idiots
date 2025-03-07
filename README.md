@@ -41,10 +41,6 @@ It is included with GAMMA but is strongly enouraged either way. Priority doesn't
 
 <br>
 
----
-
-<br>
-
 ## Replacement UI
 
 A new UI replaces the base game's Companion Wheel and is opened with the same keybind. It includes:
@@ -60,17 +56,9 @@ The new UI behaves like the Companion Wheel when opened:
 
 <br>
 
----
-
-<br>
-
 ## Keybinds and Modifiers
 
 Every available command can be assigned a keybind with alt/ctrl/shift modifiers. Separate keybinds can be assigned to cycle through groups of related commands. There are also a [subset of commands](#keyboard-only-commands) that are *only* available though keybinds.
-
-<br>
-
----
 
 <br>
 
@@ -114,8 +102,8 @@ Like "Patrol an Area" but they keep patrolling between their waypoints rather th
 
 <br>
 
-<!--  -- >
-# Combat Commands
+## Combat Commands
+
 These control what your idiots do when they *are* shooting at things. Idiots do the following things in all combat modes besides "Default Combat":
 
 - Dodge grenades without disengaging
@@ -125,47 +113,44 @@ These control what your idiots do when they *are* shooting at things. Idiots do 
 - Find and correctly position themselves behind partial (low/mid/high) cover
 - Use augmented sight to see properly through anomalies and geometry jank
 
-## Default Combat
+### Default Combat
 Bypasses the mod and uses the vanilla engine-based combat system instead.
 
-## Assault Combat
+### Assault Combat
 An offensive-geared combat mode inspired by the base game's "Monolith" scheme. Idiots pursue the enemy to a distance suitable for their weapon type. They attempt to flank enemies that are distracted by other NPCs. They switch strategies when fighting mutants, rush downed enemies, duck behind cover when reloading, fall back and recover when hurt, and search the surrounding area for lost enemies.
 
-## Guard Combat
+### Guard Combat
 A defensive-geared combat mode inspired by the base game's "Camper" scheme. Idiots guard their initial position. They may move to improve their cover, reaquire an enemy, evade mutants, rush downed enemies, and duck behind cover when reloading, but always stay within a radius around their initial position.
 
-## Support Combat
+### Support Combat
 Very similar to "Guard Combat" except they guard your position instead of their initial position and move with you. They try their best to stay out of your line of fire but accidents happen.
-> [!TIP]
 > [Stay Near](#you-can-make-them-stay-a-certain-distance-from-you), [Normal](#you-can-make-them-stay-a-certain-distance-from-you) and [Stay Far](#you-can-make-them-stay-a-certain-distance-from-you) keep them within 8m/16m/24m of your position respectively.
 
-## Sniper Combat
+### Sniper Combat
 Keeps them fixed in their current position at all times. This mode is for when you want complete control over where they are positioned during combat or wish to guide them manually with [Move to Point](#keyboard-only-commands)
 
-### You can choose how your idiots respond to threats:
+#### You can choose how your idiots respond to threats:
 - **Attack Enemies:** engage enemies on sight
 - **Defend Only:**    only engage enemies that attack you
 - **Ignore Combat:**  ignore all enemies
 
-### You can tell them which weapon type to choose from their inventory:
+#### You can tell them which weapon type to choose from their inventory:
 - **Best:**
 - **Pistol**
 - **Shotgun**
 - **Rifle/SMG**
 - **Sniper**
-> [!NOTE]
 > "Best" is determined by repair kit tier. Weapons without kits (like RPGs) are considered best. Ties are broken by comparing weapon cost.
 
-### You can also enable 3 additional combat modes from the base game:
+#### You can also enable 3 additional combat modes from the base game:
 - **Monolith**
 - **Camper**
 - **Zombied**
-> [!CAUTION]
 > These modes are functional but you may run into issues and general jank. They come as-is and are not supported in any way. Consider them "bonus" content:
 
 <br>
 
-# Other Commands
+## Other Commands
 
 ### Waypoints
 - **Add Waypoint:** assigns a patrol waypoint at your current position
@@ -196,9 +181,10 @@ Keeps them fixed in their current position at all times. This mode is for when y
 > [!CAUTION]
 > "Gather Artifacts" is disabled in MCM. Enabling it takes the fun out of artifact hunting and is technically cheating so use it with caution. In order to enable it "Gather Items" must also be enabled.
 
-# Keyboard-Only Commands
+## Keyboard-Only Commands
 
 These additional commands are only available via keyboard shortcut.
+
 - **Select Companion:**    selects individual idiots to apply your next command to
 - **Clear all Selected:**  clears all selected idiots so subsequent commands affect all of them
 - **Move to Point:**       tells idiots to move to your cursor
@@ -207,6 +193,7 @@ These additional commands are only available via keyboard shortcut.
 - **Add Waypoint:**        assigns at waypoint at your cursor
 
 "Move to Point" affects idiots differently depending on which command is active:
+
 - **Follow:**         moves to your cursor but resumes following when you move
 - **Wait:**           moves directly to your cursor
 - **Find Cover:**     takes cover near your cursor
