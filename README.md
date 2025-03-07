@@ -62,7 +62,7 @@ Every available command can be assigned a keybind with alt/ctrl/shift modifiers.
 
 <br>
 
-## Movemement Commands
+## Movement Commands
 These control what your idiots do when they're not busy shooting at things.
 
 ### Follow
