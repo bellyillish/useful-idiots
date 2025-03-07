@@ -38,7 +38,6 @@ It is included with GAMMA but is strongly enouraged either way. Priority doesn't
 - **Settings -> Gameplay -> General:** If "Only Companions Can Loot and Gather Items" is enabled in the mod settings, I'd suggest turning "Corpse Loot Distance" down to 0-2m. If disabled the Anomaly default is fine but GAMMA's is a bit high (I'd suggest 5-6m)
 
 <br>
-<!-- -->
 
 # Features
 
@@ -59,6 +58,7 @@ The new UI behaves like the Companion Wheel when opened:
 
 Every available command can be assigned a keybind with alt/ctrl/shift modifiers. Separate keybinds can be assigned to cycle through groups of related commands. There are also a [subset of commands](#keyboard-only-commands) that are *only* available though keybinds.
 
+<!-- -->
 ## Commands
 
 ### Movement Commands
@@ -74,8 +74,9 @@ These control what your idiots do when they're not busy shooting at things.
   - **Spread:**  to spread out laterally behind you
   - **Line:**    to follow behind you in single-file line
   - **Covered:** to follow while staying in cover if possible
-  > [!NOTE]
-  > You can only assign formations to an entire group (not to individual idiots).
+
+> [!NOTE]
+> You can only assign formations to an entire group (not to individual idiots).
 
   #### You can make them stay a certain distance from you:
   - **Stay Near:** at least 2.5m away
@@ -86,8 +87,9 @@ These control what your idiots do when they're not busy shooting at things.
   - **Stand**
   - **Sneak**
   - **Prone:**
-  > [!NOTE]
-  > Idiots sneak while moving because no crawl animation exists
+
+> [!NOTE]
+> Idiots sneak while moving because no crawl animation exists
 
 - #### Wait
   Like "Wait Here" but without the constant staring. This makes them more useful as lookouts and less creepy. They perform idle activities as boredom sets in. Eventually you may catch them smoking, drinking, or sitting on the job.
@@ -97,13 +99,15 @@ These control what your idiots do when they're not busy shooting at things.
 
 - #### Relax
   Idiots will look for a nearby campfire with room to sit. If none are nearby they will find a random location, usually indoors or with their backs to something. When relaxing they may smoke, drink, eat, use their PDA, and eventually nap.
-  > [!NOTE]
-  > Unlike many other implementations this does not rely on base game "camp" mechanics. This allows them to use any nearby campfire including ones you place with the "Placeable Campfires" mod.
+
+> [!NOTE]
+> Unlike many other implementations this does not rely on base game "camp" mechanics. This allows them to use any nearby campfire including ones you place with the "Placeable Campfires" mod.
 
 - #### Patrol
   Like "Patrol an Area" but they keep patrolling between their waypoints rather than stopping at the last one.
-  > [!NOTE]
-  > Like in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [Add Waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
+
+> [!NOTE]
+> Like in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [Add Waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
 
 <!--  -- >
 ### Combat Commands
