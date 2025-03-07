@@ -59,18 +59,15 @@ Every available command can be assigned a keybind with alt/ctrl/shift modifiers.
 
 <br>
 
-# Commands
-
-## Movement Commands
+# Movement Commands
 These control what your idiots do when they're not busy shooting at things.
 
-### Follow
----
+## Follow
 Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-assign-followers-to-one-of-4-formations) support. Idiots move like a single squad with you as leader. They stay closer and on the same side of walls and obstacles in enclosed spaces. They avoid following you into cramped spaces unless you tell them to [stay near](#you-can-make-them-stay-a-certain-distance-from-you).
 
 Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (all of which can be disabled in MCM).
 
-#### You can assign followers to one of 4 formations:
+### You can assign followers to one of 4 formations:
 - **Bunch:**   to randomly cluster behind you in a group
 - **Spread:**  to spread out laterally behind you
 - **Line:**    to follow behind you in single-file line
@@ -78,39 +75,38 @@ Followers automatically sprint, crouch, go prone, and adjust their headlamps to 
 > [!NOTE]
 > You can only assign formations to an entire group (not to individual idiots).
 
-#### You can make them stay a certain distance from you:
+### You can make them stay a certain distance from you:
 - **Stay Near:** at least 2.5m away
 - **Normal:**    at least   5m away
 - **Stay Far:**  at least  10m away
 
-#### You can also assign them one of 3 stances:
+### You can also assign them one of 3 stances:
 - **Stand**
 - **Sneak**
 - **Prone:**
 > [!NOTE]
 > Idiots sneak while moving because no crawl animation exists
 
-### Wait
----
+## Wait
 Like "Wait Here" but without the constant staring. This makes them more useful as lookouts and less creepy. They perform idle activities as boredom sets in. Eventually you may catch them smoking, drinking, or sitting on the job.
 
-### Find Cover
----
+## Find Cover
 Idiots will look for nearby cover (relative to you) to wait behind. If there's no suitable cover they will behave the same as [Wait](#wait).
 
-### Relax
----
+## Relax
 Idiots will look for a nearby campfire with room to sit. If none are nearby they will find a random location, usually indoors or with their backs to something. When relaxing they may smoke, drink, eat, use their PDA, and eventually nap.
 > [!NOTE]
 > Unlike many other implementations this does not rely on base game "camp" mechanics. This allows them to use any nearby campfire including ones you place with the "Placeable Campfires" mod.
 
-### Patrol
----
+## Patrol
 Like "Patrol an Area" but they keep patrolling between their waypoints rather than stopping at the last one.
+
 > [!NOTE]
 > Like in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [Add Waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
 
-## Combat Commands
+<br>
+
+# Combat Commands
 These control what your idiots do when they *are* shooting at things. Idiots do the following things in all combat modes besides "Default Combat":
 
 - Dodge grenades without disengaging
@@ -120,34 +116,29 @@ These control what your idiots do when they *are* shooting at things. Idiots do 
 - Find and correctly position themselves behind partial (low/mid/high) cover
 - Use augmented sight to see properly through anomalies and geometry jank
 
-### Default Combat
----
+## Default Combat
 Bypasses the mod and uses the vanilla engine-based combat system instead.
 
-### Assault Combat
----
+## Assault Combat
 An offensive-geared combat mode inspired by the base game's "Monolith" scheme. Idiots pursue the enemy to a distance suitable for their weapon type. They attempt to flank enemies that are distracted by other NPCs. They switch strategies when fighting mutants, rush downed enemies, duck behind cover when reloading, fall back and recover when hurt, and search the surrounding area for lost enemies.
 
-### Guard Combat
----
+## Guard Combat
 A defensive-geared combat mode inspired by the base game's "Camper" scheme. Idiots guard their initial position. They may move to improve their cover, reaquire an enemy, evade mutants, rush downed enemies, and duck behind cover when reloading, but always stay within a radius around their initial position.
 
-### Support Combat
----
+## Support Combat
 Very similar to "Guard Combat" except they guard your position instead of their initial position and move with you. They try their best to stay out of your line of fire but accidents happen.
 > [!TIP]
 > [Stay Near](#you-can-make-them-stay-a-certain-distance-from-you), [Normal](#you-can-make-them-stay-a-certain-distance-from-you) and [Stay Far](#you-can-make-them-stay-a-certain-distance-from-you) keep them within 8m/16m/24m of your position respectively.
 
-### Sniper Combat
----
+## Sniper Combat
 Keeps them fixed in their current position at all times. This mode is for when you want complete control over where they are positioned during combat or wish to guide them manually with [Move to Point](#keyboard-only-commands)
 
-#### You can choose how your idiots respond to threats:
+### You can choose how your idiots respond to threats:
 - **Attack Enemies:** engage enemies on sight
 - **Defend Only:**    only engage enemies that attack you
 - **Ignore Combat:**  ignore all enemies
 
-#### You can tell them which weapon type to choose from their inventory:
+### You can tell them which weapon type to choose from their inventory:
 - **Best:**
 - **Pistol**
 - **Shotgun**
@@ -156,28 +147,27 @@ Keeps them fixed in their current position at all times. This mode is for when y
 > [!NOTE]
 > "Best" is determined by repair kit tier. Weapons without kits (like RPGs) are considered best. Ties are broken by comparing weapon cost.
 
-#### You can also enable 3 additional combat modes from the base game:
+### You can also enable 3 additional combat modes from the base game:
 - **Monolith**
 - **Camper**
 - **Zombied**
 > [!CAUTION]
 > These modes are functional but you may run into issues and general jank. They come as-is and are not supported in any way. Consider them "bonus" content:
 
-## Other Commands
+<br>
+
+# Other Commands
 
 ### Waypoints
----
 - **Add Waypoint:** assigns a patrol waypoint at your current position
 - **Clear All Waypoints:** clears all patrol waypoints and switches them out of "Patrol"
 
 ### Headlamps
----
 - **Lights On:** forces headlamps on
 - **Lights Off:** forces headlamps off
 - **Default Lights:** lets the base game or other mods control headlamps
 
 ### Toggles
----
 - **Hurry:**                     forces them to run to their destination
 - **Loot Corpses (on/off):**     lets them loot items from dead bodies
 - **Gather Items (on/off):**     lets them pick up items lying around
@@ -185,7 +175,6 @@ Keeps them fixed in their current position at all times. This mode is for when y
 - **Help Wounded:**              lets them heal wounded friendlies (including during combat)
 
 ### Utilities
----
 - **Open Inventory:** opens their inventory (if they're less than 8 meters away)
 - **Reload Weapons:** forces them to reload their active weapon, or all weapons if enabled in MCM
 - **Retreat:** Sets [Follow](#follow), [Hurry](#toggles), [Ignore Combat](#you-can-choose-how-your-idiots-respond-to-threats), and [Stay Near](#you-can-make-them-stay-a-certain-distance-from-you) simultaneously (when you need to get your idiots out of trouble)
@@ -198,9 +187,9 @@ Keeps them fixed in their current position at all times. This mode is for when y
 > [!CAUTION]
 > "Gather Artifacts" is disabled in MCM. Enabling it takes the fun out of artifact hunting and is technically cheating so use it with caution. In order to enable it "Gather Items" must also be enabled.
 
-## Keyboard-Only Commands
-These additional commands are only available via keyboard shortcut.
+# Keyboard-Only Commands
 
+These additional commands are only available via keyboard shortcut.
 - **Select Companion:**    selects individual idiots to apply your next command to
 - **Clear all Selected:**  clears all selected idiots so subsequent commands affect all of them
 - **Move to Point:**       tells idiots to move to your cursor
