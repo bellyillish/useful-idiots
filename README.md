@@ -73,7 +73,6 @@ Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-ass
 - **Spread:**  to spread out laterally behind you
 - **Line:**    to follow behind you in single-file line
 - **Covered:** to follow while staying in cover if possible
-> [!NOTE]
 > You can only assign formations to an entire group (not to individual idiots).
 
 #### You can make them stay a certain distance from you:
@@ -85,7 +84,6 @@ Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-ass
 - **Stand**
 - **Sneak**
 - **Prone:**
-> [!NOTE]
 > Idiots sneak while moving because no crawl animation exists
 
 ### Wait
@@ -96,12 +94,10 @@ Idiots will look for nearby cover (relative to you) to wait behind. If there's n
 
 ### Relax
 Idiots will look for a nearby campfire with room to sit. If none are nearby they will find a random location, usually indoors or with their backs to something. When relaxing they may smoke, drink, eat, use their PDA, and eventually nap.
-> [!NOTE]
 > Unlike many other implementations this does not rely on base game "camp" mechanics. This allows them to use any nearby campfire including ones you place with the "Placeable Campfires" mod.
 
 ### Patrol
 Like "Patrol an Area" but they keep patrolling between their waypoints rather than stopping at the last one.
-> [!NOTE]
 > Like in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [Add Waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
 
 <br>
