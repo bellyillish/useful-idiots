@@ -71,19 +71,19 @@ These control what your idiots do when they're not busy shooting at things.
   Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-assign-followers-to-one-of-4-formations) support. Idiots move like a single squad with you as leader. They stay closer and on the same side of walls and obstacles in enclosed spaces. They avoid following you into cramped spaces unless you tell them to [stay near](#you-can-make-them-stay-a-certain-distance-from-you).
   > Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (all of which can be disabled in MCM).
 
-- ### You can assign followers to one of 4 formations:
+  #### You can assign followers to one of 4 formations:
   - **Bunch:**   to randomly cluster behind you in a group
   - **Spread:**  to spread out laterally behind you
   - **Line:**    to follow behind you in single-file line
   - **Covered:** to follow while staying in cover if possible
   > You can only assign formations to an entire group (not to individual idiots).
 
-- ### You can make them stay a certain distance from you:
+  #### You can make them stay a certain distance from you:
   - **Stay Near:** at least 2.5m away
   - **Normal:**    at least   5m away
   - **Stay Far:**  at least  10m away
 
-- ### You can also assign them one of 3 stances:
+  #### You can also assign them one of 3 stances:
   - **Stand**
   - **Sneak**
   - **Prone:**
