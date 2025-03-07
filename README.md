@@ -68,8 +68,7 @@ Every available command can be assigned a keybind with alt/ctrl/shift modifiers.
 These control what your idiots do when they're not busy shooting at things.
 
 - ### Follow
-  Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-assign-followers-to-one-of-4-formations) support. Idiots move like a single squad with you as leader. They stay closer and on the same side of walls and obstacles in enclosed spaces. They avoid following you into cramped spaces unless you tell them to [stay near](#you-can-make-them-stay-a-certain-distance-from-you).
-  > Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (all of which can be disabled in MCM).
+  Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-assign-followers-to-one-of-4-formations) support. Idiots move like a single squad with you as leader. They stay closer and on the same side of walls and obstacles in enclosed spaces. They avoid following you into cramped spaces unless you tell them to [stay near](#you-can-make-them-stay-a-certain-distance-from-you). Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (all of which can be disabled in MCM).
 
   #### You can assign followers to one of 4 formations:
   > You can only assign formations to an entire group (not to individual idiots).
@@ -84,6 +83,7 @@ These control what your idiots do when they're not busy shooting at things.
   - **Stay Far:**  at least  10m away
 
   #### You can also assign them one of 3 stances:
+  > [!NOTE]
   > Idiots sneak while moving because no crawl animation exists
   - **Stand**
   - **Sneak**
@@ -97,6 +97,7 @@ These control what your idiots do when they're not busy shooting at things.
 
 - ### Relax
   Idiots will look for a nearby campfire with room to sit. If none are nearby they will find a random location, usually indoors or with their backs to something. When relaxing they may smoke, drink, eat, use their PDA, and eventually nap.
+
   > Unlike many other implementations this does not rely on base game "camp" mechanics. This allows them to use any nearby campfire including ones you place with the "Placeable Campfires" mod.
 
   - ### Patrol
