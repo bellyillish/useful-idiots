@@ -1,4 +1,5 @@
-> Р”РѕРєСѓРјРµРЅС‚Р°С†РёСЏ РЅР° СЂСѓСЃСЃРєРѕРј СЏР·С‹РєРµ РґРѕСЃС‚СѓРїРЅР° [Р·РґРµСЃСЊ](README_ru.md).
+<!-- -- >
+> Документация на русском языке доступна [здесь](README_ru.md).
 
 # Useful Idiots
 
@@ -35,6 +36,9 @@ It is included with GAMMA but is strongly enouraged either way. Priority doesn't
 - **He Is With Me:** also doesn't conflict but is redundant. A replacement is included (with some [minor changes](#he-is-with-me) to the original's behavior).
 
 - **Settings -> Gameplay -> General:** If "Only Companions Can Loot and Gather Items" is enabled in the mod settings, I'd suggest turning "Corpse Loot Distance" down to 0-2m. If disabled the Anomaly default is fine but GAMMA's is a bit high (I'd suggest 5-6m)
+
+<br>
+<!-- -->
 
 # Features
 
