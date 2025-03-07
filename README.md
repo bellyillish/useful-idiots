@@ -1,9 +1,12 @@
+<!--
 > [!TIP]
 > ƒокументаци€ на русском €зыке доступна [здесь](README_ru.md).
+-->
 
 # Useful Idiots
 
 Overhauls the companion system with:
+
 - [Over 50 commands](#commands) to control them
 - A dynamic and customizable [UI replacement](#new-companion-ui) for the Companion Wheel
 - Extensive support for [keybinds and modifiers](#extensive-keyboard-support) (powered by MCM)
@@ -11,20 +14,20 @@ Overhauls the companion system with:
 
 Does not (and never will) overwrite any core files to keep it as compatible as possible out of the box with other mods.
 
-## Installation Requirements
+### Installation Requirements
 
 - Requires [Modded EXEs](https://github.com/themrdemonized/xray-monolith/releases)
 - Requires [Mod Configuration Menu](https://www.moddb.com/mods/stalker-anomaly/addons/anomaly-mod-configuration-menu)
 - Safe to add or remove whenever
 
-## Installation Instructions
+### Installation Instructions
 
 1. Download the ZIP file from here or [GitHub Releases](https://github.com/bellyillish/useful-idiots/releases).
 2. Install it with [Mod Organizer 2](https://anomalymodding.blogspot.com/2021/04/Mod-Organizer-2-setup-and-Amomaly-modding-guide.html).
 It is included with GAMMA but is strongly enouraged either way. Priority doesn't matter for Anomaly. For GAMMA just put it below the mods that come with it.
 3. Go to **Mod Configuration Menu -> Useful Idiots** to customize and configure to your liking.
 
-## Known Conflicts
+### Known Conflicts
 
 - **NPC Stops Dropping Weapons and Looting Dead Bodies** interferes with looting and gathering. Instead, an MCM option is included that does the exact same thing. By default it is enabled if running GAMMA and disabled otherwise.
 
@@ -38,7 +41,7 @@ It is included with GAMMA but is strongly enouraged either way. Priority doesn't
 
 <br>
 
-# Replacement UI
+## Replacement UI
 
 A new UI replaces the base game's Companion Wheel and is opened with the same keybind. It includes:
 
@@ -53,59 +56,56 @@ The new UI behaves like the Companion Wheel when opened:
 
 <br>
 
-# Keybinds and Modifiers
+## Keybinds and Modifiers
 
 Every available command can be assigned a keybind with alt/ctrl/shift modifiers. Separate keybinds can be assigned to cycle through groups of related commands. There are also a [subset of commands](#keyboard-only-commands) that are *only* available though keybinds.
 
 <br>
 
-# Movement Commands
+## Commands
+
+### Movemement Commands
 These control what your idiots do when they're not busy shooting at things.
 
-## Follow
-Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-assign-followers-to-one-of-4-formations) support. Idiots move like a single squad with you as leader. They stay closer and on the same side of walls and obstacles in enclosed spaces. They avoid following you into cramped spaces unless you tell them to [stay near](#you-can-make-them-stay-a-certain-distance-from-you).
+- ### Follow
+  Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-assign-followers-to-one-of-4-formations) support. Idiots move like a single squad with you as leader. They stay closer and on the same side of walls and obstacles in enclosed spaces. They avoid following you into cramped spaces unless you tell them to [stay near](#you-can-make-them-stay-a-certain-distance-from-you).
+  > Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (all of which can be disabled in MCM).
 
-Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (all of which can be disabled in MCM).
+- ### You can assign followers to one of 4 formations:
+  - **Bunch:**   to randomly cluster behind you in a group
+  - **Spread:**  to spread out laterally behind you
+  - **Line:**    to follow behind you in single-file line
+  - **Covered:** to follow while staying in cover if possible
+  > You can only assign formations to an entire group (not to individual idiots).
 
-### You can assign followers to one of 4 formations:
-- **Bunch:**   to randomly cluster behind you in a group
-- **Spread:**  to spread out laterally behind you
-- **Line:**    to follow behind you in single-file line
-- **Covered:** to follow while staying in cover if possible
-> [!NOTE]
-> You can only assign formations to an entire group (not to individual idiots).
+- ### You can make them stay a certain distance from you:
+  - **Stay Near:** at least 2.5m away
+  - **Normal:**    at least   5m away
+  - **Stay Far:**  at least  10m away
 
-### You can make them stay a certain distance from you:
-- **Stay Near:** at least 2.5m away
-- **Normal:**    at least   5m away
-- **Stay Far:**  at least  10m away
+- ### You can also assign them one of 3 stances:
+  - **Stand**
+  - **Sneak**
+  - **Prone:**
+  > Idiots sneak while moving because no crawl animation exists
 
-### You can also assign them one of 3 stances:
-- **Stand**
-- **Sneak**
-- **Prone:**
-> [!NOTE]
-> Idiots sneak while moving because no crawl animation exists
+- ### Wait
+  Like "Wait Here" but without the constant staring. This makes them more useful as lookouts and less creepy. They perform idle activities as boredom sets in. Eventually you may catch them smoking, drinking, or sitting on the job.
 
-## Wait
-Like "Wait Here" but without the constant staring. This makes them more useful as lookouts and less creepy. They perform idle activities as boredom sets in. Eventually you may catch them smoking, drinking, or sitting on the job.
+- ### Find Cover
+  Idiots will look for nearby cover (relative to you) to wait behind. If there's no suitable cover they will behave the same as [Wait](#wait).
 
-## Find Cover
-Idiots will look for nearby cover (relative to you) to wait behind. If there's no suitable cover they will behave the same as [Wait](#wait).
+- ### Relax
+  Idiots will look for a nearby campfire with room to sit. If none are nearby they will find a random location, usually indoors or with their backs to something. When relaxing they may smoke, drink, eat, use their PDA, and eventually nap.
+  > Unlike many other implementations this does not rely on base game "camp" mechanics. This allows them to use any nearby campfire including ones you place with the "Placeable Campfires" mod.
 
-## Relax
-Idiots will look for a nearby campfire with room to sit. If none are nearby they will find a random location, usually indoors or with their backs to something. When relaxing they may smoke, drink, eat, use their PDA, and eventually nap.
-> [!NOTE]
-> Unlike many other implementations this does not rely on base game "camp" mechanics. This allows them to use any nearby campfire including ones you place with the "Placeable Campfires" mod.
-
-## Patrol
-Like "Patrol an Area" but they keep patrolling between their waypoints rather than stopping at the last one.
-
-> [!NOTE]
-> Like in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [Add Waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
+  - ### Patrol
+  Like "Patrol an Area" but they keep patrolling between their waypoints rather than stopping at the last one.
+  > Like in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [Add Waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
 
 <br>
 
+<!-- -- >
 # Combat Commands
 These control what your idiots do when they *are* shooting at things. Idiots do the following things in all combat modes besides "Default Combat":
 
