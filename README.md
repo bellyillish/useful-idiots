@@ -1,200 +1,320 @@
-# Useful Idiots for GAMMA and Anomaly
-
 > [!TIP]
 > Документация на русском языке доступна [здесь](README_ru.md).
 
-Overhauls the companion system with new and improved commands, configurable keybinds, a new UI, and several fixes and tweaks to companion behavior. 
+# Useful Idiots for Anomaly and GAMMA
 
-*Does not (and hopefully never will) overwrite any core files to play nice with other mods.*
+Overhauls the companion system with:
 
-## UI
+- [Over 50 commands](#movement-commands) for controlling your idiots
+- A dynamic and customizable [UI replacement](#replacement-ui) for the companion wheel
+- Extensive support for [keybinds and modifiers](#keybinds-and-modifiers) (powered by MCM)
+- Lots of AI [improvements and bug fixes](#improvements-and-fixes), some for companions and some for everyone
 
-Replaces the companion wheel (and is available via the same keybind). Functions similarly: when pointing at a companion, commands are given only to that companion. When pointed at nobody, commands are given to everyone.
-- Shows all commands to control companions in one place
-- Always indicates which commands are set globally and for each companion
-- Tabs let you directly access global or individual companions' commands at all times
-- When open, numeric indicators are shown above companions indicating their tab number (can be disabled via MCM)
+Does not (and never will) overwrite any base game files to keep it as compatible as possible out of the box with other mods.
 
-It includes the following commands (more info on each below):
-- [Movement Commands](#behaviors): follow, wait, find cover, relax, patrol
-- [Formations](#formations): bunch, spread, line, cover
-- [Stance](#stances): stand, sneak, prone
-- [Distance](#distances): far, normal, near
-- [Combat Readiness](#combat-readiness): ignore, defend player, attack
-- [Combat Modes](#combat-modes): default, assault, support, guard, snipe
-- [Weapon Types](#weapon-types): best, pistol, shotgun, SMG, rifle, sniper, RPG
-- [Headlamps](#headlamps): auto, on, off
-- [Toggles](#toggles): hurry, gather items, gather artifacts*, loot corpses, help wounded
-- [Buttons](#buttons): add waypoint, clear all waypoints, open inventory, reload weapons*, retreat*, fix/unstick*, re-sync to global state
+## Installation Requirements
 
-\* = *disabled by default in MCM*
+- Requires [Modded EXEs](https://github.com/themrdemonized/xray-monolith/releases)
+- Requires [Mod Configuration Menu](https://www.moddb.com/mods/stalker-anomaly/addons/anomaly-mod-configuration-menu)
+- Safe to add or remove at any point
 
-## Keybinds
+## Installation Instructions
 
-You can set and configure keybinds for any of the commands above. There are also a few additional commands that are only available via keybind:
+1. Download the ZIP from here or from [GitHub Releases](https://github.com/bellyillish/useful-idiots/releases).
+2. Install it with [Mod Organizer 2](https://anomalymodding.blogspot.com/2021/04/Mod-Organizer-2-setup-and-Amomaly-modding-guide.html). It is included with GAMMA but is strongly encouraged either way. Priority doesn't matter for Anomaly. For GAMMA just put it below the mods that come with it.
+3. Go to **Mod Configuration Menu -> Useful Idiots** to customize and configure to your liking.
 
-- **Select companion:** Lets you select one or more companions with the cursor. Subsequent keybind presses will affect only selected companions instead of everyone.
-- **Clear all selected companions:** Clears any selected companions. Subsequent keybind presses will resume affecting everyone.
-- **Add waypoint:** Adds a patrol waypoint where the cursor is pointed
-- **Move to point:** Moves companions to where the cursor is pointed (same behavior as Anomaly keybind).
-- **Look at point:** Forces companions to look where the cursor is pointed.
-- **Move out of the way:** Forces companions near the cursor to try to move out of the way and clear a path for the player.
+## Known Conflicts
 
-## Commands
+- **NPC Stops Dropping Weapons and Looting Dead Bodies** interferes with looting and gathering. An MCM option is included instead that does the same thing. It defaults to enabled in GAMMA and disabled in Anomaly.
 
-### Behaviors
----
+- **NPC Use Grenade Launchers:** contains a syntax error that crashes scripts in the base game. Useful Idiots relies on one of those scripts so using the two together will result in a CTD. I'd recommend avoiding that mod entirely until it is fixed and properly tested.
+
+- **Companion Anti AWOL for Anomaly:** doesn't conflict but can *sort of* get in the way. You'll have plenty of control over your idiots, but this can make them de-aggro in front of enemies and leave them defenseless. It works fine so it's your call, but keep it in mind.
+
+- **He Is With Me:** also doesn't conflict but is redundant since a replacement with [slightly modified logic](#he-is-with-me) is already included.
+
+- **Settings -> Gameplay -> General:** If "Only Companions Can Loot and Gather Items" is enabled in the mod settings, I'd suggest turning "Corpse Loot Distance" down to 0-2m. If disabled Anomaly's default is fine but GAMMA's is a bit high (I'd suggest 5-6m)
+
+<br>
+
+## Replacement UI
+
+A new UI replaces the base game's Companion Wheel. The same keybind opens it. It includes:
+- Central access to [all commands](#movement-commands) (no more digging through nested dialogs)
+- Shows which commands are enabled and disabled at all times
+- Tabs to issue commands to individual idiots or all at once
+- Numeric indicators above idiots to show which tab is theirs
+
+It behaves like the original companion wheel when opened:
+- When pointing at an idiot the UI opens to that idiot's tab
+- When pointing at nobody the UI opens to the "All" tab
+
+<br>
+
+## Keybinds and Modifiers
+
+Every available command can be assigned to a key with alt/ctrl/shift and click/hold/double-tap modifiers. You can also choose whether keys enable a command, toggle it, or cycle through groups of related ones. [Some commands](#keyboard-only-commands) are only available using keybinds.
+
+<br>
+
+## Movement Commands
+These control what your idiots do when they're not busy shooting at things.
+
+### Follow
+Like "Follow Me" but rewritten with [formation](#formations) support and new pathfinding. Idiots move like a single squad with you as leader. In enclosed spaces they stay closer to you and on the same side of walls. They avoid following you into cramped spaces unless you tell them to [stay near](#distances). Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (each can be disabled in MCM).
+<a name="formations"></a>
+
+#### You can assign followers to one of 4 formations:
+- **Bunch:**   to randomly cluster behind you in a group
+- **Spread:**  to spread out laterally behind you
+- **Line:**    to follow behind you in single-file line
+- **Covered:** to follow while staying in cover if possible
+> [!TIP]
+> You can only assign formations to an entire group (not to individual idiots).
+<a name="distances"></a>
+
+#### You can make them stay a certain distance from you:
+- **Stay Near:** at least 2.5m away
+- **Normal:**    at least   5m away
+- **Stay Far:**  at least  10m away
+<a name="stances"></a>
+
+#### You can also assign them one of 3 stances:
+- **Prone:** no crawl animation exists so they sneak when moving
+- **Sneak**
+- **Stand**
+
+### Wait
+Like "Wait Here" but without the constant staring, which makes them more useful as lookouts and less creepy. They perform idle activities when boredom sets in. Eventually you may catch them smoking, drinking, or sitting on the job.
+
+### Find Cover
+Idiots will look for nearby cover (relative to you) to hide and wait behind. If there's no suitable cover they will behave the same as "Wait".
+
+### Relax
+Idiots will look for a nearby campfire with room to sit. If none are nearby they will find a random location, usually indoors or with their backs to something. When relaxing they may smoke, drink, eat, use their PDA, or eventually nap.
 > [!NOTE]
-> Affects companions when not engaged in combat.
+> My implementation is a bit different becuase it doesn't rely on base game's "camp" mechanics, which allows them to use any nearby campfire including ones you place with the "Placeable Campfires" mod.
 
-- **Follow:** Follow the actor in the formation selected in the UI. Similar to vanilla but with rewritten pathfinding logic.
-  - Rather than moving as individual squads they move more like a single squad with you as the squad leader.
-  - They obey "Move to Point" but will break off and resume following when the player moves. "Move to Point" can automatically switch them to "Wait" via MCM.
-  - Companions will automically sprint, crouch, go prone, and adjust their headlamps to match the player (these can all be disabled via MCM).
-  - Companions detect when the player is in an open, enclosed, or cramped space and follow accordingly. In an enclosed space they favor staying on the same side of any obstacles (e.g. walls) as the player. They try to avoid following the player into cramped spaces unless they are set to "Stay Near".
+### Patrol
+Like "Patrol an Area" but they continue to loop through their waypoints instead of stopping at the last one.
+> [!TIP]
+> As in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [add waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
 
-- **Wait:** Stop immediately and wait at the current position. Similar to vanilla. After a few seconds they will stop looking at the player and instead look in a fixed direction. You can make them look in a specific direction by using the "Look at Point" command. When using "Move to Point" they will go directly to that point.
+<br>
 
-- **Find Cover:** Try to find suitable cover nearby and wait there. If there isn't any nearby they will wait at their current position. When using "Move to Point" they will seek cover around that point.
+## Combat Commands
 
-- **Relax:** Try to find a nearby campfire with room to sit/kneel. If none are aound with room, pick a random spot nearby (usually indoors or in front of a wall or other large object). This behavior does not rely on the "camp" scheme, so they will use any nearby campfire including ones you set (if you have a mod installed that lets you do so). When using "Move to Point" they will relax near that point.
+These control what your idiots do when they *are* shooting at things. Idiots always do the following in all combat modes besides "Default Combat":
 
-- **Patrol:** Patrol between 2 or more waypoints. Similar to vanila except they continue to patrol back and forth instead of stopping at the last waypoint. Companions can only be set to "Patrol" if at least two waypoints have been set using the "Add Waypoint" command.
+- Dodge grenades without disengaging
+- Efficiently avoid friendly fire
+- Locate enemies by sound
+- Share enemy locations with each other
+- Find and correctly position themselves behind partial (low/mid/high) cover
+- Use augmented sight to see properly through anomalies and geometry issues
 
-Companions also perform various idle animations and get increasingly bored as time passes. Eventually you might catch them smoking or sitting on the job. When relaxing they might eat, drink, pull out their PDA, or sleep.
+### Default Combat
+Bypasses the mod and uses the vanilla engine-based combat system instead.
 
-### Formations
----
-> [!NOTE]
-> Affects companions that are set to "Follow" and are not engaged in combat. They can only be set globally in the "All" tab.
+### Assault Combat
+An offensive-geared combat mode inspired by the base game's "Monolith" scheme. Idiots pursue the enemy to a distance suitable for their weapon type. They attempt to flank enemies that are distracted by other NPCs. They switch strategies when fighting mutants, rush downed enemies, duck behind cover when reloading, fall back and recover when hurt, and search the surrounding area for lost enemies.
 
-- **Bunch:** Follow the player in a random, bunched-up formation similar to vanilla.
-- **Spread:** Follow the player while side-by-side in a lateral line.
-- **Line:** Follow the player in a single-file line.
-- **Covered:** Follow the player while trying to stay in cover as much as possible.
+### Guard Combat
+A defensive-geared combat mode inspired by the base game's "Camper" scheme. Idiots guard their initial position. They may move to improve their cover, reacquire an enemy, evade mutants, rush downed enemies, and duck behind cover when reloading, but always stay within a radius around their initial position.
 
-### Stances
----
-> [!NOTE]
-> Affect companions that are idle, following, or in combat (combat logic will sometimes override their stance).
+### Support Combat
+Very similar to "Guard Combat" except they guard your position instead of their initial position and move with you. They try their best to stay out of your line of fire (but accidents happen).
+> [!TIP]
+> [Stay near](#distances), [normal](#distances) and [stay far](#distances) keep them within 8m, 16m, and 24m of your position respectively.
 
-- **Stand:** Stand/walk/jog/run (same as vanilla when not using stealth).
-- **Sneak:** Crouch/sneak (same as vanilla when using stealth).
-- **Prone:** Prone/sneak (no animations for moving in a prone position exist AFAIK).
+### Sniper Combat
+Keeps them fixed in their current position at all times. This mode is for when you want complete control over where they are positioned during combat or wish to guide them manually with [move to point](#keyboard-only-commands)
+<a name="readiness"></a>
 
-### Distances
----
-> [!NOTE]
-> Affects companions that are set to "Follow" or in "Support" combat. Distances below apply to "Follow".
+#### You can choose how your idiots respond to threats:
+- **Attack Enemies:** engage enemies on sight
+- **Defend Only:**    only engage enemies that attack you
+- **Ignore Combat:**  ignore all enemies
+<a name="weapon-type"></a>
 
-- **Near:** Stay at least ~2.5m from the player.
-- **Normal:** Stay at least ~5m from the player.
-- **Far:** Stay at least ~10m from the player.
+#### You can tell them which weapon type to choose from their inventory:
+- **Best:** determined by repair kit tier. Weapons without kits (like RPGs) are considered best. Ties are broken by comparing weapon cost.
+- **Pistol**
+- **Shotgun**
+- **Rifle/SMG**
+- **Sniper**
+<a name="legacy-combat"></a>
 
-### Combat Readiness
----
-- **Attack Enemies:** Engage enemies on sight (same as vanilla)
-- **Defend Only:** Only engage if an enemy attacks the player (same as "Don't attack unless attacked" in vanilla)
-- **Ignore Combat:** Ignore enemies always (same as vanilla)
+#### You can also enable 3 additional combat modes from the base game:
+- **Monolith**
+- **Camper**
+- **Zombied**
+> [!CAUTION]
+> These modes are functional but you may run into issues oddities. They come as-is and are not supported in any way. Consider them "bonus" content:
 
-### Combat Modes
----
-> [!NOTE]
-> All custom combat modes have the following behaviors built in:
-> - Dodge grenades (without disengaging with the enemy)
-> - Avoid friendly fire (with minimal disengagement)
-> - Melee attack enemies at close range
-> - Use hearing to locate enemies
-> - Share locations of enemies when spotted or spotted by the player
-> - Find the best high/mid/low cover depending on the situation
-> - Stand or crouch to shoot from or hide behind cover
-> - Use raycasting to augment their sight and help them see through obstacles like transparent anomalies
+<br>
 
-- **Default:** Bypasses this mod and uses the default engine-based combat scheme instead.
+## Other Commands
 
-- **Assault Combat:** An "offensive" combat style. They approach the enemy in stages to a distance suitable for their active weapon's range and preferring partial cover that they can shoot behind. They pursue differently when the enemy is in an enclosed space (e.g. in a building). When their enemy is focused on another NPC, they try to flank. When fighting mutants they backpedal and evade while firing. When losing sight of the enemy they search starting at the last known position. They rush wounded enemy NPCs. They fall back and seek higher cover when injured.
-
-- **Guard Combat:** A "defensive" combat style. They fight the enemy while staying within a radius around their initial position, defending/guarding it. They move periodically to regain sight of the enemy or to seek better cover. They evade when fighting mutants. They rush wounded enemy NPCs that are inside the radius.
-
-- **Support Combat:** They fight the enemy while staying within a radius around the player, providing covering or supporting fire. They move periodically to regain sight of the enemy or to seek better cover. They evade when fighting mutants. They rush wounded enemy NPCs that are inside the radius. They obey "Stay Near", "Normal", and "Stay Far" by staying 8m/16m/24m from the player respectively. They try not to cross into the line of fire between the player and enemy as much as possible.
-
-- **Sniper Combat:** They in their current fixed position. They only move to dodge grenades or avoid friendly fire regardless of whether they are fighting NPCs or mutants.
-
-Combat modes respond to the "Move to Point" command in a way that fits their scheme. For example in "Guard" or "Snipe" that point will become their new permanent fixed position. In "Assault" or "Support" they will move to that point but resume their normal combat behavior afterwards. "Move to Point" can automatically switch them to "Guard Combat" via an MCM option.
-
-> [!WARNING]
->You can also enable the **"Monolith"**, **"Camper"** and **"Zombied"** combat modes that ship with Anomaly via MCM. AFAIK thse are not used by Anomaly, but are used by GAMMA and some other mods. They work for the most part but have some issues and jankiness. Therefore they are **disabled by default not supported in any way**. Consider them "bonus content".
-
-### Weapon Types
----
-> [!NOTE]
-> In vanilla companions switch weapons based on enemy distance. This is determined by the engine and can happen at inopportune times. If they're on top of a boundary between two of these distances, they may repeatedly switch back and forth between weapons and get caught in reload animations that cancel before they finish. This leaves them vulnerable and unable to defend themselves.
-
-When **"Best"** is selected, companions always use their best weapon. The "best" weapon is determined by:
-  1. Repair kit tier (weapons without repair kits like RPGs are considered best)
-  2. For weapons that use the same repair kit, the one with the highest cost is considered best
-
-You can also command them to use specific weapon types by choosing **"Pistol"**, **"Shotgun"**, **"SMG"**, **"Rifle"**, **"Sniper"** or **"RPG"**. But regardless of what is selected, they will never switch weapons during combat unless you tell them to.
+### Waypoints
+- **Add Waypoint:** assigns a patrol waypoint at your current position
+- **Clear All Waypoints:** clears all patrol waypoints and switches them out of "Patrol"
 
 ### Headlamps
----
-- **Default Light:** Let vanilla or other mods control headlamps.
-- **Light Off:** Force headlamps off.
-- **Light On:** Force headlamps on.
-
-When in "Follow", companions will match how the player's headlamp is set when using "Default Light" and when not overriden by another mod. This can be disabled via MCM.
+- **Lights On:** forces headlamps on
+- **Lights Off:** forces headlamps off
+- **Default Lights:** lets the base game or other mods control headlamps
 
 ### Toggles
----
-- **Hurry:** Run to the destination.
-- **Gather Items:** Pick up items lying around in the world.
-- **Gather Artifacts:** Retrieve artifacts (can only be enabled if "Gather Items" is also enabled).
-- **Loot Corpses:** Loot nearby corpses.
-- **Help Wounded:** Patch up wounded friendly NPCs (including during combat).
+- **Hurry:**                     forces them to run to their destination
+- **Loot Corpses (on/off):**     lets them loot items from dead bodies
+- **Gather Items (on/off):**     lets them pick up items lying around
+- **Gather Artifacts (on/off):** lets them detect and retrieve nearby artifacts
+- **Help Wounded:**              lets them heal wounded allies (including during combat)
 
-Any items picked up by companions while looting or gathering is enabled can be accessed via their inventories. All other items they're carrying will remain hideen from the player as usual.
+### Utilities
+- **Open Inventory:** opens their inventory (if they're less than 8 meters away)
+- **Reload Weapons:** forces them to reload their active weapon, or all weapons if enabled in MCM
+- **Retreat:** Sets [follow](#follow), [hurry](#toggles), [ignore Combat](#readiness), and [stay near](#distances) simultaneously (when you need to get your idiots out of trouble)
+- **Unstick:** Triggers a fix for stuck or unresponsive idiots
+- **Re-Sync:** Syncs idiots to the current state of the "All" tab
 
-> [!IMPORTANT]
-> When using these commands, Make sure to disable any mods that interfere with or prevent NPCs from looting and gathering. You can contol whether non-companion NPCs can loot or gather via MCM instead. By default this is disabled for GAMMA but enabled otherwise.
+> [!TIP]
+> Only the items your idiots pick up while looting or gathering are accessible when opening their inventories. All other items including their original primary weapon remain hidden from you.
 
 > [!CAUTION]
-> Since NPCs are impervious to anomalies, "Gather Artifacts" is technically cheating. I'd only reccommend enabling it if you also use other mods that compensate (e.g. mods that make NPCs avoid anomalies and/or get hurt by them).
+> "Gather Artifacts" is disabled in MCM. Enabling it takes the fun out of artifact hunting and is technically cheating so use it with caution. In order to enable it "Gather Items" must also be enabled.
 
-### Buttons
----
-- **Add Waypoint:** Add a patrol waypoint for a companion. They can be placed in "Patrol" once two or more waypoints have been added.
-- **Clear All Waypoints:** Clear all patrol waypoints and switch them out of "Patrol" if they're in it.
-- **Open Inventory:** Open their inventory. The companion must be 8m or less from the player to use this.
-- **Reload Weapons:** Force companions to reload all empty or partially-loaded weapons. Pressing it again cancels the reloading process. Hidden by default but can be enabled in MCM.
-- **Retreat:** Simultaneously sets "Follow", "Hurry", "Ignore Combat", and "Stay Near". Useful for emergencies. Hidden by default but can be enabled in MCM.
-- **Unstick:** Triggers an "unstick" function which can fix stuck or unresponsive companions. Hidden by default but can be enabled in MCM.
-- **Re-Sync:** Resets all companions to the global state (the state shown in the "All" tab in the UI).
+<br>
 
-## Other AI Improvements
+## Keyboard-Only Commands
 
-### Friendly Fire AI
----
-> [!NOTE]
-> The vanilla "friendly fire" scheme (`rx_ff.script`) is a huge hindrance to NPC combat AI. When you see them constantly moving side-to-side and not firing their weapon, this is the reason. As soon as a friendly or neutral NPC gets near their line of fire, they immediately leave combat, strafe 10-12 meters, and not re-enter combat for a minimum of 2.5 seconds. On top of that, the strafe logic strongly favors one direction over the other. This means that multiple NPCs strafing at the same time will continue to be in each other's way and further delay them from re-entering combat. This is why large firefights tend to look more like a dance-off than actual combat.
+These additional commands are only available via keyboard shortcut:
 
-Useful Idiots **modifies the friendly fire behavior** in a couple ways to improve combat without causing too much disruption to AI or overall balance:
+- **Select Companion:**    selects individual idiots to command with your cursor
+- **Clear all Selected:**  clears all selected idiots to resume commanding all of them
+- **Move to Point:**       tells idiots to move to your cursor
+- **Look at Point:**       tells idiots to look at your cursor
+- **Move Out of the Way:** tells idiots around your cursor to clear a path for you
+- **Add Waypoint:**        assigns a patrol waypoint at your cursor
 
-1. When a friendly/neutral NPC gets in the LoF, there is a 1.5 second grace period before the NPC starts strafing. During this period they stop firing but immediately re-enter combat once the LoF is clear. This allows NPCs to pass through without interrupting combat for a long period of time.
+"Move to Point" affects idiots differently depending on which command is active:
 
-2. If the LoF is still obstructed after 1.5s they will strafe a shorter distance. If the LoF clears during strafing, they will stop and re-enter combat after 500ms instead of waiting the entire 2.5s.
+- **Follow:**         moves to your cursor but resumes following when you move
+- **Wait:**           moves directly to your cursor
+- **Find Cover:**     takes cover near your cursor
+- **Relax:**          finds a spot to relax near your cursor
+- **Assault Combat:** moves to your cursor but resumes combat afterwards
+- **Support Combat:** moves to your cursor but resumes combat afterwards
+- **Guard Combat:**   moves to guard your cursor position
+- **Sniper Combat:**  moves to your cursor and stays there
 
-For companions, friendly fire logic is built into the [custom combat modes](#combat-modes), but it functions nearly identically. The only difference is the strafe direction is better randomized.
+<br>
 
-### Reloading AI
----
-> [!NOTE]
-> Another hindrance to combat effectiveness is NPC reloading behavior. Aside from the engine switching them to unloaded weapons in the middle of combat or keeping them in and endless reload loop, they also tend to keep their weapons empty or mostly unloaded after leaving combat. Once re-entering combat, they then have to immediately stop and reload, once again making themselves vulnerable.
+## Improvements and Fixes
 
-In addition to [improved weapon switching](#weapon-types), useful idiots also makes two additions to reloading behavior:
-1. Companions automatically reload their active weapon after leaving combat, when first joining, or when loading a save (they can be told to reload all of their weapons instead via MCM).
-2. Companions automatically reload their weapons during combat right before they start searching for an enemy.
+Useful Idiots addresses lots of bugs, inconsistencies, and overall jank. Your idiots should feel much snappier and more responsive, pathfind better, respect personal space, and be less inclined to get stuck on random rocks and trees. They should spend more time following your orders and less time blankly staring at you.
 
+Useful Idiots isn't meant to be an all-encompassing "Improved AI" mod. It mainly cares about what makes companions work better. That said, some fixes and improvements gave idiots an unfair advantage over their enemies. Some general AI improvements have been made in those cases to re-level the playing field, and it's possible for one or more to overlap with other AI-focused mods.
 
-## Fixes
+To this end, everything in Useful Idiots is done via DLTX, DXML, callbacks, and monkey patching. In the future you will also be able to individually disable anything that affects non-companions just in case you encounter weirdness with other mods.
 
-Useful Idiots fixes many bugs, issues, inconsistencies, and general wonkiness with companions. They should feel much snappier and more responsive in general, pathfind better, respect personal space more, and get stuck much less. They no longer ignore enemies that are less than 30m from them (and vice versa) while they are sneaking. They no longer stop, creepily stare at you, and ignore their commands when you are near them. Many values have been tweaked or reworked via DLTX.
+<br>
+
+## Base Game Changes
+
+Source code for changes are commented and can be found [in here](https://github.com/bellyillish/useful-idiots/tree/main/gamedata/scripts/illish/patches).
+
+- [Ignoring Combat (xr_combat_ignore)](#ignoring-combat-xr_combat_ignore)
+- [Danger Detection (xr_danger)](#danger-detection-xr_danger)
+- [Friendly Fire (rx_ff)](#friendly-fire-rx_ff)
+- [Weapon Jamming (xr_weapon_jam)](#weapon-jamming-xr_weapon_jam)
+- [Automatic Weapon Switching](#automatic-weapon-switching)
+- [Melee Combat (xr_facer)](#melee-combat-xr_facer)
+- [Reloading](#reloading)
+- [Invalid Bone IDs](#invalid-bone-ids)
+- [State Manager (state_mgr)](#state-manager-state_mgr)
+- [Picking Up Weapons](#picking-up-weapons)
+- [He is With Me](#he-is-with-me)
+
+### Ignoring Combat (xr_combat_ignore)
+
+Useful Idiots replaces `xr_combat_ignore.is_enemy()` to fix bugs and add the following improvements:
+
+1. Hard-coded distance values have been moved to `xr_combat_ignore.ltx` (which is no longer unused)
+2. Vision degrades *gradually* at night (6-9pm) and improves in the morning (3-6am)
+3. Vision degrades *gradually* from rain strength
+4. Night and rain effects now stack and affect all NPCs relatively the same
+5. Companions and actor enemies have equal and consistent vision ranges for balance purposes
+
+### Danger Detection (xr_danger)
+
+Useful Idiots replaces `xr_danger.is_danger()` to a few fix bugs. Most are already fixed in GAMMA but included here as well for Anomaly. A long-standing GAMMA bug where neutral NPCs panic when you pass is also fixed. Idiots in the danger scheme don't respond to commands, so following changes were made specifically for them as a workaround:
+
+1. Idiots only stay in danger mode for 4 seconds
+
+2. Idiots don't enter danger mode when hearing something but will instead turn to look at the source
+
+3. Idiots still enter danger mode to dodge grenades or react to being hit by gunfire but ignore all other sources of danger (like corpses)
+
+### Friendly Fire (rx_ff)
+
+NPCs enter this scheme way too early and often, stay in it way too long, and move in a way causes it to trigger over and over again. If you've ever witnessed a squad vs. squad conflict that looks more like a dance-off than an actual gunfight, this is probably why.
+
+1. Added a 1.5s grace period to let allies pass by. If their LOF clears up before then they will immediately return to combat.
+
+2. If their LOF does not clear they will strafe but a much shorter distance and re-enter combat as soon as their LOF has been clear for 500ms.
+
+3. Allies have to be closer to the LOF in order to be considered "in the way"
+
+4. Better-randomized strafing direction (coming soon)
+
+### Weapon Jamming (xr_weapon_jam)
+
+1. Fixed it being impossible to disable because it didn't parse its LTX file correctly.
+
+2. Fixed a calculation error that made the first jam trigger a max chance of a 2nd jam immediately after.
+
+3. Changed how NPC jam chance is calculated. Instead of a fixed per-shot percentage, it starts low and gradually increases as more rounds are spent (up to a max). Chance resets on each jam, and clip size is also taken into account to even it out among different gun types. It should now be very rare for multiple jams to happen in a row, and the overall frequency of NPC jams should feel much less absurd making them more effective in combat.
+
+### Automatic Weapon Switching
+
+The engine forces NPCs to switch weapons at certain distances, which would always trigger at the worst time and leave them vulnerable. If you've ever witnessed an NPC rush an enemy only to switch to an unloaded pistol or shotgun and immediately get blown up trying to reload it directly in front of them, or 2 enemies locked in a cycle of weapon switching and interrupted attempts at reloading instead of shooting each other, this is probably why.
+
+1. Idiots always use their best weapon (based on [weapon type](#weapon-type)) and will never switch to another unless you tell them to. I plan to extend this to all NPCs in the future.
+
+2. A hacky little fix was added to prevent taking your idiot's remaining weapon away (e.g. with "Show All Items in Companion Inventories" enabled) would get them temporarily stuck with empty hands. Now they switch back to the weapon(s) you give them afterwards.
+
+### Melee Combat (xr_facer)
+
+The config file for `xr_facer` was missing a few ranks which meant some NPCs would never use melee combat at close range and be at disadvantage vs. (possibly lower-ranked) NPCs that did. The missing ranks have been filled in so that everyone can use melee combat including your idiots.
+
+### Reloading
+
+1. NPCs don't reload after combat which puts them in a bad spot the next time around. Spending the first few seconds of a gunfight reloading your weapon in front of an enemy is rarely a good strategy, so Useful Idiots forces all NPCs to reload their weapon when empty.
+
+2. NPC reload animations were fixed to no longer loop or repeat multiple times after their weapon is loaded. Non clip-fed weapons like shotguns are still not exactly right, but overall things are improved and NPCs should spend more time shooting and less time pretending to reload.
+
+### Invalid Bone IDs
+
+Some mutants have inconsistent and arbitrary names for their bone IDs (because of course they do). This can cause "Invalid Bone ID" errors and issues in scripts that rely on `utils_obj.safe_bone_pos()`. This affected Useful Idiots when calculating aim direction, detecting line of sight, and evaluating cover. A patch is included that tries to translate the asinine bone IDs into ones that are consistent with everything else and helps `utils_obj.safe_bone_pos()` return the correct bone information.
+
+### State Manager (state_mgr)
+
+1. The "hide" and "prone" animations look nicer when companions go into a crouched or prone position but look janky when they move or turn, so their "hide_na" and "prone_idle" counterparts are often used instead. A patch is added to replace the former with the latter after 1 second to get the best of both worlds. Various other config fixes were also applied to make prone animations work properly.
+
+2. `{fast_set = true}` is appended to all `state_mgr.set_state()` calls (unless explicitly set to `false` in the original call). This seems to make companions feel less sluggish when responding to commands.
+
+3. When `state_mgr.set_state()` tells NPCs to look in a direction with a very small magnitude (e.g. at their feet) the NPC can disappear into an alternate dimension and never be seen again. I accidentally did this a lot early on in development. As an extra safeguard I added a patch that detects and removes this when it happens. Just in case.
+
+### Picking Up Weapons
+
+NPCs no longer magically hoover up weapons off the ground with their toes. However if allowed to [gather items](#toggles) they will pick up weapons the correct way with a proper animation.
+
+### He is With Me
+
+Useful Idiots includes a modified replacement for this mod. My version uses the following logic:
+1. Companions never fight other companions
+2. Companions never fight NPCs that are not your enemy
+3. NPCs that are not your enemy never fight companions
