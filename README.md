@@ -72,12 +72,11 @@ These control what your idiots do when they're not busy shooting at things.
   > Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (all of which can be disabled in MCM).
 
   #### You can assign followers to one of 4 formations:
+  > You can only assign formations to an entire group (not to individual idiots).
   - **Bunch:**   to randomly cluster behind you in a group
   - **Spread:**  to spread out laterally behind you
   - **Line:**    to follow behind you in single-file line
   - **Covered:** to follow while staying in cover if possible
-  &nbsp;
-  > You can only assign formations to an entire group (not to individual idiots).
 
   #### You can make them stay a certain distance from you:
   - **Stay Near:** at least 2.5m away
@@ -85,11 +84,10 @@ These control what your idiots do when they're not busy shooting at things.
   - **Stay Far:**  at least  10m away
 
   #### You can also assign them one of 3 stances:
+  > Idiots sneak while moving because no crawl animation exists
   - **Stand**
   - **Sneak**
   - **Prone:**
-
-  > Idiots sneak while moving because no crawl animation exists
 
 - ### Wait
   Like "Wait Here" but without the constant staring. This makes them more useful as lookouts and less creepy. They perform idle activities as boredom sets in. Eventually you may catch them smoking, drinking, or sitting on the job.
