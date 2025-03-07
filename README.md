@@ -7,27 +7,27 @@
 
 Overhauls the companion system with:
 
-- [Over 50 commands](#commands) to control them
-- A dynamic and customizable [UI replacement](#new-companion-ui) for the Companion Wheel
-- Extensive support for [keybinds and modifiers](#extensive-keyboard-support) (powered by MCM)
+- [Over 50 commands](#movement-commands) to control them
+- A dynamic and customizable [UI replacement](#replacement-ui) for the Companion Wheel
+- Extensive support for [keybinds and modifiers](#keybinds-and-modifiers) (powered by MCM)
 - Lots of AI [improvements and bug fixes](#improvements-and-fixes) (some for companions and some for all NPCs)
 
 Does not (and never will) overwrite any core files to keep it as compatible as possible out of the box with other mods.
 
-### Installation Requirements
+## Installation Requirements
 
 - Requires [Modded EXEs](https://github.com/themrdemonized/xray-monolith/releases)
 - Requires [Mod Configuration Menu](https://www.moddb.com/mods/stalker-anomaly/addons/anomaly-mod-configuration-menu)
 - Safe to add or remove whenever
 
-### Installation Instructions
+## Installation Instructions
 
 1. Download the ZIP file from here or [GitHub Releases](https://github.com/bellyillish/useful-idiots/releases).
 2. Install it with [Mod Organizer 2](https://anomalymodding.blogspot.com/2021/04/Mod-Organizer-2-setup-and-Amomaly-modding-guide.html).
 It is included with GAMMA but is strongly enouraged either way. Priority doesn't matter for Anomaly. For GAMMA just put it below the mods that come with it.
 3. Go to **Mod Configuration Menu -> Useful Idiots** to customize and configure to your liking.
 
-### Known Conflicts
+## Known Conflicts
 
 - **NPC Stops Dropping Weapons and Looting Dead Bodies** interferes with looting and gathering. Instead, an MCM option is included that does the exact same thing. By default it is enabled if running GAMMA and disabled otherwise.
 
@@ -47,7 +47,7 @@ A new UI replaces the base game's Companion Wheel and is opened with the same ke
 
 - Tabbed access to issue commands globally or to individual companions
 - Shows which commands are currently enabled and disabled at all times
-- Central access to [all commands](#commands) (no more digging through nested dialogs)
+- Central access to [all commands](#movement-commands) (no more digging through nested dialogs)
 - When the UI is open, numeric indicators show which tab belongs to which idiot
 
 The new UI behaves like the Companion Wheel when opened:
@@ -66,7 +66,8 @@ Every available command can be assigned a keybind with alt/ctrl/shift modifiers.
 These control what your idiots do when they're not busy shooting at things.
 
 ### Follow
-Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-assign-followers-to-one-of-4-formations) support. Idiots move like a single squad with you as leader. They stay closer and on the same side of walls and obstacles in enclosed spaces. They avoid following you into cramped spaces unless you tell them to [stay near](#you-can-make-them-stay-a-certain-distance-from-you). Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (all of which can be disabled in MCM).
+Like "Follow Me" but rewritten with new pathfinding and [formation](#formations) support. Idiots move like a single squad with you as leader. They stay closer and on the same side of walls and obstacles in enclosed spaces. They avoid following you into cramped spaces unless you tell them to [stay near](#distances). Followers automatically sprint, crouch, go prone, and adjust their headlamps to match your actions (all of which can be disabled in MCM).
+<a name="formations"></a>
 
 #### You can assign followers to one of 4 formations:
 - **Bunch:**   to randomly cluster behind you in a group
@@ -75,11 +76,13 @@ Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-ass
 - **Covered:** to follow while staying in cover if possible
 > [!TIP]
 > You can only assign formations to an entire group (not to individual idiots).
+<a name="distances"></a>
 
 #### You can make them stay a certain distance from you:
 - **Stay Near:** at least 2.5m away
 - **Normal:**    at least   5m away
 - **Stay Far:**  at least  10m away
+<a name="stances"></a>
 
 #### You can also assign them one of 3 stances:
 - **Stand**
@@ -92,7 +95,7 @@ Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-ass
 Like "Wait Here" but without the constant staring. This makes them more useful as lookouts and less creepy. They perform idle activities as boredom sets in. Eventually you may catch them smoking, drinking, or sitting on the job.
 
 ### Find Cover
-Idiots will look for nearby cover (relative to you) to wait behind. If there's no suitable cover they will behave the same as [Wait](#wait).
+Idiots will look for nearby cover (relative to you) to wait behind. If there's no suitable cover they will behave the same as [wait](#wait).
 
 ### Relax
 Idiots will look for a nearby campfire with room to sit. If none are nearby they will find a random location, usually indoors or with their backs to something. When relaxing they may smoke, drink, eat, use their PDA, and eventually nap.
@@ -129,15 +132,17 @@ A defensive-geared combat mode inspired by the base game's "Camper" scheme. Idio
 ### Support Combat
 Very similar to "Guard Combat" except they guard your position instead of their initial position and move with you. They try their best to stay out of your line of fire but accidents happen.
 > [!TIP]
-> [Stay Near](#you-can-make-them-stay-a-certain-distance-from-you), [Normal](#you-can-make-them-stay-a-certain-distance-from-you) and [Stay Far](#you-can-make-them-stay-a-certain-distance-from-you) keep them within 8m/16m/24m of your position respectively.
+> [Stay near](#distances), [normal](#distances) and [stay far](#distances) keep them within 8m, 16m, and 24m of your position respectively.
 
 ### Sniper Combat
-Keeps them fixed in their current position at all times. This mode is for when you want complete control over where they are positioned during combat or wish to guide them manually with [Move to Point](#keyboard-only-commands)
+Keeps them fixed in their current position at all times. This mode is for when you want complete control over where they are positioned during combat or wish to guide them manually with [move to point](#keyboard-only-commands)
+<a name="readiness">
 
 #### You can choose how your idiots respond to threats:
 - **Attack Enemies:** engage enemies on sight
 - **Defend Only:**    only engage enemies that attack you
 - **Ignore Combat:**  ignore all enemies
+<a name="weapon-type">
 
 #### You can tell them which weapon type to choose from their inventory:
 - **Best:** determined by repair kit tier. Weapons without kits (like RPGs) are considered best. Ties are broken by comparing weapon cost.
@@ -145,6 +150,7 @@ Keeps them fixed in their current position at all times. This mode is for when y
 - **Shotgun**
 - **Rifle/SMG**
 - **Sniper**
+<a name="legacy-combat">
 
 #### You can also enable 3 additional combat modes from the base game:
 - **Monolith**
@@ -176,7 +182,7 @@ Keeps them fixed in their current position at all times. This mode is for when y
 ### Utilities
 - **Open Inventory:** opens their inventory (if they're less than 8 meters away)
 - **Reload Weapons:** forces them to reload their active weapon, or all weapons if enabled in MCM
-- **Retreat:** Sets [Follow](#follow), [Hurry](#toggles), [Ignore Combat](#you-can-choose-how-your-idiots-respond-to-threats), and [Stay Near](#you-can-make-them-stay-a-certain-distance-from-you) simultaneously (when you need to get your idiots out of trouble)
+- **Retreat:** Sets [follow](#follow), [hurry](#toggles), [ignore Combat](#readiness), and [stay near](#distances) simultaneously (when you need to get your idiots out of trouble)
 - **Unstick:** Triggers a fix for stuck or unresponsive idiots
 - **Re-Sync:** Syncs idiots to the current state of the "All" tab
 
@@ -270,7 +276,7 @@ NPCs enter this scheme way too early and often, stay in it way too long, and mov
 
 The engine forces NPCs to switch weapons at certain distances, which would always trigger at the worst time and leave them vulnerable. If you've ever witnessed an NPC rush an enemy only to switch to an unloaded pistol or shotgun and immediately get blown up trying to reload it directly in front of them, or 2 enemies locked in a cycle of weapon switching and interrupted attempts at reloading instead of shooting each other, this is probably why.
 
-1. Idiots always use their best weapon (depending your weapon selection command) and will never switch to another unless you tell them to. I plan to extend this to all NPCs in the future.
+1. Idiots always use their best weapon (based on [weapon type](#weapon-type)) and will never switch to another unless you tell them to. I plan to extend this to all NPCs in the future.
 
 2. A hacky little fix was added to prevent taking your idiot's remaining weapon away (e.g. with "Show All Items in Companion Inventories" enabled) would get them temporarily stuck with empty hands. Now they switch back to the weapon(s) you give them afterwards.
 
@@ -298,7 +304,7 @@ Some mutants have inconstent and arbitrary names for their bone IDs (because of 
 
 ### Picking Up Weapons
 
-NPCs no longer magically hoover up weapons off the ground with their toes. However if allowed to gather items they will pick up weapons the correct way with a proper animation.
+NPCs no longer magically hoover up weapons off the ground with their toes. However if allowed to [gather items](#toggles) they will pick up weapons the correct way with a proper animation.
 
 ### He is With Me
 
