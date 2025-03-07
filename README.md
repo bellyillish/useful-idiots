@@ -73,6 +73,7 @@ Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-ass
 - **Spread:**  to spread out laterally behind you
 - **Line:**    to follow behind you in single-file line
 - **Covered:** to follow while staying in cover if possible
+> [!TIP]
 > You can only assign formations to an entire group (not to individual idiots).
 
 #### You can make them stay a certain distance from you:
@@ -84,6 +85,7 @@ Like "Follow Me" but rewritten with new pathfinding and [formation](#you-can-ass
 - **Stand**
 - **Sneak**
 - **Prone:**
+> [!NOTE]
 > Idiots sneak while moving because no crawl animation exists
 
 ### Wait
@@ -94,10 +96,12 @@ Idiots will look for nearby cover (relative to you) to wait behind. If there's n
 
 ### Relax
 Idiots will look for a nearby campfire with room to sit. If none are nearby they will find a random location, usually indoors or with their backs to something. When relaxing they may smoke, drink, eat, use their PDA, and eventually nap.
+> [!NOTE]
 > Unlike many other implementations this does not rely on base game "camp" mechanics. This allows them to use any nearby campfire including ones you place with the "Placeable Campfires" mod.
 
 ### Patrol
 Like "Patrol an Area" but they keep patrolling between their waypoints rather than stopping at the last one.
+> [!TIP]
 > Like in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [Add Waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
 
 <br>
@@ -124,6 +128,7 @@ A defensive-geared combat mode inspired by the base game's "Camper" scheme. Idio
 
 ### Support Combat
 Very similar to "Guard Combat" except they guard your position instead of their initial position and move with you. They try their best to stay out of your line of fire but accidents happen.
+> [!TIP]
 > [Stay Near](#you-can-make-them-stay-a-certain-distance-from-you), [Normal](#you-can-make-them-stay-a-certain-distance-from-you) and [Stay Far](#you-can-make-them-stay-a-certain-distance-from-you) keep them within 8m/16m/24m of your position respectively.
 
 ### Sniper Combat
@@ -135,17 +140,17 @@ Keeps them fixed in their current position at all times. This mode is for when y
 - **Ignore Combat:**  ignore all enemies
 
 #### You can tell them which weapon type to choose from their inventory:
-- **Best:**
+- **Best:** determined by repair kit tier. Weapons without kits (like RPGs) are considered best. Ties are broken by comparing weapon cost.
 - **Pistol**
 - **Shotgun**
 - **Rifle/SMG**
 - **Sniper**
-> "Best" is determined by repair kit tier. Weapons without kits (like RPGs) are considered best. Ties are broken by comparing weapon cost.
 
 #### You can also enable 3 additional combat modes from the base game:
 - **Monolith**
 - **Camper**
 - **Zombied**
+> [!CAUTION]
 > These modes are functional but you may run into issues and general jank. They come as-is and are not supported in any way. Consider them "bonus" content:
 
 <br>
@@ -175,7 +180,7 @@ Keeps them fixed in their current position at all times. This mode is for when y
 - **Unstick:** Triggers a fix for stuck or unresponsive idiots
 - **Re-Sync:** Syncs idiots to the current state of the "All" tab
 
-> [!NOTE]
+> [!TIP]
 > Only the items your idiots pick up while looting or gathering are accessible when opening their inventories. All other items including their original primary weapon remain hidden from you.
 
 > [!CAUTION]
