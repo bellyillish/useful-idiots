@@ -105,7 +105,7 @@ Idiots will look for a nearby campfire with room to sit. If none are nearby they
 ### Patrol
 Like "Patrol an Area" but they keep patrolling between their waypoints rather than stopping at the last one.
 > [!TIP]
-> Like in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [Add Waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
+> Like in the base game, you must assign them 2 or more waypoints before you can use "Patrol". You can only [add waypoints](#waypoints) or assign "Patrol" to one Idiot at a time (not on the entire group).
 
 <br>
 
@@ -231,6 +231,18 @@ To this end, everything in Useful Idiots is done via DLTX, DXML, callbacks, and 
 <br>
 
 ## Base Game Changes
+
+- [Ignoring Combat (xr_combat_ignore)](#ignoring-combat-xr_combat_ignore)
+- [Danger Detection (xr_danger)](#danger-detection-xr_danger)
+- [Friendly Fire (rx_ff)](#friendly-fire-rx_ff)
+- [Weapon Jamming (xr_weapon_jam)](#weapon-jamming-xr_weapon_jam)
+- [Automatic Weapon Switching](#automatic-weapon-switching)
+- [Melee Combat (xr_facer)](#melee-combat-xr_facer)
+- [Reloading](#reloading)
+- [Invalid Bone IDs](#invalid-bone-ids)
+- [State Manager (state_mgr)](#state-manager-state_mgr)
+- [Picking Up Weapons](#picking-up-weapons)
+- [He is With Me](#he-is-with-me)
 
 ### Ignoring Combat (xr_combat_ignore)
 
