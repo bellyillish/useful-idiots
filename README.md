@@ -171,7 +171,7 @@ Keeps them fixed in their current position at all times. This mode is for when y
 - **Loot Corpses (on/off):**     lets them loot items from dead bodies
 - **Gather Items (on/off):**     lets them pick up items lying around
 - **Gather Artifacts (on/off):** lets them detect and retrieve nearby artifacts
-- **Help Wounded:**              lets them heal wounded friendlies (including during combat)
+- **Help Wounded:**              lets them heal wounded allies (including during combat)
 
 ### Utilities
 - **Open Inventory:** opens their inventory (if they're less than 8 meters away)
@@ -185,6 +185,8 @@ Keeps them fixed in their current position at all times. This mode is for when y
 
 > [!CAUTION]
 > "Gather Artifacts" is disabled in MCM. Enabling it takes the fun out of artifact hunting and is technically cheating so use it with caution. In order to enable it "Gather Items" must also be enabled.
+
+<br>
 
 ## Keyboard-Only Commands
 
@@ -208,93 +210,99 @@ These additional commands are only available via keyboard shortcut.
 - **Guard Combat:**   moves to guard your cursor position
 - **Sniper Combat:**  moves to your cursor and stays there
 
-<!-- -- >
 <br>
 
-# Improvements and Fixes
+## Improvements and Fixes
 
-Useful Idiots addresses lots of bugs, inconsistencies, and overall jank. Generally speaking your idiots should feel much snappier and more responsive, pathfind better, respect personal space, and be less inclined to get stuck on random rocks and trees. They should spend more time following your orders and less time blankly staring at you.
+Useful Idiots addresses lots of bugs, inconsistencies, and overall jank. Your idiots should feel much snappier and more responsive, pathfind better, respect personal space, and be less inclined to get stuck on random rocks and trees. They should spend more time following your orders and less time blankly staring at you.
 
-This mod is not meant to be an all-encompassing "Improved AI" mod. That said, there are many issues in the codebase that affect how well companions work, and Useful Idiots tries to address as many as possible in order to improve the experience. Some things once fixed give your idiots an unfair advantage over other NPCs. In those cases, Useful Idiots does make AI Improvements that affect all NPCs in order to re-level the playing field. Some might overlap and interact with other "Improved AI" mods.
+Useful Idiots isn't meant to be an all-encompassing "Improved AI" mod. It mainly cares about what makes companions work better. That said, some fixes and improvements gave idiots an unfair advantage over their enemies. Some general AI improvements have been made in those cases to re-level the playing field, and it's possible for one or more to overlap with other AI-focused mods.
 
-One thing I refuse to do is overwrite base game files. Everything in Useful Idiots is done via DLTX, DXML, callbacks, and monkey patching. This makes it as compatible as possible with other mods. Since I plan to add or extend more fixes, improvements, and things like custom combat modes to all NPCs, in the future you will be able to configure anything affecting non-companion NPCs so it can be disabled if it interferes with another mod's AI improvements.
+To this end, everything in Useful Idiots is done via DLTX, DXML, callbacks, and monkey patching. In the future you will also be able to individually disable anything that affects non-companions just in case you encounter weirdness with other mods.
 
-Here are some specifics on what Useful Idiots touches:
+- Changes are commented and can be found [in here](https://github.com/bellyillish/useful-idiots/tree/main/gamedata/scripts/illish/patches).
 
-- ### Ignoring Combat (xr_combat_ignore)
+<br>
 
-  Useful Idiots replaces `xr_combat_ignore.is_enemy()` because it is filled with too many bugs to monkey patch. (Four significant ones that affect gameplay at last count). While fixing bugs the following improvements were also added:
+## Base Game Changes
 
-  - Hard-coded distance values have been moved to `xr_combat_ignore.ltx` (which is no longer unused)
-  - Vision degrades *gradually* at night (6-9pm) and improves in the morning (3-6am)
-  - Vision degrades *gradually* from rain strength
-  - Night and rain effects now stack and affect all NPCs relatively the same
-  - Companions and actor enemies have equal and consistent vision ranges for balance purposes
+### Ignoring Combat (xr_combat_ignore)
 
-- ### Danger Detection (xr_danger)
+Useful Idiots replaces `xr_combat_ignore.is_enemy()` to fix bugs and add the following improvements:
 
-  Useful Idiots replaces `xr_danger.is_danger()` because it also has a few scattered bugs and issues. Most of these are fixed in G.A.M.M.A. but are included to fix Anomaly as well. A long-standing G.A.M.M.A. bug where neutral NPCs randmonly panic when you pass by has also been fixed.
+1. Hard-coded distance values have been moved to `xr_combat_ignore.ltx` (which is no longer unused)
+2. Vision degrades *gradually* at night (6-9pm) and improves in the morning (3-6am)
+3. Vision degrades *gradually* from rain strength
+4. Night and rain effects now stack and affect all NPCs relatively the same
+5. Companions and actor enemies have equal and consistent vision ranges for balance purposes
 
-  The "danger" scheme also prevents you from controlling your idiots until they either enter combat or the danger passes. To fix this the following changes were made only to companions:
+### Danger Detection (xr_danger)
 
-  - They only stay in "danger" for 4 seconds
-  - They don't enter "danger" when hearing something but will instead turn to look at the source
-  - They still enter "danger" to dodge grenades or react to being hit by gunfire but ignore all other sources of danger (like corpses)
+Useful Idiots replaces `xr_danger.is_danger()` to a few fix bugs. Most are already fixed in GAMMA but included here as well for Anomaly. A long-standing GAMMA bug where neutral NPCs panic when you pass is also fixed. Idiots in the danger scheme don't respond to commands, so following changes were made specifically for them as a workaround:
 
-- ### Friendly Fire (rx_ff)
+1. Idiots only stay in danger mode for 4 seconds
 
-  LOL, this scheme. To summarize, NPCs enter this scheme way too early and often, stay in it way too long, and move in a way causes it to trigger over and over again. The entire time they are out of combat and thus not firing their weapon. If you've ever witnessed a squad vs. squad conflict that looks more like a dance-off than an actual gunfight, this is probably the reason why.
+2. Idiots don't enter danger mode when hearing something but will instead turn to look at the source
 
-  After I added my own friendly-fire behavior to the custom combat modes I noticed that companions would just mop the floor with squads of much stronger enemies. When I realized this was why I felt the need to fix `rx_ff` as well to balance things back out. I made these changes:
+3. Idiots still enter danger mode to dodge grenades or react to being hit by gunfire but ignore all other sources of danger (like corpses)
 
-  1. Added a 1.5s grace period to let friendlies pass by. If their LOF clears up before then they will immediately return to combat.
-  2. If their LOF does not clear they will strafe but a much shorter distance (10-12m is absurd) and re-enter combat as soon as their LOF has been clear for 500ms (instead of 2.5s)
-  3. Friendlies have to be closer (0.8m instead of 2m) in order to be considered "in the way"
+### Friendly Fire (rx_ff)
 
-  One fix is still needed but not done yet (more random strafe direction). As is now though it's easily the biggest impact on combat out of everything on this list.
+NPCs enter this scheme way too early and often, stay in it way too long, and move in a way causes it to trigger over and over again. If you've ever witnessed a squad vs. squad conflict that looks more like a dance-off than an actual gunfight, this is probably why.
 
-- ### Weapon Jamming (xr_weapon_jam)
+1. Added a 1.5s grace period to let allies pass by. If their LOF clears up before then they will immediately return to combat.
 
-  Another gem. The original didn't parse its LTX correctly and was impossible to disable. That's been fixed. I also fixed a calculation error that made the first jam trigger a max chance of a 2nd jam immediately after. I also changed how jam chance is calculated for NPCs. Instead of a fixed per-shot percentage, it starts low and gradually increases as more rounds are spent (up to a max). Chance resets on each jam, and clip size is also taken into account to even it out among different gun types. It should now be very rare for multiple jams to happen in a row, and the overall frequency of NPC jams should feel much less absurd making them more effective in combat.
+2. If their LOF does not clear they will strafe but a much shorter distance and re-enter combat as soon as their LOF has been clear for 500ms.
 
-- ### Automatic Weapon Switching
+3. Allies have to be closer to the LOF in order to be considered "in the way"
 
-  One thing the game engine really liked to do was force NPCs to switch weapons at certain distances. It would always trigger at the worst times and leave them vulnerable. If you've ever witnessed an NPC rush an enemy only to switch to an unloaded pistol or shotgun and immediately get blown up trying to reload it directly in front of them, or 2 enemies locked in a cycle of weapon switching and interrupted attempts at reloading instead of shooting each other, this is probably why.
+4. Better-randomized strafing direction (coming soon)
 
-  Useful Idiots forces them to always use their best weapon based on your chosen type and will never switch to another unless you tell them to. So far this is only fixed for companions, but I plan to extend it to all NPCS at some point.
+### Weapon Jamming (xr_weapon_jam)
 
-  I also added a little hacky fix where taking away their only remaining weapon (e.g. with "Show All Items in Companion Inventories" enabled) would cause them to get temporarily stuck with empty hands. Now they immediately switch to whatever weapon you give them afterwards.
+1. Fixed it being impossible to disable because it didn't parse its LTX file correctly.
 
-- ### Melee Combat (xr_facer)
+2. Fixed a calculation error that made the first jam trigger a max chance of a 2nd jam immediately after.
 
-  The config file for `xr_facer` was missing a few ranks which meant some NPCs would never use melee combat at close range and be at the mercy of (possibly lower-ranked) NPCs that did. Those missing ranks have been filled in so that everyone can use melee combat. Your idiots also use melee combat now as well.
+3. Changed how NPC jam chance is calculated. Instead of a fixed per-shot percentage, it starts low and gradually increases as more rounds are spent (up to a max). Chance resets on each jam, and clip size is also taken into account to even it out among different gun types. It should now be very rare for multiple jams to happen in a row, and the overall frequency of NPC jams should feel much less absurd making them more effective in combat.
 
-- ### Reloading
+### Automatic Weapon Switching
 
-  NPCs don't think to reload after combat which puts them in a bad spot the next time around. Spending the first few seconds of a gunfight reloading your weapon in front of an enemy is rarely a good strategy, so Useful Idiots forces all NPCs to reload their weapon when empty regardless of what scheme they are in.
+The engine forces NPCs to switch weapons at certain distances, which would always trigger at the worst time and leave them vulnerable. If you've ever witnessed an NPC rush an enemy only to switch to an unloaded pistol or shotgun and immediately get blown up trying to reload it directly in front of them, or 2 enemies locked in a cycle of weapon switching and interrupted attempts at reloading instead of shooting each other, this is probably why.
 
-  NPC reload animations were also fixed to no longer loop or repeat multiple times or continue after their weapon is loaded. It's not a perfect fix -- non clip-fed weapons like shotguns are still a little goofy, but overall it is much improved and NPCs will spend more time shooting and less time stuck in a reload animation.
+1. Idiots always use their best weapon (depending your weapon selection command) and will never switch to another unless you tell them to. I plan to extend this to all NPCs in the future.
 
-- ### Invalid Bone IDs
+2. A hacky little fix was added to prevent taking your idiot's remaining weapon away (e.g. with "Show All Items in Companion Inventories" enabled) would get them temporarily stuck with empty hands. Now they switch back to the weapon(s) you give them afterwards.
 
-  Some mutants have inconstent and arbitrary names for their bone IDs (because of course they do). This can cause "Invalid Bone ID" errors and issues in scripts that rely on `utils_obj.safe_bone_pos()`. This affected Useful Idiots when calculating aim direction, detecting line of sight, and evaluating cover. A patch is included that tries to translate asinine bone IDs into ones that are consistent with everything else and helps `utils_obj.safe_bone_pos()` return the correct bone information.
+### Melee Combat (xr_facer)
 
-- ### State Manager (state_mgr)
+The config file for `xr_facer` was missing a few ranks which meant some NPCs would never use melee combat at close range and be at disadvantage vs. (possibly lower-ranked) NPCs that did. The missing ranks have been filled in so that everyone can use melee combat including your idiots.
 
-  The "hide" and "prone" animations look nicer when companions go into a crouched or prone position but look janky when they move or turn, so their "hide_na" and "prone_idle" counterparts are often used instead. A patch is added to replace the former with the latter after 1 second to get the best of both worlds. Various other config fixes were also applied to make prone animations work properly.
+### Reloading
 
-  Useful Idiots also appends `{fast_set = true}` to all `state_mgr.set_state()` calls (unless explicitly set to `false` in the original call). This seems to make companions feel less sluggish when responding to commands.
+1. NPCs don't reload after combat which puts them in a bad spot the next time around. Spending the first few seconds of a gunfight reloading your weapon in front of an enemy is rarely a good strategy, so Useful Idiots forces all NPCs to reload their weapon when empty.
 
-  Lastly, when `state_mgr.set_state()` tells NPCs to look in a direction with a very small magnitude (e.g. at their feet) the NPC can disappear into an alternate dimension and never be seen again. I accidentally did this a lot early on in development. As an extra safeguard I added a patch that detects and removes this when it happens. Just in case.
+2. NPC reload animations were fixed to no longer loop or repeat multiple times after their weapon is loaded. Non clip-fed weapons like shotguns are still not exactly right, but overall things are improved and NPCs should spend more time shooting and less time pretending to reload.
 
-- ### Picking Up Weapons
+### Invalid Bone IDs
 
-  NPCs no longer magically hoover up weapons off the ground with their toes. However if allowed to gather items, they will pick up weapons the correct way with a proper animation.
+Some mutants have inconstent and arbitrary names for their bone IDs (because of course they do). This can cause "Invalid Bone ID" errors and issues in scripts that rely on `utils_obj.safe_bone_pos()`. This affected Useful Idiots when calculating aim direction, detecting line of sight, and evaluating cover. A patch is included that tries to translate the asinine bone IDs into ones that are consistent with everything else and helps `utils_obj.safe_bone_pos()` return the correct bone information.
 
-- ### He is With Me
+### State Manager (state_mgr)
 
-  Useful Idiots includes a modified replacement for this popular and awesome mod. My version makes the following changes:
-  - Companions will never fight other companions
-  - Companions will never fight NPCs that are not your enemy
-  - NPCs that are not your enemy will never fight companions
-<!-- -->
+1. The "hide" and "prone" animations look nicer when companions go into a crouched or prone position but look janky when they move or turn, so their "hide_na" and "prone_idle" counterparts are often used instead. A patch is added to replace the former with the latter after 1 second to get the best of both worlds. Various other config fixes were also applied to make prone animations work properly.
+
+2. `{fast_set = true}` is appended to all `state_mgr.set_state()` calls (unless explicitly set to `false` in the original call). This seems to make companions feel less sluggish when responding to commands.
+
+3. When `state_mgr.set_state()` tells NPCs to look in a direction with a very small magnitude (e.g. at their feet) the NPC can disappear into an alternate dimension and never be seen again. I accidentally did this a lot early on in development. As an extra safeguard I added a patch that detects and removes this when it happens. Just in case.
+
+### Picking Up Weapons
+
+NPCs no longer magically hoover up weapons off the ground with their toes. However if allowed to gather items they will pick up weapons the correct way with a proper animation.
+
+### He is With Me
+
+Useful Idiots includes a modified replacement for this mod. My version makes the following changes:
+1. Companions will never fight other companions
+2. Companions will never fight NPCs that are not your enemy
+3. NPCs that are not your enemy will never fight companions
