@@ -97,17 +97,17 @@
   <string id="ui_mcm_idiots_options_autoDeselect_desc">
     <text>Автоматически снять выбор со всех компаньонов после использования команд "Переместиться на точку" или "Смотреть на точку".</text>
   </string>
-  <string id="ui_mcm_idiots_options_autoReload">
+  <string id="ui_mcm_idiots_options_autoReloadAll">
     <text>Позволить компаньонам перезаряжать все оружие во время бездействия</text>
   </string>
-  <string id="ui_mcm_idiots_options_autoReload_desc">
+  <string id="ui_mcm_idiots_options_autoReloadAll_desc">
     <text>Заставляет компаньонов перезаряжать ВСЕ оружие в их инвентаре после загрузки сохранения, присоединения к отряду игрока, или после боя. Если выключено - они будут перезаряжать только свое активное оружие.</text>
   </string>
   <string id="ui_mcm_idiots_options_manualReloadAll">
-    <text>Make Companions Reload All Weapons in Inventory When Using the Reload Button or Keybind</text>
+    <text>Позволить компаньонам перезаряжать все оружие при перезарядке оружия игроком</text>
   </string>
   <string id="ui_mcm_idiots_options_manualReloadAll_desc">
-    <text>When enabled, companions will reload all weapons in their inventory when using the Reload button or keybind. When disabled they will only reload their active weapon.</text>
+    <text>Заставляет компаньонов перезаряжать ВСЕ оружие в их инвентаре после перезарядки оружия игроком. Если выключено - они будут перезаряжать только свое активное оружие.</text>
   </string>
 
   <!-- Combat Options -->
@@ -115,22 +115,22 @@
     <text>Настройки боя</text>
   </string>
   <string id="ui_mcm_idiots_options_camperCombat">
-    <text>Enable Legacy "Camper" Combat Command</text>
+    <text>Включить режим боя "Меткий стрелок"</text>
   </string>
   <string id="ui_mcm_idiots_options_camperCombat_desc">
-    <text>Adds a command to put companions into the "Camper" combat scheme. This scheme comes with Anomaly but is disabled for companions. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
+    <text>Включает/выключает команду, позволяющую перевести компаньонов в боевой паттерн «Меткий стрелок». Он появился в ванильной Anomaly, но был отключен для напарников. Обратите внимание, что он может быть багнутым и поэтому не поддерживаются. Вы можете назначить ему бинд, но он не может быть активирован клавишей «Циклический бой».</text>
   </string>
   <string id="ui_mcm_idiots_options_monolithCombat">
-    <text>Enable Legacy "Monolith" Combat Command</text>
+    <text>Включить режим боя "Монолит"</text>
   </string>
   <string id="ui_mcm_idiots_options_monolithCombat_desc">
-    <text>Adds a command to put companions into the "Monolith" combat scheme. This scheme comes with Anomaly but is disabled for companions. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
+    <text>Включает/выключает команду, позволяющую перевести компаньонов в боевой паттерн «Монолит». Он появился в ванильной Anomaly, но был отключен для напарников. Обратите внимание, что он может быть багнутым и поэтому не поддерживаются. Вы можете назначить ему бинд, но он не может быть активирован клавишей «Циклический бой».</text>
   </string>
   <string id="ui_mcm_idiots_options_zombiedCombat">
-    <text>Enable "Zombied" Combat Command</text>
+    <text>Включить режим боя "Зомби"</text>
   </string>
   <string id="ui_mcm_idiots_options_zombiedCombat_desc">
-    <text>Adds a command to put companions into the "Zombied" combat scheme. This scheme comes with Anomaly but is not meant for companions or human NPCs. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
+    <text>Включает/выключает команду, позволяющую перевести компаньонов в боевой паттерн "Зомби", который прописан в Anomaly зомбированным. Он не тестировался и не поддерживается. Вы можете назначить ему бинд, но они не могут быть активированы клавишей «Циклический бой».</text>
   </string>
 
   <!-- Jobs Options -->
@@ -219,7 +219,7 @@
     <text>Положение по Y относительно низа</text>
   </string>
   <string id="ui_mcm_idiots_ui_alpha">
-    <text>Background Transparency</text>
+    <text>Прозрачность фона</text>
   </string>
   <string id="ui_mcm_idiots_scheme">
     <text>Цветовая палитра</text>
