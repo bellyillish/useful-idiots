@@ -1,6 +1,7 @@
-local TABLE = require "illish.lib.table"
-local NPC   = require "illish.lib.npc"
-local WPN   = require "illish.lib.weapon"
+local TABLE  = require "illish.lib.table"
+local NPC    = require "illish.lib.npc"
+local WPN    = require "illish.lib.weapon"
+local COMBAT = require "illish.lib.combat"
 
 
 local PATCH = {}
@@ -254,6 +255,8 @@ end
 
 -- Callbacks
 RegisterScriptCallback("idiots_on_start", function()
+  RegisterScriptCallback("npc_on_hit_callback",  COMBAT.combatHitCallback)
+  RegisterScriptCallback("npc_on_hear_callback", COMBAT.combatHearCallback)
   RegisterScriptCallback("npc_on_choose_weapon", PATCH.onChooseWeapon)
   RegisterScriptCallback("GUI_on_show", onShowGUI)
   RegisterScriptCallback("GUI_on_hide", onHideGUI)

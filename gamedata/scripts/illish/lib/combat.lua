@@ -299,12 +299,29 @@ local COMBAT = {}
 
 
 -- CALLBACKS --
-  function COMBAT.combatHitCallback(self, obj, amount, direction, who, bone)
-    local enemy = self.st.enemy
-    local state = self.st.state
-    local npc   = self.object
+  function COMBAT.combatHitCallback(obj, amount, direction, who, bone)
+    local st = db.storage[obj:id()]
 
-    if not (npc and obj:id() == npc:id() and who and who:id() == enemy.id) then
+    if
+      not st
+      or not st.enemy
+      or not st.combat
+      or not st.combat.enemy
+      or not st.combat.state
+      or (
+        st.script_combat_type ~= "assault"
+        and st.script_combat_type ~= "support"
+        and st.script_combat_type ~= "snipe"
+        and st.script_combat_type ~= "guard"
+      )
+    then
+      return
+    end
+
+    local enemy = st.combat.enemy
+    local state = st.combat.state
+
+    if not who or who:id() ~= enemy.id then
       return
     end
 
@@ -316,12 +333,29 @@ local COMBAT = {}
   end
 
 
-  function COMBAT.combatHearCallback(self, obj, whoid, type, position, power)
-    local enemy = self.st.enemy
-    local state = self.st.state
-    local npc   = self.object
+  function COMBAT.combatHearCallback(obj, whoid, type, distance, power, position)
+    local st = db.storage[obj:id()]
 
-    if not (npc and obj:id() == npc:id() and enemy.id == whoid) then
+    if
+      not st
+      or not st.enemy
+      or not st.combat
+      or not st.combat.enemy
+      or not st.combat.state
+      or (
+        st.script_combat_type ~= "assault"
+        and st.script_combat_type ~= "support"
+        and st.script_combat_type ~= "snipe"
+        and st.script_combat_type ~= "guard"
+      )
+    then
+      return
+    end
+
+    local enemy = st.combat.enemy
+    local state = st.combat.state
+
+    if whoid ~= enemy.id then
       return
     end
 

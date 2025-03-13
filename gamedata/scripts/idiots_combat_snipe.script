@@ -1,8 +1,10 @@
 local WP     = world_property
 local UTIL   = require "illish.lib.util"
+local VEC    = require "illish.lib.vector"
 local POS    = require "illish.lib.pos"
 local NPC    = require "illish.lib.npc"
 local COMBAT = require "illish.lib.combat"
+local DEBUG  = require "illish.debug"
 
 
 EVAL_FF       = rx_ff.evaid
@@ -42,13 +44,6 @@ ACTION_ID     = xr_actions_id.chugai_actions + 160
 
   function action_combat_snipe:initialize()
     action_base.initialize(self)
-
-    self.npc_on_hit_callback  = COMBAT.combatHitCallback
-    self.npc_on_hear_callback = COMBAT.combatHearCallback
-
-    RegisterScriptCallback("npc_on_hit_callback",  self)
-    RegisterScriptCallback("npc_on_hear_callback", self)
-
     self:initConfig()
     self:initEnemy()
     self:initState()
@@ -89,14 +84,6 @@ ACTION_ID     = xr_actions_id.chugai_actions + 160
     local look = COMBAT.getCombatLookState(self)
 
     state_mgr.set_state(npc, move, nil, nil, look, {fast_set = true})
-  end
-
-
-  function action_combat_snipe:finalize()
-    action_base.finalize(self)
-
-    UnregisterScriptCallback("npc_on_hit_callback",  self)
-    UnregisterScriptCallback("npc_on_hear_callback", self)
   end
 --
 
