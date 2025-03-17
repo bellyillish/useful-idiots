@@ -750,7 +750,10 @@ end
 
 
 function CompanionManager:Close()
+  SendScriptCallback("idiots_on_close", self)
+
   self:HideDialog()
+
   Unregister_UI("CompanionManager")
   GUI = nil
 end
@@ -774,6 +777,7 @@ function openCompanionManager()
     end
 
     GUI = CompanionManager(target and target:id() or nil)
+    SendScriptCallback("idiots_on_open", GUI)
   end
 
   if GUI and not GUI:IsShown() then
@@ -849,4 +853,6 @@ function on_game_start()
 end
 
 
+AddScriptCallback("idiots_on_open")
 AddScriptCallback("idiots_on_button")
+AddScriptCallback("idiots_on_close")
