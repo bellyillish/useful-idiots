@@ -3,7 +3,7 @@ on_combat = combat
 
 
 @[combat]
-combat_type = {+npcx_beh_combat_tactics_assault} assault, {+npcx_beh_combat_tactics_support} support, {+npcx_beh_combat_tactics_guard} guard, {+npcx_beh_combat_tactics_snipe} snipe, {+npcx_beh_combat_tactics_camper} camper, {+npcx_beh_combat_tactics_monolith} monolith, {+npcx_beh_combat_tactics_zombied} zombied, nil
+combat_type = {+npcx_beh_combat_tactics_assault} assault, {+npcx_beh_combat_tactics_support} support, {+npcx_beh_combat_tactics_guard} guard, {+npcx_beh_combat_tactics_snipe} snipe, {+npcx_beh_combat_tactics_camper} camper, {+npcx_beh_combat_tactics_monolith} monolith, {+npcx_beh_combat_tactics_zombied} zombied
 
 
 ![beh@general]
@@ -12,7 +12,7 @@ sound_idle = state
 ; behaviors and targets
 behavior_state = {+npcx_beh_substate_relax} beh_relax,  {+npcx_beh_patrol_mode} beh_path, {+npcx_beh_cover} beh_cover,  {+npcx_beh_wait} beh_wait, beh_move
 target         = {+npcx_beh_substate_relax} relax_spot, {+npcx_beh_patrol_mode} waypoint, {+npcx_beh_cover} cover_spot, {+npcx_beh_wait} look_around, follow_actor
-path_end       = {+npcx_beh_patrol_mode} loop, nil
+path_end       = {+npcx_beh_patrol_mode} loop
 
 ; animations
 walk_anim   = {=is_wounded} wounded, {=follow_prone} sneak,     {=follow_crouch} sneak,     {+npcx_beh_substate_prone} sneak,     {+npcx_beh_substate_stealth} sneak, patrol
