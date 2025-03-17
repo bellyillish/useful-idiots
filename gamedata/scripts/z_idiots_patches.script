@@ -3,9 +3,11 @@ AddScriptCallback("idiots_on_start")
 
 require "illish.patches.axr_beh"
 require "illish.patches.axr_companions"
+require "illish.patches.itms_manager"
 require "illish.patches.rx_ff"
 require "illish.patches.sr_light"
 require "illish.patches.state_mgr"
+require "illish.patches.surge_rush_schemes"
 require "illish.patches.utils_obj"
 require "illish.patches.xr_combat_ignore"
 require "illish.patches.xr_combat"
