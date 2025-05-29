@@ -8,7 +8,7 @@ local PATCH = {}
 
 
 -- Custom combat types to inject
-PATCH.CUSTOM_COMBAT = {
+PATCH.COMBAT_MODES = {
   idiots_combat_assault,
   idiots_combat_support,
   idiots_combat_snipe,
@@ -36,7 +36,7 @@ function xr_combat.add_to_binder(npc, ini, scheme, section, storage, temp)
   local manager = npc:motivation_action_manager()
 
   if manager and temp.section then
-    for i, scheme in ipairs(PATCH.CUSTOM_COMBAT) do
+    for i, scheme in ipairs(PATCH.COMBAT_MODES) do
       if scheme and scheme.add_to_binder then
         scheme.add_to_binder(npc, ini, storage, manager, temp)
       end
@@ -161,7 +161,7 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
   if item or not weapons[1] then
     NPC.setForcingWeapon(npc, false)
 
-    -- Force if no active item
+  -- Force if no active item
   elseif not NPC.getForcingWeapon(npc) then
     NPC.setForcingWeapon(npc, true)
     NPC.forceWeapon(npc)

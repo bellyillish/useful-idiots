@@ -29,7 +29,7 @@ function axr_beh.init_custom_data(npc, ini, section, st, scheme)
 end
 
 
--- Check if weapon needs to be reloading when entering BEH scheme
+--[[ Check if weapon needs to be reloading when entering BEH scheme
 local PATCH_initialize = axr_beh.action_beh.initialize
 
 function axr_beh.action_beh:initialize()
@@ -41,6 +41,7 @@ function axr_beh.action_beh:initialize()
 
   NPC.setReloadModes(self.object, wmode, WPN.NOT_FULL)
 end
+--]]
 
 
 -- Inject custom targets into BEH scheme
