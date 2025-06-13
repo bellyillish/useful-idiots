@@ -79,7 +79,9 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
 
   -- Do nothing if inventory is open
   if Check_UI("UIInventory") and ui_inventory.GUI.npc_id == npc:id() then
-    item:switch_state(0)
+    if WPN.isGun(item) then
+      item:switch_state(0)
+    end
     return
   end
 
