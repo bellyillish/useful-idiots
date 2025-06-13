@@ -48,8 +48,15 @@ function xr_combat_ignore.is_enemy(npc, enemy, noMemory)
   end
 
   -- ignore stale enemies
-  if not noMemory and cfg.memoryExpires and time_global() > npc:memory_time(enemy) + cfg.memoryExpires then
-    return false
+  if IsStalker(npc) and not noMemory then
+    -- time-based
+    if enemy:id() == 0 and time_global() >  npc:memory_time(enemy) + cfg.memoryTime then
+      return false
+    end
+    -- distance-based
+    if dist > cfg.memoryDistance and not enemy:see(npc) then
+      return false
+    end
   end
 
   -- respect combat_ignore_keep_when_attacked
@@ -157,7 +164,8 @@ function PATCH.initCombatIgnoreConfig()
     enemyRangeMin   = ini:r_string_to_condlist("settings", "enemy_range_min", "nil"),
     enemyRangeSurge = ini:r_string_to_condlist("settings", "enemy_range_surge", "nil"),
     maxElevation    = ini:r_string_to_condlist("settings", "max_elevation", "nil"),
-    memoryExpires   = ini:r_string_to_condlist("settings", "memory_expires", "nil"),
+    memoryTime      = ini:r_string_to_condlist("settings", "memory_time", "nil"),
+    memoryDistance  = ini:r_string_to_condlist("settings", "memory_distance", "nil"),
     nightMultiplier = ini:r_string_to_condlist("night_settings", "multiplier", "1"),
     rainMultiplier  = ini:r_string_to_condlist("rain_settings", "multiplier", "1"),
     surgeMultiplier = ini:r_string_to_condlist("surge_settings", "multiplier", "1"),
