@@ -77,6 +77,12 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
     return
   end
 
+  -- Do nothing if inventory is open
+  if Check_UI("UIInventory") and ui_inventory.GUI.npc_id == npc:id() then
+    item:switch_state(0)
+    return
+  end
+
   local preferred = NPC.getActiveState(npc, "weapon")
   local reload    = NPC.getReloadModes(npc)
   local weapons   = NPC.getGuns(npc)
@@ -93,7 +99,7 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
     -- reload if needed
     elseif
       reload.emode    == WPN.EMPTY      and ammo.current == 0
-      or reload.emode == WPN.HALF_EMPTY and ammo.current < ammo.total / 2
+       or reload.emode == WPN.HALF_EMPTY and ammo.current < ammo.total / 2
       or reload.emode == WPN.NOT_FULL   and ammo.current < ammo.total
     then
       flags.gun_id = item:id()
@@ -186,9 +192,66 @@ if schemes_ai_gamma and schemes_ai_gamma.scheme_cover then
 end
 
 
+-- Track companion ammo while inventory is open
+local AMMO_COUNTS = {}
+
+
+-- Save companion ammo counts and unload weapons before opening inventory
+local function onShowGUI(name)
+  if name ~= "UIInventory" or not ui_inventory.GUI then
+    return
+  end
+
+  local npc = ui_inventory.GUI:GetPartner()
+  if not NPC.isCompanion(npc) then
+    return
+  end
+
+  npc:iterate_inventory(function(npc, item)
+    if item and IsWeapon(item) then
+      AMMO_COUNTS[item:id()] = item:get_ammo_in_magazine()
+      item:set_ammo_elapsed(0)
+    end
+  end, npc)
+end
+
+
+-- Restore companion ammo counts after closing inventory
+local function onHideGUI(name)
+  if name ~= "UIInventory" or not ui_inventory.GUI then
+    return
+  end
+
+  local npc = ui_inventory.GUI:GetPartner()
+  if not NPC.isCompanion(npc) then
+    return
+  end
+
+  npc:iterate_inventory(function(npc, item)
+    if item and IsWeapon(item) then
+      local ammoCount = AMMO_COUNTS[item:id()]
+
+      if ammoCount then
+        item:set_ammo_elapsed(ammoCount)
+      end
+
+      AMMO_COUNTS[item:id()] = nil
+    end
+  end, npc)
+end
+
+
+-- Disable GAMMA's version of the above
+if grok_companions_no_ammo then
+  grok_companions_no_ammo.unload_ammo = nil
+end
+
+
 -- Callbacks
 RegisterScriptCallback("idiots_on_start", function()
   RegisterScriptCallback("npc_on_choose_weapon", PATCH.onChooseWeapon)
+  RegisterScriptCallback("GUI_on_show", onShowGUI)
+  RegisterScriptCallback("GUI_on_hide", onHideGUI)
 end)
 
 

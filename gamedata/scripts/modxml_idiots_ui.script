@@ -617,8 +617,20 @@ end
 --
 
 
+local CACHE = nil
+
+function clearCache()
+  CACHE = nil
+end
+
+
 function onReadHUDXML(name, XML)
   if name ~= "ui\\idiots_ui.xml" then
+    return
+  end
+
+  if CACHE then
+    XML.xml_table.kids = CACHE.xml_table.kids
     return
   end
 
@@ -654,6 +666,8 @@ function onReadHUDXML(name, XML)
   for i, el in ipairs(XML:query("tab")) do
     XML:wrapElement(el, XML:convertElement({name = "stub"}))
   end
+
+  CACHE = XML
 end
 
 

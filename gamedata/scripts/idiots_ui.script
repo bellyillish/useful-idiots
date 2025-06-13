@@ -589,7 +589,7 @@ end
 function CompanionManager:InitTooltip()
   local showTooltips  = ui_mcm.get("idiots/ui/showTooltips")
 
-  if not (showTooltips and self.xml:NodeExist("tooltip")) then
+  if not (showTooltips and self.xml:NodeExist("tooltip") and self.xml:NodeExist("tooltip:tip")) then
     return
   end
 
@@ -816,10 +816,36 @@ local onUpdateButtons = UTIL.throttle(function()
 end, 50)
 
 
+-- CACHE CALLBACKS --
+local LAST_RESOLUTION = nil
+
+
+function mcmOnOptionChange(changes)
+  for key in pairs(changes) do
+    if (key:match("^idiots/")) then
+      modxml_idiots_ui.clearCache()
+      return
+    end
+  end
+end
+
+
+function onResolutionChange()
+  local resolution = string.format("%dx%d", device().width, device().height)
+
+  if resolution ~= LAST_RESOLUTION then
+    LAST_RESOLUTION = resolution
+    modxml_idiots_ui.clearCache()
+  end
+end
+
+
 function on_game_start()
   RegisterScriptCallback("actor_on_update",  onUpdateIndexers)
   RegisterScriptCallback("actor_on_update",  onUpdateButtons)
   RegisterScriptCallback("idiots_on_state",  onStateChange)
+  RegisterScriptCallback("on_screen_resolution_changed", onResolutionChange)
+  RegisterScriptCallback("mcm_option_change", mcmOnOptionChange)
 end
 
 
