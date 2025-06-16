@@ -68,7 +68,7 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
     local ammo = WPN.getAmmoCount(item)
 
     if ammo.current == ammo.total then
-      item:switch_state(0)
+      item:switch_state(CWeapon.eFire)
     end
   end
 
@@ -79,8 +79,8 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
 
   -- Do nothing if inventory is open
   if Check_UI("UIInventory") and ui_inventory.GUI.npc_id == npc:id() then
-    if WPN.isGun(item) then
-      item:switch_state(0)
+    if WPN.isGun(item) and item:get_state() == CWeapon.eReload then
+      item:switch_state(CWeapon.eFire)
     end
     return
   end
@@ -101,11 +101,11 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
     -- reload if needed
     elseif
       reload.emode    == WPN.EMPTY      and ammo.current == 0
-       or reload.emode == WPN.HALF_EMPTY and ammo.current < ammo.total / 2
+      or reload.emode == WPN.HALF_EMPTY and ammo.current < ammo.total / 2
       or reload.emode == WPN.NOT_FULL   and ammo.current < ammo.total
     then
       flags.gun_id = item:id()
-      item:switch_state(7)
+      item:switch_state(CWeapon.eReload)
       return
     end
   end
@@ -155,7 +155,7 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
         or reload.emode == WPN.NOT_FULL   and ammo.current < ammo.total
       then
         flags.gun_id = weapon:id()
-        weapon:switch_state(7)
+        weapon:switch_state(CWeapon.eReload)
         return
       end
     end
@@ -168,7 +168,7 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
   if item or not weapons[1] then
     NPC.setForcingWeapon(npc, false)
 
-    -- Force if no active item
+  -- Force if no active item
   elseif not NPC.getForcingWeapon(npc) then
     NPC.setForcingWeapon(npc, true)
     NPC.forceWeapon(npc)
