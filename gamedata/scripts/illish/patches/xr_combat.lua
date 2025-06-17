@@ -60,15 +60,16 @@ end
 
 
 -- Override weapon selection for companions
+-- NOTE: don't use CWeapon consts because lua_help is wrong
 function PATCH.onChooseWeapon(npc, wpn, flags)
   local item = npc:active_item()
 
   -- Fix reload animation for everyone
-  if WPN.isGun(item) and item:get_state() == CWeapon.eReload then
+  if WPN.isGun(item) and item:get_state() == 7 then
     local ammo = WPN.getAmmoCount(item)
 
     if ammo.current == ammo.total then
-      item:switch_state(CWeapon.eFire)
+      item:switch_state(0)
     end
   end
 
@@ -78,9 +79,9 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
   end
 
   -- Do nothing if inventory is open
-  if Check_UI("UIInventory") and ui_inventory.GUI.npc_id == npc:id() then
-    if WPN.isGun(item) and item:get_state() == CWeapon.eReload then
-      item:switch_state(CWeapon.eFire)
+  if NPC.isInventoryOpen(npc) then
+    if WPN.isGun(item) and item:get_state() == 7 then
+      item:switch_state(0)
     end
     return
   end
@@ -93,7 +94,7 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
     local ammo = WPN.getAmmoCount(item)
 
     -- don't switch weapon if reloading
-    if item:get_state() == CWeapon.eReload then
+    if item:get_state() == 7 then
       if ammo.current < ammo.total then
         flags.gun_id = item:id()
         return
@@ -105,7 +106,7 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
       or reload.emode == WPN.NOT_FULL   and ammo.current < ammo.total
     then
       flags.gun_id = item:id()
-      item:switch_state(CWeapon.eReload)
+      item:switch_state(7)
       return
     end
   end
@@ -155,7 +156,9 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
         or reload.emode == WPN.NOT_FULL   and ammo.current < ammo.total
       then
         flags.gun_id = weapon:id()
-        weapon:switch_state(CWeapon.eReload)
+        if item:get_state() ~= 7 then
+          weapon:switch_state(7)
+        end
         return
       end
     end

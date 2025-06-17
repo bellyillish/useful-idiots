@@ -161,6 +161,15 @@ NPC.LOOT_SHARING_NPCS = {}
 
     return VEC.average(pos), VEC.average(dir)
   end
+
+
+  function NPC.isInventoryOpen(npc)
+    if not Check_UI("UIInventory") or not ui_inventory.GUI then
+      return false
+    end
+
+    return ui_inventory.GUI.npc_id == npc:id()
+  end
 --
 
 
