@@ -156,7 +156,7 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
         or reload.emode == WPN.NOT_FULL   and ammo.current < ammo.total
       then
         flags.gun_id = weapon:id()
-        if item:get_state() ~= 7 then
+        if weapon:get_state() ~= 7 then
           weapon:switch_state(7)
         end
         return
