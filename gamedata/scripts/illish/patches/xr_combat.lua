@@ -249,7 +249,7 @@ end
 
 -- Disable GAMMA's version of the above
 if grok_companions_no_ammo then
-  grok_companions_no_ammo.unload_ammo = nil
+  grok_companions_no_ammo.unload_ammo = function() end
 end
 
 
