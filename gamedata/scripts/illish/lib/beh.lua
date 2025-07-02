@@ -599,10 +599,6 @@ local BEH = {}
       end
     else
       dir = dir or VEC.direction(pos, actorPos)
-
-      if math.abs(moveDist) >= 1 then
-        dir = dir:average(VEC.direction(savedActorPos, actorPos))
-      end
     end
 
     POS.setLVID(npc, vid)
