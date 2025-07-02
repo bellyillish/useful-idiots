@@ -113,7 +113,9 @@ function VEC.pointsAlongAxis(options)
         count = count + 1
       end
 
-      local angle = arcAngle / count
+      local angle = arcAngle % 360 == 0
+        and arcAngle / (count + 1)
+        or  arcAngle / count
 
       local bdir = r % 2 == 0
         and VEC.rotate(baseDir, angle * -0.25)
