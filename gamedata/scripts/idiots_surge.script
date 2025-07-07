@@ -23,15 +23,15 @@ ACTION_ID = 188210
 
   function evaluator_surge:evaluate()
     local npc  = self.object
-  	local comm = npc:character_community()
+    local comm = npc:character_community()
 
     if not SURGE.isActive() then
       return false
     end
 
-		if IsWounded(npc) then
-			return false
-		end
+    if IsWounded(npc) then
+      return false
+    end
 
     if not NPC.isCompanion(npc) then
       return false
@@ -60,7 +60,7 @@ ACTION_ID = 188210
 
 
   function action_surge:initialize()
-  	action_base.initialize(self)
+    action_base.initialize(self)
     local npc = self.object
 
     self.st = {
@@ -75,7 +75,7 @@ ACTION_ID = 188210
 
 
   function action_surge:execute()
-  	action_base.execute(self)
+    action_base.execute(self)
 
     local st   = self.st
     local npc  = self.object
@@ -200,7 +200,7 @@ ACTION_ID = 188210
 
     if temp.action then
       temp.action:add_precondition(WP(stalker_ids.property_alive, true))
-    	temp.action:add_precondition(WP(xr_evaluators_id.sidor_wounded_base, false))
+      temp.action:add_precondition(WP(xr_evaluators_id.sidor_wounded_base, false))
       temp.action:add_precondition(WP(EVAL_ID, true))
       temp.action:add_precondition(WP(EVAL_FACER, false))
       temp.action:add_precondition(WP(EVAL_STEAL_UP, false))
@@ -213,7 +213,7 @@ ACTION_ID = 188210
 
 
   function configure_actions(npc, ini, scheme, section, stype, temp)
-  	local manager = npc:motivation_action_manager()
+    local manager = npc:motivation_action_manager()
 
     local otherActions = {
       xr_danger.actid,

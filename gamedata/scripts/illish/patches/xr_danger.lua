@@ -7,7 +7,7 @@ local PATCH = {}
 -- Fix values in Anomaly that got incorrectly overwritten
 xr_danger.bd_types[danger_object.entity_attacked] = "entity_attacked"
 xr_danger.bd_types[danger_object.bullet_ricochet] = "bullet_ricochet"
-xr_danger.bd_types[danger_object.attack_sound]	  = "attack_sound"
+xr_danger.bd_types[danger_object.attack_sound]    = "attack_sound"
 
 
 -- Add IsStalker() check to corpses for Anomaly

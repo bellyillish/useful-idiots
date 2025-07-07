@@ -56,7 +56,7 @@ function axr_companions.add_to_actor_squad(npc)
   axr_companions.setup_companion_logic(npc, db.storage[npc:id()], false)
 
   -- Reset vanilla flags that might interfere
-	npc:disable_info_portion("npcx_beh_hide_in_cover")
+  npc:disable_info_portion("npcx_beh_hide_in_cover")
   save_var(npc, "fight_from_point", nil)
 
   -- Sync with global state
