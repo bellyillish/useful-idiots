@@ -2,13 +2,14 @@ local TABLE  = require "illish.lib.table"
 local NPC    = require "illish.lib.npc"
 local WPN    = require "illish.lib.weapon"
 local COMBAT = require "illish.lib.combat"
+local SURGE  = require "illish.lib.surge"
 
 
 local PATCH = {}
 
 
 -- Custom combat types to inject
-PATCH.CUSTOM_COMBAT = {
+PATCH.COMBAT_MODES = {
   idiots_combat_assault,
   idiots_combat_support,
   idiots_combat_snipe,
@@ -16,13 +17,19 @@ PATCH.CUSTOM_COMBAT = {
 }
 
 
--- Force combat type to update to fix an issue where companions can get stuck
--- in legacy scripted combat (because the original was probably not written to
--- work with condlists)
+-- 1. Force combat type to update to fix an issue where companions can get stuck
+--    in legacy scripted combat (because the original was probably not written to
+--    work with condlists)
+-- 2. Force default (engine) combat during surges for companions
 local PATCH_evaluate = xr_combat.evaluator_check_combat.evaluate
 
 function xr_combat.evaluator_check_combat:evaluate()
   xr_combat.set_combat_type(self.object, db.actor, self.st)
+
+  if NPC.isCompanion(self.object) and SURGE.isActive() then
+    return false
+  end
+
   return PATCH_evaluate(self)
 end
 
@@ -36,7 +43,7 @@ function xr_combat.add_to_binder(npc, ini, scheme, section, storage, temp)
   local manager = npc:motivation_action_manager()
 
   if manager and temp.section then
-    for i, scheme in ipairs(PATCH.CUSTOM_COMBAT) do
+    for i, scheme in ipairs(PATCH.COMBAT_MODES) do
       if scheme and scheme.add_to_binder then
         scheme.add_to_binder(npc, ini, storage, manager, temp)
       end
@@ -45,7 +52,7 @@ function xr_combat.add_to_binder(npc, ini, scheme, section, storage, temp)
 end
 
 
--- Patch zombied combat type to allow companions to use it (for lulz)
+-- Patch zombied combat type to allow companions to use it
 local PATCH_zombied_evaluate = xr_combat_zombied.evaluator_combat_zombied.evaluate
 
 function xr_combat_zombied.evaluator_combat_zombied:evaluate()
@@ -65,10 +72,20 @@ end
 function PATCH.onChooseWeapon(npc, wpn, flags)
   local item = npc:active_item()
 
+  -- Do nothing if inventory is open
+  if NPC.isInventoryOpen(npc) then
+    if WPN.isGun(item) then
+      flags.gun_id = item:id()
+      if item:get_state() == 7 then
+        item:switch_state(0)
+      end
+    end
+    return
+  end
+
   -- Fix reload animation for everyone
   if WPN.isGun(item) and item:get_state() == 7 then
     local ammo = WPN.getAmmoCount(item)
-
     if ammo.current == ammo.total then
       item:switch_state(0)
     end
@@ -76,14 +93,6 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
 
   -- The rest is only for companions
   if not NPC.isCompanion(npc) then
-    return
-  end
-
-  -- Do nothing if inventory is open
-  if NPC.isInventoryOpen(npc) then
-    if WPN.isGun(item) and item:get_state() == 7 then
-      item:switch_state(0)
-    end
     return
   end
 
@@ -157,7 +166,7 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
         or reload.emode == WPN.NOT_FULL   and ammo.current < ammo.total
       then
         flags.gun_id = weapon:id()
-        if weapon:get_state() ~= 7 then
+        if weapon:get_state() == 0 then
           weapon:switch_state(7)
         end
         return
@@ -171,7 +180,6 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
   -- Don't force if there's an active item or no weapons
   if item or not weapons[1] then
     NPC.setForcingWeapon(npc, false)
-
   -- Force if no active item
   elseif not NPC.getForcingWeapon(npc) then
     NPC.setForcingWeapon(npc, true)
