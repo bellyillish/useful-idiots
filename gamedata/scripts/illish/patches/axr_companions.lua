@@ -1,6 +1,52 @@
 local NPC = require "illish.lib.npc"
 
 
+local PATCH = {}
+
+
+--
+function PATCH.splitCompanionSquads()
+  for id in pairs(axr_companions.non_task_companions) do
+    local se    = alife():object(id)
+    local squad = get_object_squad(se)
+
+    if not se or not squad then
+      axr_companions.non_task_companions[id] = nil
+    else
+      for member in squad:squad_members() do
+        if squad:npc_count() > 1 then
+          local newSquad = NPC.createOwnSquad(member.id)
+          if newSquad then
+            axr_companions.companion_squads[newSquad.id] = newSquad
+            SIMBOARD:setup_squad_and_group(se)
+            newSquad:set_squad_relation()
+            newSquad:refresh()
+          end
+        end
+      end
+    end
+  end
+end
+
+
+--
+PATCH.become_actor_companion = dialogs_axr_companion.become_actor_companion
+
+function dialogs_axr_companion.become_actor_companion(actor, npc)
+  PATCH.become_actor_companion(actor, npc)
+  PATCH.splitCompanionSquads()
+end
+
+
+--
+PATCH.add_companion_squad = sim_squad_warfare.add_companion_squad
+
+function sim_squad_warfare.add_companion_squad(squad)
+  PATCH.add_companion_squad(squad)
+  PATCH.splitCompanionSquads()
+end
+
+
 -- Overwrite to sync with global state
 function axr_companions.add_to_actor_squad(npc)
   axr_companions.non_task_companions[npc:id()] = true
@@ -62,3 +108,11 @@ function axr_companions.is_assigned_item(npcID, itemID)
 
   return PATCH_is_assigned_item(npcID, itemID)
 end
+
+
+RegisterScriptCallback("idiots_on_start", function()
+  RegisterScriptCallback("actor_on_first_update", PATCH.splitCompanionSquads)
+end)
+
+
+return PATCH

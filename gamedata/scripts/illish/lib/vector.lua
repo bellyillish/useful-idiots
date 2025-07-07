@@ -141,4 +141,18 @@ function VEC.pointsAlongAxis(options)
 end
 
 
+function VEC.serialize(point)
+  return type(point) == "userdata" and point.x and point.y and point.z
+    and  {x = point.x, y = point.y, z = point.z}
+    or   point
+end
+
+
+function VEC.unserialize(point)
+  return point and point.x and point.y and point.z
+    and  VEC.set(point.x, point.y, point.z)
+    or   point
+end
+
+
 return VEC

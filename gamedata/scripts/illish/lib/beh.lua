@@ -59,12 +59,6 @@ local BEH = {}
 
 
 -- UTILS --
-  function BEH.isActive(npc)
-    local manager = npc:motivation_action_manager()
-    return manager and manager:current_action_id() == axr_beh.beh_actid
-  end
-
-
   function BEH.getActorMovement(self)
     local npc = self.object
     local st  = self.st
@@ -223,6 +217,85 @@ local BEH = {}
       and vid
       or  formation.vid
   end
+
+
+  function BEH.saveStorage(id, beh)
+    local st = db.storage[id].beh
+    local dt = st and st.desired_target
+
+    if not (st and beh) then
+      return
+    end
+
+    beh[id] = {target = st.target, keepType = st.keepType}
+
+    if not dt then
+      return
+    end
+
+    beh[id].desired_target = {
+      direction       = VEC.serialize(dt.direction),
+      position        = VEC.serialize(dt.position),
+      actorPos        = VEC.serialize(dt.actorPos),
+      level_vertex_id = dt.level_vertex_id,
+      followCount     = dt.followCount,
+      formation       = dt.formation,
+      expires         = dt.expires,
+    }
+  end
+
+
+  function BEH.loadStorage(id, beh)
+    local st = db.storage[id].beh
+
+    if not (st and beh and beh[id]) then
+      return
+    end
+
+    if beh[id].target then
+      st.target = beh[id].target
+    end
+
+    if beh[id].keepType then
+      st.keepType = beh[id].keepType
+    end
+
+    if not beh[id].desired_target then
+      return
+    end
+
+    if not st.desired_target then
+      st.desired_target = {}
+    end
+
+    if beh[id].desired_target.level_vertex_id then
+      st.desired_target.level_vertex_id = beh[id].desired_target.level_vertex_id
+    end
+
+    if beh[id].desired_target.expires then
+      st.desired_target.expires = beh[id].desired_target.expires
+    end
+
+    if beh[id].desired_target.position then
+      st.desired_target.position = VEC.unserialize(beh[id].desired_target.position)
+    end
+
+    if beh[id].desired_target.direction then
+      st.desired_target.direction = VEC.unserialize(beh[id].desired_target.direction)
+    end
+
+    if beh[id].desired_target.actorPos then
+      st.desired_target.actorPos = VEC.unserialize(beh[id].desired_target.actorPos)
+    end
+
+    if beh[id].desired_target.followCount then
+      st.desired_target.followCount = beh[id].desired_target.followCount
+    end
+
+    if beh[id].desired_target.formation then
+      st.desired_target.formation = beh[id].desired_target.formation
+    end
+  end
 --
 
 
@@ -368,11 +441,12 @@ local BEH = {}
     local npc = self.object
     local st  = self.st
 
-    local vid, pos, dir, reached =
+    local vid, pos, dir, reached, facing =
       st.savedTarget.level_vertex_id,
       st.savedTarget.position,
       st.savedTarget.direction,
-      st.savedTarget.reached
+      st.savedTarget.reached,
+      st.savedTarget.facing
 
     if st.movePoint then
       vid = nil
@@ -383,8 +457,9 @@ local BEH = {}
       st.movePoint = nil
     end
 
+    facing  = dir and VEC.dotProduct(npc:direction(), dir) >= 0.6
     reached = vid == npc:level_vertex_id()
-    pos = POS.position(vid)
+    pos     = POS.position(vid)
 
     if not st.lookPoint then
       st.lookTimer = nil
@@ -409,6 +484,7 @@ local BEH = {}
     st.desired_target = {
       look_dir        = (reached or st.lookPoint) and dir or nil,
       reached         = reached,
+      facing          = facing,
       level_vertex_id = vid,
       position        = pos,
       direction       = dir,
@@ -422,11 +498,12 @@ local BEH = {}
     local npc = self.object
     local st  = self.st
 
-    local vid, pos, dir, reached, expires =
+    local vid, pos, dir, reached, facing, expires =
       st.savedTarget.level_vertex_id,
       st.savedTarget.position,
       st.savedTarget.direction,
       st.savedTarget.reached,
+      st.savedTarget.facing,
       st.savedTarget.expires
 
     if st.keepType ~= st.lastKeepType
@@ -464,8 +541,9 @@ local BEH = {}
       end
     end
 
+    facing  = dir and VEC.dotProduct(npc:direction(), dir) >= 0.6
     reached = vid == npc:level_vertex_id()
-    pos = POS.position(vid)
+    pos     = POS.position(vid)
 
     if not st.lookPoint then
       st.lookTimer = nil
@@ -490,6 +568,7 @@ local BEH = {}
     st.desired_target = {
       look_dir        = (reached or st.lookPoint) and dir or nil,
       reached         = reached,
+      facing          = facing,
       expires         = expires,
       level_vertex_id = vid,
       position        = pos,
@@ -504,11 +583,12 @@ local BEH = {}
     local npc = self.object
     local st  = self.st
 
-    local vid, pos, dir, reached, expires =
+    local vid, pos, dir, reached, facing, expires =
       st.savedTarget.level_vertex_id,
       st.savedTarget.position,
       st.savedTarget.direction,
       st.savedTarget.reached,
+      st.savedTarget.facing,
       st.savedTarget.expires
 
     local savedVid, savedActorPos, savedFormation, savedFollowCount =
@@ -574,8 +654,9 @@ local BEH = {}
       end
     end
 
+    facing  = dir and VEC.dotProduct(npc:direction(), dir) >= 0.6
     reached = vid == npc:level_vertex_id()
-    pos = POS.position(vid)
+    pos     = POS.position(vid)
 
     if moveDist >= 2 then
       st.lookPoint = nil
@@ -610,6 +691,7 @@ local BEH = {}
       formation       = formation,
       expires         = expires,
       reached         = reached,
+      facing          = facing,
       direction       = dir,
       position        = pos,
       level_vertex_id = vid,
@@ -623,11 +705,12 @@ local BEH = {}
     local npc = self.object
     local st  = self.st
 
-    local vid, dir, pos, reached, expires =
+    local vid, dir, pos, reached, facing, expires =
       st.savedTarget.level_vertex_id,
       st.savedTarget.direction,
       st.savedTarget.position,
       st.savedTarget.reached,
+      st.savedTarget.facing,
       st.savedTarget.expires
 
     if UTIL.timeExpired(expires)
@@ -664,15 +747,17 @@ local BEH = {}
       end
     end
 
+    facing  = dir and VEC.dotProduct(npc:direction(), dir) >= 0.6
     reached = vid == npc:level_vertex_id()
-    pos = POS.position(vid)
 
+    pos = POS.position(vid)
     POS.setLVID(npc, vid)
 
     st.desired_target = {
       look_dir        = reached and dir or nil,
-      reached         = reached,
       expires         = expires,
+      reached         = reached,
+      facing          = facing,
       level_vertex_id = vid,
       direction       = dir,
       position        = pos,
@@ -690,7 +775,7 @@ local BEH = {}
     local dt   = st.desired_target
     local anim = st.moveState
 
-    if dt.reached then
+    if dt.reached and dt.facing then
       anim = st.wait_animation
       st.moveState = nil
     end

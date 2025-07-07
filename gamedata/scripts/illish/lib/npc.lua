@@ -170,6 +170,27 @@ NPC.LOOT_SHARING_NPCS = {}
 
     return ui_inventory.GUI.npc_id == npc:id()
   end
+
+
+  function NPC.createOwnSquad(id)
+    local se    = alife():object(id)
+    local squad = alife():object(se.group_id)
+
+    if not se or not squad then
+      return
+    end
+
+    local pos  = se.position
+    local lvid = se.m_level_vertex_id
+    local gvid = se.m_game_vertex_id
+
+    local newSquad = alife_create(squad:section_name(), pos, lvid, gvid)
+
+    squad:unregister_member(se.id)
+    newSquad:register_member(se.id)
+
+    return newSquad
+  end
 --
 
 
@@ -189,7 +210,8 @@ NPC.LOOT_SHARING_NPCS = {}
 
   function NPC.isReloading(npc)
     return WPN.isGun(npc:active_item())
-      and npc:active_item():get_state() == CWeapon.eReload
+      and npc:active_item():get_state() == 7
+      and not NPC.isInventoryOpen(npc)
       or  false
   end
 
