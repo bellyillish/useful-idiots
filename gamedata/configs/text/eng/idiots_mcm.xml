@@ -133,6 +133,26 @@
     <text>Adds a command to put companions into the "Zombied" combat scheme. This scheme comes with Anomaly but is not meant for companions or human NPCs. Note that it can be buggy and is thus unsupported. You can assign a keybind to this command but ikt can't be activated with the "Cycle Combat" keybind.</text>
   </string>
 
+  <!-- Surge Options -->
+  <string id="ui_mcm_idiots_subtitle_options_surge">
+    <text>Surge Options</text>
+  </string>
+  <string id="ui_mcm_idiots_options_dynamicSurgeCover">
+    <text>Enable Dynamic Surge Cover</text>
+  </string>
+  <string id="ui_mcm_idiots_options_dynamicSurgeCover_desc">
+    <text>Enables a feature similar to the "Dynamic Emissions Cover" mod except it also gives companions more options for surge cover. You can enable it for both the player and companions (recommended), for companions only if you prefer to only use "Dynamic Emission Cover" for the player, or neither to disable it entirely.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_surgesKillCompanions">
+    <text>Surges Can Kill Companions</text>
+  </string>
+  <string id="ui_mcm_idiots_options_surgesKillCompanions_desc">
+    <text>Surges kill companions in Anomaly but do not harm them in GAMMA. This option will default to match which you are currently running. Enabling it is recommended but keep in mind it is a new feature and carries some risk to your companions.</text>
+  </string>
+  <string id="ui_mcm_idiots_options_surge_note">
+    <text>NOTE: "NPCs Die in Emissions for Real" is compatible as Useful Idiots will replace its surge scheme only for companions. "TB Coordinate Based Safe Zones" is compatible but companions will not use its additional covers. "Dynamic Emission Cover" is compatible as it has no effect on companions and both mods will affect the player if enabled.</text>
+  </string>
+
   <!-- Jobs Options -->
   <string id="ui_mcm_idiots_subtitle_options_jobs">
     <text>Looting and Gathering Options</text>
@@ -535,5 +555,14 @@
   </string>
   <string id="ui_mcm_lst_idiots_stalker">
     <text>Loner</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_both">
+    <text>For Player and Companions</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_companions">
+    <text>For Companions Only</text>
+  </string>
+  <string id="ui_mcm_lst_idiots_neither">
+    <text>Disabled</text>
   </string>
 </string_table>

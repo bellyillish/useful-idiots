@@ -41,6 +41,22 @@ local NPC   = require "illish.lib.npc"
         MCM.getCheckboxField({id = "monolithCombat"}),
         MCM.getCheckboxField({id = "zombiedCombat"}),
         MCM.getLine(),
+        MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_surge"}),
+        {
+          id   = "dynamicSurgeCover",
+          type = "list",
+          hint = "idiots_options_dynamicSurgeCover",
+          val  = 0,
+          def  = "both",
+          content = {
+            {"both",       "idiots_both"},
+            {"companions", "idiots_companions"},
+            {"neither",    "idiots_neither"},
+          }
+        },
+        MCM.getCheckboxField({id = "surgesKillCompanions", def = not isGAMMA}),
+        MCM.getNote({text = "ui_mcm_idiots_options_surge_note", clr = {255, 200, 175, 75}}),
+        MCM.getLine(),
         MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_jobs"}),
         MCM.getCheckboxField({id = "noNpcLooting", def = isGAMMA}),
         MCM.getNote({text = "ui_mcm_idiots_options_jobs_note", clr = {255, 200, 175, 75}}),
