@@ -24,7 +24,6 @@ local PATCH_init_custom_data = axr_beh.init_custom_data
 
 function axr_beh.init_custom_data(npc, ini, section, st, scheme)
   PATCH_init_custom_data(npc, ini, section, st, scheme)
-
   st.normal_desired_dist = ini:r_string_to_condlist(section, "normal_desired_dist", "4")
 end
 
@@ -34,6 +33,11 @@ local PATCH_initialize = axr_beh.action_beh.initialize
 
 function axr_beh.action_beh:initialize()
   PATCH_initialize(self)
+  local npc = self.object
+
+  if not NPC.isCompanion(npc) then
+    return
+  end
 
   local wmode = ui_mcm.get("idiots/options/autoReloadAll")
     and WPN.RELOAD_ALL
@@ -49,6 +53,10 @@ local PATCH_set_desired_target = axr_beh.action_beh.set_desired_target
 function axr_beh.action_beh:set_desired_target()
   local npc = self.object
   local st  = self.st
+
+  if not NPC.isCompanion(npc) then
+    return PATCH_set_desired_target(self)
+  end
 
   local target = xr_logic.pick_section_from_condlist(db.actor, npc, st.goto_target)
 
@@ -69,9 +77,8 @@ function axr_beh.action_beh:set_desired_target()
   local success  = PATCH_set_desired_target(self)
   local targetFn = PATCH.CUSTOM_TARGETS[target]
 
-  -- Run custom target function only if original did not match and the NPC is
-  -- a companion (since axr_beh is only meant for companions)
-  if success or not (NPC.isCompanion(npc) and targetFn) then
+  -- Run custom target function only if original did not match
+  if success or not targetFn then
     return success
   end
 
