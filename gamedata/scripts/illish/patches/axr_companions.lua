@@ -4,7 +4,7 @@ local NPC = require "illish.lib.npc"
 local PATCH = {}
 
 
---
+-- Split each companion into their own squad for better control
 function PATCH.splitCompanionSquads()
   for id in pairs(axr_companions.non_task_companions) do
     local se    = alife():object(id)
@@ -29,7 +29,7 @@ function PATCH.splitCompanionSquads()
 end
 
 
---
+-- Split each companion into own squad when joining
 PATCH.become_actor_companion = dialogs_axr_companion.become_actor_companion
 
 function dialogs_axr_companion.become_actor_companion(actor, npc)
@@ -38,7 +38,7 @@ function dialogs_axr_companion.become_actor_companion(actor, npc)
 end
 
 
---
+-- Split each companion into own squad when warfare stuff happens
 PATCH.add_companion_squad = sim_squad_warfare.add_companion_squad
 
 function sim_squad_warfare.add_companion_squad(squad)
@@ -110,6 +110,7 @@ function axr_companions.is_assigned_item(npcID, itemID)
 end
 
 
+-- Split existing companions into own squads at load
 RegisterScriptCallback("idiots_on_start", function()
   RegisterScriptCallback("actor_on_first_update", PATCH.splitCompanionSquads)
 end)
