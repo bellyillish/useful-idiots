@@ -17,18 +17,13 @@ PATCH.COMBAT_MODES = {
 }
 
 
--- 1. Force combat type to update to fix an issue where companions can get stuck
---    in legacy scripted combat (because the original was probably not written to
---    work with condlists)
--- 2. Force default (engine) combat during surges for companions
+-- Force combat type to update to fix an issue where companions can get stuck
+-- in legacy scripted combat (because the original was probably not written to
+-- work with condlists)
 local PATCH_evaluate = xr_combat.evaluator_check_combat.evaluate
 
 function xr_combat.evaluator_check_combat:evaluate()
   xr_combat.set_combat_type(self.object, db.actor, self.st)
-
-  if NPC.isCompanion(self.object) and SURGE.isActive() then
-    return false
-  end
 
   return PATCH_evaluate(self)
 end
