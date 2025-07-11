@@ -101,7 +101,6 @@ function axr_beh.action_beh:beh_move()
     return PATCH_beh_move(self)
   end
 
-  -- TODO: for easy throttling later if needed
   if not st.setStateFn then
     st.setStateFn = state_mgr.set_state
   end

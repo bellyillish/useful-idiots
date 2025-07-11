@@ -40,7 +40,7 @@ function state_mgr.set_state(npc, state, callback, timeout, target, extra)
     end
   end
 
-  -- todo write comment
+  -- Do the same for look_dir just as an extra precaution
   if target and target.look_dir then
     if UTIL.round(target.look_dir:magnitude()) == 0 then
       target.look_dir = nil

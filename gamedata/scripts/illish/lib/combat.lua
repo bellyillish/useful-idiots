@@ -103,11 +103,6 @@ local COMBAT = {}
       return COMBAT.squadSeesEnemy(npc, enemy)
     end
 
-    -- TODO: eval if this is better on or off
-    if db.actor:see(enemy) and COMBAT.hasLineOfSight(db.actor, enemy) then
-      -- return true
-    end
-
     for i, companion in ipairs(NPC.getCompanions()) do
       if companion:see(enemy) then
         return true
