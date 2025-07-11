@@ -55,6 +55,12 @@
   <string id="ui_mcm_idiots_subtitle_options_general">
     <text>Общие настройки</text>
   </string>
+  <string id="ui_mcm_idiots_options_splitSquads">
+    <text>Split Each Companion Into Own Squad</text>
+  </string>
+  <string id="ui_mcm_idiots_options_splitSquads_desc">
+    <text>Lets companions move individually between maps. Otherwise they may not stay/follow as expected or may teleport to far-away positions when transitioning between maps. Squads cannot be restored once split.</text>
+  </string>
   <string id="ui_mcm_idiots_options_autoSneak">
     <text>Включить Авто-Приседание</text>
   </string>
