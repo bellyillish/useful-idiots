@@ -6,6 +6,10 @@ local PATCH = {}
 
 -- Split each companion into their own squad for better control
 function PATCH.splitCompanionSquads()
+  if not ui_mcm.get("idiots/options/splitSquads") then
+    return
+  end
+
   for id in pairs(axr_companions.non_task_companions) do
     local se    = alife():object(id)
     local squad = get_object_squad(se)
