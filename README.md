@@ -24,7 +24,7 @@ Does not (and never will) overwrite any base game files to keep it as compatible
 2. Install it with [Mod Organizer 2](https://anomalymodding.blogspot.com/2021/04/Mod-Organizer-2-setup-and-Amomaly-modding-guide.html). It is included with GAMMA but is strongly encouraged either way. Priority doesn't matter for Anomaly. For GAMMA just put it below the mods that come with it.
 3. Go to **Mod Configuration Menu -> Useful Idiots** to customize and configure to your liking.
 
-## Known Conflicts
+## Mod Interactions
 
 - **NPC Stops Dropping Weapons and Looting Dead Bodies** interferes with looting and gathering. An MCM option is included instead that does the same thing. It defaults to enabled in GAMMA and disabled in Anomaly.
 
@@ -34,7 +34,15 @@ Does not (and never will) overwrite any base game files to keep it as compatible
 
 - **He Is With Me:** also doesn't conflict but is redundant since a replacement with [slightly modified logic](#he-is-with-me) is already included.
 
+- **Mora's Combat Ignore Military Fix:** overwrites core files and is not compatible. I made a replacement for this mod instead called [Cordon Truce](https://github.com/bellyillish/cordon-truce):
+
 - **Settings -> Gameplay -> General:** If "Only Companions Can Loot and Gather Items" is enabled in the mod settings, I'd suggest turning "Corpse Loot Distance" down to 0-2m. If disabled Anomaly's default is fine but GAMMA's is a bit high (I'd suggest 5-6m)
+
+- **NPCs Die in Emissions For Real:** Works fine but Useful Idiots replaces its cover behavior scheme with its own only for companions
+
+- **TB Coordinate Based Surge Covers:** Works fine but companions will not use TB covers.
+
+- **Dynamic Emission Cover:** Works fine as both mods' dynamic cover detectors will work alongside each other for the actor. DEC's HUD meter won't show Useful Idiots' dynamic covers however, and you may prefer to disable one or the other (Useful Idiots' dynamic cover detection can be disabled for the actor in MCM).
 
 <br>
 
@@ -237,6 +245,8 @@ Source code for changes are commented and can be found [in here](https://github.
 - [State Manager (state_mgr)](#state-manager-state_mgr)
 - [Picking Up Weapons](#picking-up-weapons)
 - [He is With Me](#he-is-with-me)
+- [Items Manager](#items-manager)
+- [Surge Behavior](#surge-behavior)
 
 ### Ignoring Combat (xr_combat_ignore)
 
@@ -302,11 +312,11 @@ Some mutants have inconsistent and arbitrary names for their bone IDs (because o
 
 ### State Manager (state_mgr)
 
-1. The "hide" and "prone" animations look nicer when companions go into a crouched or prone position but look janky when they move or turn, so their "hide_na" and "prone_idle" counterparts are often used instead. A patch is added to replace the former with the latter after 1 second to get the best of both worlds. Various other config fixes were also applied to make prone animations work properly.
+1. The "prone" animation looks nicer when companions go into a prone position but looks janky when they move or turn. A patch is added to replace it with "prone_idle" after 1 second. Various other config fixes were also applied to make prone animations work properly.
 
-2. `{fast_set = true}` is appended to all `state_mgr.set_state()` calls (unless explicitly set to `false` in the original call). This seems to make companions feel less sluggish when responding to commands.
+2. `{fast_set = true}` is appended to all `state_mgr.set_state()` calls (unless explicitly set to `false` in the original call). This seems to make NPCs get stuck less and makes companions feel less sluggish when responding to commands.
 
-3. When `state_mgr.set_state()` tells NPCs to look in a direction with a very small magnitude (e.g. at their feet) the NPC can disappear into an alternate dimension and never be seen again. I accidentally did this a lot early on in development. As an extra safeguard I added a patch that detects and removes this when it happens. Just in case.
+3. When `state_mgr.set_state()` tells NPCs to look at a position with a very small magnitude (e.g. at their feet) the NPC can disappear into an alternate dimension and never be seen again. I accidentally did this a lot early on in development. As an extra safeguard I added a patch that detects and removes this when it happens. Just in case.
 
 ### Picking Up Weapons
 
@@ -318,3 +328,11 @@ Useful Idiots includes a modified replacement for this mod. My version uses the 
 1. Companions never fight other companions
 2. Companions never fight NPCs that are not your enemy
 3. NPCs that are not your enemy never fight companions
+
+### Items Manager
+
+Useful Idiots patches a typo in `itms_manager.actor_on_item_take()`. I have no idea what it does or if this makes any difference though.
+
+### Surge Behavior
+
+Companions now run from surges. An MCM option also toggles whether they can be hurt by them as well. Useful Idiots scans around objects on a map at load and around the actor when a surge starts for additional cover options for companions to use. A dynamic cover system has been written and works for both the actor and companions. Companions ignore combat until close to cover, and once in cover do not leave it to fight until after the surge ends. Companions prioritize cover near them vs. cover near the actor.

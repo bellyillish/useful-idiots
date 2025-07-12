@@ -113,7 +113,9 @@ function VEC.pointsAlongAxis(options)
         count = count + 1
       end
 
-      local angle = arcAngle / count
+      local angle = arcAngle % 360 == 0
+        and arcAngle / (count + 1)
+        or  arcAngle / count
 
       local bdir = r % 2 == 0
         and VEC.rotate(baseDir, angle * -0.25)
@@ -136,6 +138,20 @@ function VEC.pointsAlongAxis(options)
   end
 
   return points
+end
+
+
+function VEC.serialize(point)
+  return type(point) == "userdata" and point.x and point.y and point.z
+    and  {x = point.x, y = point.y, z = point.z}
+    or   point
+end
+
+
+function VEC.unserialize(point)
+  return point and point.x and point.y and point.z
+    and  VEC.set(point.x, point.y, point.z)
+    or   point
 end
 
 

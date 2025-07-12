@@ -38,7 +38,9 @@ local POS = {}
 
 
   function POS.snap(pos)
-    return POS.position(POS.lvid(pos))
+    local vid = POS.lvid(pos)
+    local pos = POS.position(vid)
+    return pos, vid
   end
 --
 
@@ -115,7 +117,7 @@ local POS = {}
   function POS.isUnoccupiedLVID(npc, vid, space)
     local space = space or 0.8
 
-    if not POS.isUnclaimedLVID(npc, vid) then
+    if not POS.isUnclaimedLVID(npc, vid, space) then
       return false
     end
 

@@ -42,13 +42,6 @@ ACTION_ID     = xr_actions_id.chugai_actions + 150
 
   function action_combat_guard:initialize()
     action_base.initialize(self)
-
-    self.npc_on_hit_callback  = COMBAT.combatHitCallback
-    self.npc_on_hear_callback = COMBAT.combatHearCallback
-
-    RegisterScriptCallback("npc_on_hit_callback",  self)
-    RegisterScriptCallback("npc_on_hear_callback", self)
-
     self:initConfig()
     self:initEnemy()
     self:initState()
@@ -91,14 +84,6 @@ ACTION_ID     = xr_actions_id.chugai_actions + 150
     local look = COMBAT.getCombatLookState(self)
 
     state_mgr.set_state(npc, move, nil, nil, look, {fast_set = true})
-  end
-
-
-  function action_combat_guard:finalize()
-    action_base.finalize(self)
-
-    UnregisterScriptCallback("npc_on_hit_callback",  self)
-    UnregisterScriptCallback("npc_on_hear_callback", self)
   end
 --
 

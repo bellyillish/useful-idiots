@@ -1,0 +1,250 @@
+local WP     = world_property
+local SM     = surge_manager
+local POS    = require "illish.lib.pos"
+local NPC    = require "illish.lib.npc"
+local COMBAT = require "illish.lib.combat"
+local SURGE  = require "illish.lib.surge"
+
+EVAL_FACER    = xrs_facer.evid_facer
+EVAL_STEAL_UP = xrs_facer.evid_steal_up_facer
+
+EVAL_ID   = 188200
+ACTION_ID = 188210
+
+
+-- EVALUATOR --
+  class "evaluator_surge" (property_evaluator)
+
+
+  function evaluator_surge:__init(name, storage) super (nil, name)
+    self.st = storage
+  end
+
+
+  function evaluator_surge:evaluate()
+    local npc  = self.object
+    local comm = npc:character_community()
+
+    if not SURGE.isActive() then
+      return false
+    end
+
+    if IsWounded(npc) then
+      return false
+    end
+
+    if not NPC.isCompanion(npc) then
+      return false
+    end
+
+    if not comm or comm == "zombied" or comm == "monolith" then
+      return false
+    end
+
+    if get_object_story_id(npc:id()) then
+      return false
+    end
+
+    return true
+  end
+--
+
+
+-- ACTION --
+  class "action_surge" (action_base)
+
+
+  function action_surge:__init(name, storage) super(nil, name)
+    self.st = storage
+  end
+
+
+  function action_surge:initialize()
+    action_base.initialize(self)
+    local npc = self.object
+
+    self.st = {
+      sm      = SM.get_surge_manager(),
+      reached = false,
+      expires = nil,
+      vid     = nil,
+      turn    = nil,
+      dist    = nil,
+    }
+  end
+
+
+  function action_surge:execute()
+    action_base.execute(self)
+
+    local st   = self.st
+    local npc  = self.object
+    local pos  = npc:position()
+    local safe = st.sm:pos_in_cover(pos)
+
+    if time_expired(st.expires) then
+      st.expires = nil
+      st.vid     = nil
+    end
+
+    if st.reached and not safe or st.safe and not safe then
+      st.expires = nil
+      st.vid     = nil
+    end
+
+    if not st.vid and safe then
+      st.vid     = npc:level_vertex_id()
+      st.expires = nil
+    end
+
+    if not st.vid then
+      st.vid = SURGE.pickBestCover(npc)
+    end
+
+    if not POS.isValidLVID(npc, st.vid) then
+      st.vid     = npc:level_vertex_id()
+      st.expires = time_plus(1000)
+    end
+
+    st.reached = st.vid == npc:level_vertex_id()
+    st.dist    = vec_dist(pos, lvpos(st.vid))
+    st.safe    = safe
+
+    POS.setLVID(npc, st.vid)
+
+    local move = self:getMoveState()
+    local look = self:getLookState()
+
+    state_mgr.set_state(npc, move, nil, nil, look, {fast_set = true})
+  end
+
+
+  function action_surge:getMoveState()
+    local npc = self.object
+    local st  = self.st
+
+    local states = {
+      safe = {
+        normal = "sneak",
+        combat = "sneak_fire",
+      },
+      near = {
+        normal = "patrol",
+        combat = "raid_fire",
+      },
+      normal = {
+        normal = "rush",
+        combat = "assault_fire",
+      },
+      far = {
+        normal = "panic",
+        combat = "panic",
+      }
+    }
+
+    local distKey = st.reached and "safe"
+      or st.dist < 3 and "near"
+      or st.dist < 6 and "normal"
+      or "far"
+
+    local be = npc:best_enemy()
+
+    local fireKey = be and (npc:see(be) or COMBAT.hasLineOfSight(npc, be))
+      and "combat"
+      or  "normal"
+
+    return states[distKey][fireKey]
+  end
+
+
+  function action_surge:getLookState()
+    local st  = self.st
+    local npc = self.object
+    local dir = npc:direction()
+
+    if st.dist < 1 then
+      st.turn = st.turn or vec(dir):invert()
+    end
+
+    local be = npc:best_enemy()
+    local bd = npc:best_danger()
+
+    if st.dist >= 6 then
+      return nil
+    end
+
+    if be and (npc:see(be) or COMBAT.hasLineOfSight(npc, be)) then
+      return {look_object = be:id()}
+    end
+
+    if bd then
+      return {look_dir = vec_dir(npc:position(), bd:position())}
+    end
+
+    return {look_dir = st.turn}
+  end
+--
+
+
+-- SETUP --
+  function setup_generic_scheme(npc, ini, scheme, section, stype, temp)
+    xr_logic.assign_storage_and_bind(npc, ini, "idiots_surge", section, temp)
+  end
+
+
+  function add_to_binder(npc, ini, scheme, section, storage, temp)
+    local manager = npc:motivation_action_manager()
+    manager:add_evaluator(EVAL_ID, evaluator_surge("idiots_surge", storage))
+
+    temp.action = action_surge("idiots_surge", storage)
+
+    if temp.action then
+      temp.action:add_precondition(WP(stalker_ids.property_alive, true))
+      temp.action:add_precondition(WP(xr_evaluators_id.sidor_wounded_base, false))
+      temp.action:add_precondition(WP(EVAL_ID, true))
+      temp.action:add_precondition(WP(EVAL_FACER, false))
+      temp.action:add_precondition(WP(EVAL_STEAL_UP, false))
+
+      temp.action:add_effect(WP(EVAL_ID, false))
+
+      manager:add_action(ACTION_ID, temp.action)
+    end
+  end
+
+
+  function configure_actions(npc, ini, scheme, section, stype, temp)
+    local manager = npc:motivation_action_manager()
+
+    local otherActions = {
+      xr_danger.actid,
+      stalker_ids.action_combat_planner,
+      stalker_ids.action_danger_planner,
+      xr_actions_id.state_mgr + 2,
+      xr_actions_id.alife,
+    }
+
+    for i, id in ipairs(otherActions) do
+      local action = manager:action(id)
+
+      if action then
+        action:add_precondition(WP(EVAL_ID, false))
+      end
+    end
+  end
+
+
+  function disable_generic_scheme(npc, scheme, stype)
+    local st = db.storage[npc:id()][scheme]
+    if st then
+      st.enabled = false
+    end
+  end
+
+
+  function npc_add_precondition(action)
+    action:add_precondition(world_property(EVAL_ID, false))
+  end
+
+
+  LoadScheme("idiots_surge", "idiots_surge", modules.stype_stalker)
+--

@@ -1,6 +1,56 @@
 local NPC = require "illish.lib.npc"
 
 
+local PATCH = {}
+
+
+-- Split each companion into their own squad for better control
+function PATCH.splitCompanionSquads()
+  if not ui_mcm.get("idiots/options/splitSquads") then
+    return
+  end
+
+  for id in pairs(axr_companions.non_task_companions) do
+    local se    = alife():object(id)
+    local squad = get_object_squad(se)
+
+    if not se or not squad then
+      axr_companions.non_task_companions[id] = nil
+    else
+      for member in squad:squad_members() do
+        if squad:npc_count() > 1 then
+          local newSquad = NPC.createOwnSquad(member.id)
+          if newSquad then
+            axr_companions.companion_squads[newSquad.id] = newSquad
+            SIMBOARD:setup_squad_and_group(se)
+            newSquad:set_squad_relation()
+            newSquad:refresh()
+          end
+        end
+      end
+    end
+  end
+end
+
+
+-- Split each companion into own squad when joining
+PATCH.become_actor_companion = dialogs_axr_companion.become_actor_companion
+
+function dialogs_axr_companion.become_actor_companion(actor, npc)
+  PATCH.become_actor_companion(actor, npc)
+  PATCH.splitCompanionSquads()
+end
+
+
+-- Split each companion into own squad when warfare stuff happens
+PATCH.add_companion_squad = sim_squad_warfare.add_companion_squad
+
+function sim_squad_warfare.add_companion_squad(squad)
+  PATCH.add_companion_squad(squad)
+  PATCH.splitCompanionSquads()
+end
+
+
 -- Overwrite to sync with global state
 function axr_companions.add_to_actor_squad(npc)
   axr_companions.non_task_companions[npc:id()] = true
@@ -10,7 +60,7 @@ function axr_companions.add_to_actor_squad(npc)
   axr_companions.setup_companion_logic(npc, db.storage[npc:id()], false)
 
   -- Reset vanilla flags that might interfere
-	npc:disable_info_portion("npcx_beh_hide_in_cover")
+  npc:disable_info_portion("npcx_beh_hide_in_cover")
   save_var(npc, "fight_from_point", nil)
 
   -- Sync with global state
@@ -62,3 +112,12 @@ function axr_companions.is_assigned_item(npcID, itemID)
 
   return PATCH_is_assigned_item(npcID, itemID)
 end
+
+
+-- Split existing companions into own squads at load
+RegisterScriptCallback("idiots_on_start", function()
+  RegisterScriptCallback("actor_on_first_update", PATCH.splitCompanionSquads)
+end)
+
+
+return PATCH

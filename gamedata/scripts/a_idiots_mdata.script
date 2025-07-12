@@ -1,6 +1,7 @@
 local CONFIG = a_idiots_config
 local TABLE  = require "illish.lib.table"
 local NPC    = require "illish.lib.npc"
+local BEH    = require "illish.lib.beh"
 
 
 -- reconfigure on MCM changes
@@ -42,6 +43,7 @@ function reconfigureStates()
   end
 end
 
+
 -- prep storage
 function initStorage()
   local mdata = alife_storage_manager.get_state()
@@ -52,6 +54,7 @@ function initStorage()
 
   return mdata[CONFIG.DATA_KEY]
 end
+
 
 -- load data
 function onLoadState(mdata)
@@ -75,9 +78,10 @@ function onLoadState(mdata)
 
   -- check version
   if data.VER ~= CONFIG.DATA_VER then
-    data.VER = CONFIG.DATA_VER
+    data.VER             = CONFIG.DATA_VER
     data.companionStates = nil
-    data.globalState = nil
+    data.globalState     = nil
+    data.beh             = nil
   end
 
   -- load jobs data
@@ -116,6 +120,7 @@ function onLoadState(mdata)
   end
 end
 
+
 -- save data
 function onSaveState()
   local data = initStorage()
@@ -124,12 +129,20 @@ function onSaveState()
   data.sharedItems = NPC.LOOT_SHARED_ITEMS
   data.sharingNPCs = NPC.LOOT_SHARING_NPCS
 
-  data.companionStates = {}
+  if not data.companionStates then
+    data.companionStates = {}
+  end
+
+  if not data.beh then
+    data.beh = {}
+  end
 
   for i, npc in ipairs(NPC.getCompanions()) do
     data.companionStates[npc:id()] = NPC.getAllStates(npc)
+    BEH.saveStorage(npc:id(), data.beh)
   end
 end
+
 
 -- load npc states
 function onNpcSpawn(npc)
@@ -148,6 +161,9 @@ function onNpcSpawn(npc)
   else
     NPC.setStates(npc, NPC.GLOBAL_STATE)
   end
+
+  -- load beh storage
+  BEH.loadStorage(npc:id(), data.beh)
 
   -- legacy combat disabled
   local camperCombat   = ui_mcm.get("idiots/options/camperCombat")
@@ -170,21 +186,11 @@ function onNpcSpawn(npc)
   end
 end
 
--- clear saved data
-function onFirstUpdate()
-  local data = initStorage()
 
-  data.companionStates = nil
-  data.globalState     = nil
-  data.sharingNPCs     = nil
-  data.sharedItems     = nil
-end
-
-
+-- manage saved data
 function on_game_start()
-  RegisterScriptCallback("load_state", onLoadState)
-  RegisterScriptCallback("save_state", onSaveState)
-  RegisterScriptCallback("npc_on_net_spawn", onNpcSpawn)
-  RegisterScriptCallback("actor_on_first_update", onFirstUpdate)
+  RegisterScriptCallback("load_state",        onLoadState)
+  RegisterScriptCallback("save_state",        onSaveState)
+  RegisterScriptCallback("npc_on_net_spawn",  onNpcSpawn)
   RegisterScriptCallback("mcm_option_change", reconfigureStates)
 end
