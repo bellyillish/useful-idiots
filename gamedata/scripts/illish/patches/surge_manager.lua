@@ -3,7 +3,7 @@ local NPC   = require "illish.lib.npc"
 local SURGE = require "illish.lib.surge"
 
 
-local OBFUSCATED = {}
+local OBFUSCATED = nil
 
 
 -- Temporarily hide companions from scripts to allow them to die in GAMMA
