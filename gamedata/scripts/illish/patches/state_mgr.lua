@@ -25,8 +25,13 @@ function state_mgr.set_state(npc, state, callback, timeout, target, extra)
     end
   end
 
-  -- Force {fast_set = true} on all companion animations because it seems to
-  -- fix some issues with them getting stuck or being unresponsive
+  -- Leave NPCs with animpoint animation alone
+  if extra and (extra.animation_position or extra.animation_direction) then
+    return PATCH_set_state(npc, state, callback, timeout, target, extra)
+  end
+
+  -- Force {fast_set = true} on all other states because it seems to
+  -- fix some issues with stuck animations
   extra = extra or {}
   extra.fast_set = extra.fast_set ~= false
 
@@ -34,7 +39,6 @@ function state_mgr.set_state(npc, state, callback, timeout, target, extra)
   -- or zero magnitudes can make NPCs/companions disappear
   if target and target.look_position then
     local dir = VEC.direction(npc:position(), target.look_position)
-
     if UTIL.round(dir:magnitude()) == 0 then
       target.look_position = nil
     end
