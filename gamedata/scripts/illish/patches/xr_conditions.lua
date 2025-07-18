@@ -89,3 +89,39 @@ end
 function xr_conditions.is_gamma()
   return grok_gamma_manual_on_startup and true or false
 end
+
+
+-- Is using RE:Done Combat AI?
+function xr_conditions.is_redone_combat()
+  return redone_ai_schemes and true or false
+end
+
+
+-- Attacked companions
+function xr_conditions.enemy_fighting_actor_squad(enemy, npc)
+  if not xr_conditions.npc_companion(enemy, npc) then
+    return false
+  end
+
+  if xr_conditions.is_enemy_fighting_actor(enemy, npc) then
+    return true
+  end
+
+  local defendMode = ui_mcm.get("idiots/options/defendMode")
+  if not defendMode or defendMode == "actor" then
+    return false
+  end
+
+  local eid = db.storage[npc:id()].hitted_by
+  if eid and NPC.get(eid) and NPC.get(eid):alive() then
+    return true
+  end
+
+  if defendMode == "self" then
+    return false
+  end
+
+  eid = db.storage[0].companion_hit_by
+
+  return eid and NPC.get(eid) and NPC.get(eid):alive()
+end

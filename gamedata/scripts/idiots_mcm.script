@@ -38,6 +38,15 @@ local NPC   = require "illish.lib.npc"
         MCM.getCheckboxField({id = "manualReloadAll"}),
         MCM.getLine(),
         MCM.getSubtitle({text = "ui_mcm_idiots_subtitle_options_combat"}),
+        MCM.getListField({
+          id  = "defendMode",
+          def = "actor",
+          content = {
+            {"actor",  "idiots_actor"},
+            {"self",   "idiots_self"},
+            {"anyone", "idiots_anyone"},
+          }
+        }),
         MCM.getCheckboxField({id = "camperCombat"}),
         MCM.getCheckboxField({id = "monolithCombat"}),
         MCM.getCheckboxField({id = "zombiedCombat"}),

@@ -2,7 +2,7 @@ local NPC = require "illish.lib.npc"
 
 
 local PATCH  = {}
-local CONFIG = {}
+PATCH.CONFIG = {}
 
 
 -- Overwrite with new implementation
@@ -159,7 +159,7 @@ end
 function PATCH.initCombatIgnoreConfig()
   local ini = ini_file("ai_tweaks\\xr_combat_ignore.ltx")
 
-  CONFIG = {
+  PATCH.CONFIG = {
     enemyRange      = ini:r_string_to_condlist("settings", "enemy_range", "nil"),
     enemyRangeMin   = ini:r_string_to_condlist("settings", "enemy_range_min", "nil"),
     enemyRangeSurge = ini:r_string_to_condlist("settings", "enemy_range_surge", "nil"),
@@ -180,7 +180,7 @@ end
 
 -- Update settings, parse condlists and calculate vision multipliers
 function PATCH.getCombatIgnoreConfig(enemy, npc)
-  local cfg = dup_table(CONFIG)
+  local cfg = dup_table(PATCH.CONFIG)
 
   for k, v in pairs(cfg) do
     if type(v) == "table" then

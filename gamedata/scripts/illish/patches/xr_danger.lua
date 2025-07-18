@@ -3,7 +3,6 @@ local NPC = require "illish.lib.npc"
 
 local PATCH = {}
 
-
 -- Fix values in Anomaly that got incorrectly overwritten
 xr_danger.bd_types[danger_object.entity_attacked] = "entity_attacked"
 xr_danger.bd_types[danger_object.bullet_ricochet] = "bullet_ricochet"
@@ -22,11 +21,11 @@ end
 
 
 -- Add has_danger() check for Anomaly
-local __npc_on_hear_callback = xr_danger.npc_on_hear_callback
+local PATCH_npc_on_hear_callback = xr_danger.npc_on_hear_callback
 
 function xr_danger.npc_on_hear_callback(npc, ...)
   if not xr_danger.has_danger(npc) then
-    __npc_on_hear_callback(npc, ...)
+    PATCH_npc_on_hear_callback(npc, ...)
   end
 end
 
@@ -91,16 +90,6 @@ function xr_danger.is_danger(npc, danger)
     return xr_danger.danger_in_radius(npc, danger, dangerType)
   end
 
-  if danger:dependent_object() then
-    dangerObject = danger:dependent_object()
-  end
-
-  -- This is where NPCs freaking out gets fixed in GAMMA
-  if not (dangerObject and (IsMonster(dangerObject) or IsStalker(dangerObject)) and npc:relation(dangerObject) >= game_object.enemy) then
-    return false
-  end
-
-  -- Attacked
   if danger:perceive_type() == danger_object.hit then
     return xr_danger.danger_in_radius(npc, danger, dangerType)
   end
@@ -109,12 +98,23 @@ function xr_danger.is_danger(npc, danger)
     return false
   end
 
-  -- Other (e.g. sound)
-  if dangerObject:alive() and xr_combat_ignore.is_enemy(npc, dangerObject, true) then
-    return xr_danger.danger_in_radius(npc, danger, dangerType)
+  if danger:dependent_object() then
+    dangerObject = danger:dependent_object()
   end
 
-  return false
+  if not dangerObject or not dangerObject:alive() or not IsMonster(dangerObject) and not IsStalker(dangerObject) then
+    return false
+  end
+
+  if dangerType ~= 0 and dangerType ~= 1 and not xr_combat_ignore.is_enemy(npc, dangerObject, true) then
+    return false
+  end
+
+  if (dangerObject:id() == 0 and npc:relation(dangerObject) < 1) or npc:relation(dangerObject) < 2 then
+    return false
+  end
+
+  return xr_danger.danger_in_radius(npc, danger, dangerType)
 end
 
 
@@ -159,3 +159,6 @@ end
 RegisterScriptCallback("idiots_on_start", function()
   RegisterScriptCallback("npc_on_eval_danger", PATCH.onEvalDanger)
 end)
+
+
+return PATCH

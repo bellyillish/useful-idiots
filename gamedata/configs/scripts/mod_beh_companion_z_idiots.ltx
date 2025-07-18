@@ -32,7 +32,7 @@ walk_dist           = {+npcx_beh_substate_relax} 24, {+npcx_beh_patrol_mode} 64,
 jog_dist            = {+npcx_beh_substate_relax} 48, {+npcx_beh_patrol_mode} 128, {=follow_sprint} 2, {+npcx_beh_hurry} 2, 20
 
 ; gathering/looting/etc.
-combat_ignore_cond            = {=check_enemy_name(actor)} true, {+npcx_beh_ignore_combat} true, {+npcx_beh_ignore_actor_enemies !is_enemy_fighting_actor} true, false
+combat_ignore_cond            = {=check_enemy_name(actor)} true, {+npcx_beh_ignore_combat} true, {+npcx_beh_ignore_actor_enemies !enemy_fighting_actor_squad} true, false
 gather_items_enabled          = {+npcx_beh_gather_items} true, false
 gather_artefact_items_enabled = {+npcx_beh_gather_artifacts} true, false
 corpse_detection_enabled      = {+npcx_beh_loot_corpses} true, false

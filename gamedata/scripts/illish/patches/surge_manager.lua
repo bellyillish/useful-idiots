@@ -3,11 +3,14 @@ local NPC   = require "illish.lib.npc"
 local SURGE = require "illish.lib.surge"
 
 
-local OBFUSCATED = nil
+local PATCH = {}
+
+-- Temp cache for obfuscated companions
+PATCH.OBFUSCATED = nil
 
 
 -- Temporarily hide companions from scripts to allow them to die in GAMMA
-function obfuscateCompanions()
+function PATCH.obfuscateCompanions()
   local companions = NPC.getCompanions()
 
   if not (companions and #companions > 0) then
@@ -18,7 +21,7 @@ function obfuscateCompanions()
     npc:disable_info_portion("npcx_is_companion")
   end
 
-  OBFUSCATED = {
+  PATCH.OBFUSCATED = {
     squads     = axr_companions.companion_squads,
     nonTask    = axr_companions.non_task_companions,
     companions = companions,
@@ -29,24 +32,24 @@ function obfuscateCompanions()
 end
 
 -- Restore companions to their original state
-function deobfuscateCompanions()
-  if not OBFUSCATED then
+function PATCH.deobfuscateCompanions()
+  if not PATCH.OBFUSCATED then
     return
   end
 
-  for i, npc in ipairs(OBFUSCATED.companions) do
+  for i, npc in ipairs(PATCH.OBFUSCATED.companions) do
     npc:give_info_portion("npcx_is_companion")
   end
 
-  axr_companions.companion_squads    = OBFUSCATED.squads
-  axr_companions.non_task_companions = OBFUSCATED.nonTask
+  axr_companions.companion_squads    = PATCH.OBFUSCATED.squads
+  axr_companions.non_task_companions = PATCH.OBFUSCATED.nonTask
 
-  OBFUSCATED = nil
+  PATCH.OBFUSCATED = nil
 end
 
 
 -- Temporarily add dummy story IDs for companions to prevent Anomaly from killing them
-function addCompanionStoryIds()
+function PATCH.addCompanionStoryIds()
   local ids = story_objects.story_id_by_object_id
 
   for i, npc in ipairs(NPC.getCompanions()) do
@@ -57,7 +60,7 @@ function addCompanionStoryIds()
 end
 
 -- Remove dummy companion story IDs
-function removeCompanionStoryIds()
+function PATCH.removeCompanionStoryIds()
   local ids = story_objects.story_id_by_object_id
 
   for i, npc in ipairs(NPC.getCompanions()) do
@@ -105,15 +108,15 @@ function surge_manager.CSurgeManager:kill_objects_at_pos(...)
   local killCompanions = ui_mcm.get("idiots/options/surgesKillCompanions")
 
   if killCompanions
-    then obfuscateCompanions()
-    else addCompanionStoryIds()
+    then PATCH.obfuscateCompanions()
+    else PATCH.addCompanionStoryIds()
   end
 
   surge_manager_kill_objects_at_pos(self, ...)
 
   if killCompanions
-    then deobfuscateCompanions()
-    else removeCompanionStoryIds()
+    then PATCH.deobfuscateCompanions()
+    else PATCH.removeCompanionStoryIds()
   end
 end
 
@@ -125,15 +128,15 @@ function psi_storm_manager.CPsiStormManager:kill_objects_at_pos(...)
   local killCompanions = ui_mcm.get("idiots/options/surgesKillCompanions")
 
   if killCompanions
-    then obfuscateCompanions()
-    else addCompanionStoryIds()
+    then PATCH.obfuscateCompanions()
+    else PATCH.addCompanionStoryIds()
   end
 
   psi_storm_manager_kill_objects_at_pos(self, ...)
 
   if killCompanions
-    then deobfuscateCompanions()
-    else removeCompanionStoryIds()
+    then PATCH.deobfuscateCompanions()
+    else PATCH.removeCompanionStoryIds()
   end
 end
 
@@ -148,3 +151,6 @@ RegisterScriptCallback("idiots_on_start", function()
     SURGE.buildCovers(true)
   end)
 end)
+
+
+return PATCH

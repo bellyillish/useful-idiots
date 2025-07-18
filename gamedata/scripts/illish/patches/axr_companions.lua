@@ -33,20 +33,28 @@ function PATCH.splitCompanionSquads()
 end
 
 
+-- Track when a companion is hit for "defend only"
+function PATCH.onHitCompanion(npc, amount, local_direction, who, bone_index)
+  if NPC.isCompanion(npc) and amount > 0 then
+    db.storage[0].companion_hit_by = who:id()
+  end
+end
+
+
 -- Split each companion into own squad when joining
-PATCH.become_actor_companion = dialogs_axr_companion.become_actor_companion
+local PATCH_become_actor_companion = dialogs_axr_companion.become_actor_companion
 
 function dialogs_axr_companion.become_actor_companion(actor, npc)
-  PATCH.become_actor_companion(actor, npc)
+  PATCH_become_actor_companion(actor, npc)
   PATCH.splitCompanionSquads()
 end
 
 
 -- Split each companion into own squad when warfare stuff happens
-PATCH.add_companion_squad = sim_squad_warfare.add_companion_squad
+local PATCH_add_companion_squad = sim_squad_warfare.add_companion_squad
 
 function sim_squad_warfare.add_companion_squad(squad)
-  PATCH.add_companion_squad(squad)
+  PATCH_add_companion_squad(squad)
   PATCH.splitCompanionSquads()
 end
 
@@ -116,6 +124,7 @@ end
 
 -- Split existing companions into own squads at load
 RegisterScriptCallback("idiots_on_start", function()
+  RegisterScriptCallback("npc_on_hit_callback", PATCH.onHitCompanion)
   RegisterScriptCallback("actor_on_first_update", PATCH.splitCompanionSquads)
 end)
 

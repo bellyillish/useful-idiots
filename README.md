@@ -336,3 +336,57 @@ Useful Idiots patches a typo in `itms_manager.actor_on_item_take()`. I have no i
 ### Surge Behavior
 
 Companions now run from surges. An MCM option also toggles whether they can be hurt by them as well. Useful Idiots scans around objects on a map at load and around the actor when a surge starts for additional cover options for companions to use. A dynamic cover system has been written and works for both the actor and companions. Companions ignore combat until close to cover, and once in cover do not leave it to fight until after the surge ends. Companions prioritize cover near them vs. cover near the actor.
+
+## Monkey Patching LUA Files
+
+Do you want to patch something in `gamedata/illish/` for your own mod? It's actually just as easy, if not easier, than monkey patching a main-folder script file. As an example I'm going to choose a random function in a random file -- let's go with the function `VEC.pointsAlongAxis()` which is in `gamedata/illish/lib/vector.lua`.
+
+> **SIDE NOTE:** If you want to use LUA "require" to import your own files into your mod, just make sure that your first folder inside of `gamedata/` is unique to you or your mod. This ensures it won't clash with another author's mod that wants to do the same. That's why I named mine "illish". Inside that folder you are free to organize and name your LUA files any way you wish (that's one of the nice things about it IMO because I'm a little OCD).
+
+1. In your script, import the file the same way I did in my scripts:
+   ```lua
+   -- Step 1 --
+   local VEC = require "illish.lib.vector"
+   ```
+
+2. Save a reference to the original function (assuming you want to call it in your patch):
+   ```lua
+   -- Step 1 --
+   local VEC = require "illish.lib.vector"
+
+   -- Step 2 --
+   local pointsAlongAxis_patched = VEC.pointsAlongAxis
+   ```
+
+3. Replace it with your own function:
+   ```lua
+   -- Step 1 --
+   local VEC = require "illish.lib.vector"
+
+   -- Step 2 --
+   local pointsAlongAxis_patched = VEC.pointsAlongAxis
+
+   -- Step 3 --
+   function VEC.pointsAlongAxis(options)
+     -- Do whatever you want here. For this example I'll just
+     -- change one of its default options to something else
+     -- (not super recommended, but again just as an example)
+
+     -- Because it's possible for 'options' to be nil:
+     options = options or {}
+
+     -- Change this from '180':
+     options.arcAngle = 360
+
+     -- Call the original (don't forget to 'return' of course):
+     return pointsAlongAxis_patched(options)
+   end
+   ```
+
+And that's all there is to it, easy peasy. Now everything that calls `VEC.pointsAlongAxis()` expecting to get a 180° arc of points will now get a full 360° circle of points instead. Surprise, bitches.
+
+### Wait, so is monkey patching always that easy?
+
+It really is. Any top-level variable, object or function without `local` in front of it, in any script, can be patched or replaced in your script without needing to replace the whole file. It's one of the 3-4 pillars to keeping your mod compatible with other mods. [See this for more info](https://igigog.github.io/anomaly-modding-book/tutorials/scripting/monkey-patching.html).
+
+It's still possible to reach things with `local` in front. It's just a tiny bit more work and [is covered here](https://igigog.github.io/anomaly-modding-book/tutorials/addons/lua-unlocalizer.html?highlight=unlocalize#lua-variables-unlocalizer).

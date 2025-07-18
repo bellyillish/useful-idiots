@@ -7,7 +7,6 @@ local SURGE  = require "illish.lib.surge"
 
 local PATCH = {}
 
-
 -- Custom combat types to inject
 PATCH.COMBAT_MODES = {
   idiots_combat_assault,
@@ -202,11 +201,11 @@ end
 
 
 -- Track companion ammo while inventory is open
-local AMMO_COUNTS = {}
+PATCH.AMMO_COUNTS = {}
 
 
 -- Save companion ammo counts and unload weapons before opening inventory
-local function onShowGUI(name)
+function PATCH.onShowGUI(name)
   if name ~= "UIInventory" or not ui_inventory.GUI then
     return
   end
@@ -218,7 +217,7 @@ local function onShowGUI(name)
 
   npc:iterate_inventory(function(npc, item)
     if item and IsWeapon(item) then
-      AMMO_COUNTS[item:id()] = item:get_ammo_in_magazine()
+      PATCH.AMMO_COUNTS[item:id()] = item:get_ammo_in_magazine()
       item:set_ammo_elapsed(0)
     end
   end, npc)
@@ -226,7 +225,7 @@ end
 
 
 -- Restore companion ammo counts after closing inventory
-local function onHideGUI(name)
+function PATCH.onHideGUI(name)
   if name ~= "UIInventory" or not ui_inventory.GUI then
     return
   end
@@ -238,13 +237,13 @@ local function onHideGUI(name)
 
   npc:iterate_inventory(function(npc, item)
     if item and IsWeapon(item) then
-      local ammoCount = AMMO_COUNTS[item:id()]
+      local ammoCount = PATCH.AMMO_COUNTS[item:id()]
 
       if ammoCount then
         item:set_ammo_elapsed(ammoCount)
       end
 
-      AMMO_COUNTS[item:id()] = nil
+      PATCH.AMMO_COUNTS[item:id()] = nil
     end
   end, npc)
 end
@@ -261,8 +260,8 @@ RegisterScriptCallback("idiots_on_start", function()
   RegisterScriptCallback("npc_on_hit_callback",  COMBAT.combatHitCallback)
   RegisterScriptCallback("npc_on_hear_callback", COMBAT.combatHearCallback)
   RegisterScriptCallback("npc_on_choose_weapon", PATCH.onChooseWeapon)
-  RegisterScriptCallback("GUI_on_show", onShowGUI)
-  RegisterScriptCallback("GUI_on_hide", onHideGUI)
+  RegisterScriptCallback("GUI_on_show",          PATCH.onShowGUI)
+  RegisterScriptCallback("GUI_on_hide",          PATCH.onHideGUI)
 end)
 
 

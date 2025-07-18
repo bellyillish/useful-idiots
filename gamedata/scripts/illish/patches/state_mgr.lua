@@ -3,9 +3,6 @@ local VEC  = require "illish.lib.vector"
 local NPC  = require "illish.lib.npc"
 
 
-local PATCH = {}
-
-
 -- Patch with various fixes
 local PATCH_set_state = state_mgr.set_state
 
@@ -64,6 +61,3 @@ state_lib.states.prone_sniper_fire.direction = nil
 
 state_mgr_animation_list.animations.prone.prop.moving      = nil
 state_mgr_animation_list.animations.prone_idle.prop.moving = nil
-
-
-return PATCH

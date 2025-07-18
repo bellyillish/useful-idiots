@@ -110,6 +110,15 @@ function MCM.getCheckboxField(overrides)
 end
 
 
+function MCM.getListField(overrides)
+  return TABLE.merge({
+    id   = "list",
+    type = ui_mcm.kb_mod_list,
+    val  = 0,
+  }, overrides or {})
+end
+
+
 function MCM.getKeybindKey(overrides)
   return TABLE.merge({
     id   = "key",

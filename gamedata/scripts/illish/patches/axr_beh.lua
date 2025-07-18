@@ -7,7 +7,6 @@ local WPN  = require "illish.lib.weapon"
 
 local PATCH = {}
 
-
 -- Additional targets added by Useful Idiots to beh_companion.ltx and the
 -- corresponding functions for their behavior.
 PATCH.CUSTOM_TARGETS = {
@@ -183,5 +182,4 @@ function axr_beh.add_to_binder(npc, ...)
 end
 
 
--- Exports
 return PATCH
