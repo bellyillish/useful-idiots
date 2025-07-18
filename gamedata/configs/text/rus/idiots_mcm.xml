@@ -135,10 +135,10 @@
     <text>Настройки боя</text>
   </string>
   <string id="ui_mcm_idiots_options_defendMode">
-    <text>Engage in "Defend Only" When Enemy Attacks</text>
+    <text>Включить "Ответный огонь" когда враг атакует</text>
   </string>
   <string id="ui_mcm_idiots_options_defendMode_desc">
-    <text>When set to "Defend Only", companions always react when the actor is attacked, but they can also react when an enemy attacks them or any other companion as well.</text>
+    <text>Если установлено значение «Ответный огонь», напарники всегда реагируют, когда на игрока нападают, но они также могут реагировать, когда враг атакует их или любого другого спутника.</text>
   </string>
   <string id="ui_mcm_idiots_options_camperCombat">
     <text>Включить режим боя "Меткий стрелок"</text>
@@ -528,13 +528,13 @@
 
   <!-- List Options -->
   <string id="ui_mcm_lst_idiots_actor">
-    <text>Actor only</text>
+    <text>Только игроку</text>
   </string>
   <string id="ui_mcm_lst_idiots_self">
-    <text>Actor or self</text>
+    <text>Игрок или я</text>
   </string>
   <string id="ui_mcm_lst_idiots_anyone">
-    <text>Actor or any companion</text>
+    <text>Игрок или любой напарник</text>
   </string>
   <string id="ui_mcm_lst_mod_none">
     <text>Не выбрано</text>
