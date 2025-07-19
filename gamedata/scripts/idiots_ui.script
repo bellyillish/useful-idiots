@@ -847,7 +847,7 @@ end
 function on_game_start()
   RegisterScriptCallback("actor_on_update",  onUpdateIndexers)
   RegisterScriptCallback("actor_on_update",  onUpdateButtons)
-  RegisterScriptCallback("idiots_on_state_changed",  onStateChange)
+  RegisterScriptCallback("idiots_on_state_change",  onStateChange)
   RegisterScriptCallback("on_screen_resolution_changed", onResolutionChange)
   RegisterScriptCallback("mcm_option_change", mcmOnOptionChange)
 end
