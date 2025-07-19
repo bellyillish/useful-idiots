@@ -68,7 +68,6 @@ function axr_companions.add_to_actor_squad(npc)
   axr_companions.setup_companion_logic(npc, db.storage[npc:id()], false)
 
   -- Reset vanilla flags that might interfere
-  npc:disable_info_portion("npcx_beh_hide_in_cover")
   save_var(npc, "fight_from_point", nil)
 
   -- Sync with global state
@@ -122,10 +121,126 @@ function axr_companions.is_assigned_item(npcID, itemID)
 end
 
 
+-- Call old functions in axr_companions for mod compatibility
+function PATCH.callLegacyStateSetters(id, group, action, enabled)
+  local npc = id and NPC.getCompanion(id) or NPC.getCompanions()[1]
+
+  if not npc then
+    return
+  end
+
+  if group == "jobs" and action == "loot_corpses" then
+    local lootingItems = NPC.getState(id and npc or nil, "jobs", "loot_items")
+    if enabled and lootingItems then
+      axr_companions.set_companion_to_loot_items_and_corpses(npc)
+    elseif enabled then
+      axr_companions.set_companion_to_loot_corpses_only(npc)
+    elseif not lootingItems then
+      axr_companions.set_companion_to_loot_nothing(npc)
+    end
+  end
+
+  if group == "jobs" and action == "loot_items" then
+    local lootingCorpses = NPC.getState(id and npc or nil, "jobs", "loot_corpses")
+    if enabled and lootingCorpses then
+      axr_companions.set_companion_to_loot_items_and_corpses(npc)
+    elseif enabled then
+      axr_companions.set_companion_to_loot_items_only(npc)
+    elseif not lootingCorpses then
+      axr_companions.set_companion_to_loot_nothing(npc)
+    end
+  end
+
+  if not enabled then
+    return
+  end
+
+  if group == "movement" and action == "follow" then
+    axr_companions.set_companion_to_follow_state(npc)
+
+  elseif group == "movement" and action == "wait" then
+    axr_companions.set_companion_to_wait_state(npc)
+    save_var(npc, "fight_from_point", nil)
+
+  elseif group == "movement" and action == "cover" then
+    axr_companions.set_companion_hide_in_cover(npc)
+
+  elseif group == "movement" and action == "relax" then
+    axr_companions.set_companion_to_relax_substate(npc)
+
+  elseif group == "movement" and action == "patrol" then
+    axr_companions.set_companion_to_patrol_state(npc)
+
+  elseif group == "stance" and action == "stand" then
+    local relaxing = NPC.getState(id and npc or nil, "movement", "relax")
+    axr_companions.set_companion_to_default_substate(npc)
+    if relaxing then
+      npc:give_info_portion("npcx_beh_substate_relax")
+    end
+
+  elseif group == "stance" and action == "sneak" then
+    axr_companions.set_companion_to_stealth_substate(npc)
+
+  elseif group == "distance" and action == "near" then
+    axr_companions.set_companion_to_stay_close(npc)
+
+  elseif group == "distance" and action == "normal" then
+    axr_companions.set_companion_to_stay_close(npc)
+
+  elseif group == "distance" and action == "far" then
+    axr_companions.set_companion_to_stay_far(npc)
+
+  elseif group == "readiness" and action == "attack" then
+    axr_companions.set_companion_to_attack_state(npc)
+
+  elseif group == "readiness" and action == "defend" then
+    axr_companions.set_companion_to_attack_only_actor_combat_enemy_state(npc)
+    npc:disable_info_portion("npcx_beh_ignore_combat")
+
+  elseif group == "readiness" and action == "ignore" then
+    axr_companions.set_companion_to_ignore_combat_state(npc)
+  	npc:disable_info_portion("npcx_beh_ignore_actor_enemies")
+  end
+end
+
+
+-- Call old waypoint add/remove functions for compatibility
+function PATCH.callLegacyWaypointSetters(group, action, ui)
+  if action ~= "add_waypoint" and action ~= "clear_waypoints" then
+    return
+  end
+
+  local npc = ui.ID and NPC.get(ui.ID)
+  if not npc then
+    return
+  end
+
+  -- but don't let the old functions actually do anything
+  local _g_se_load_var = _G.se_load_var
+  local _g_se_save_var = _G.se_save_var
+
+  _G.se_load_var = function() end
+  _G.se_save_var = function() end
+
+  if action == "add_waypoint" then
+    axr_companions.companion_add_waypoints(npc)
+  end
+
+  if action == "clear_waypoints" then
+    axr_companions.companion_remove_waypoints(npc)
+  end
+
+  _G.se_load_var = _g_se_load_var
+  _G.se_save_var = _g_se_save_var
+end
+
+
 -- Split existing companions into own squads at load
 RegisterScriptCallback("idiots_on_start", function()
   RegisterScriptCallback("npc_on_hit_callback", PATCH.onHitCompanion)
   RegisterScriptCallback("actor_on_first_update", PATCH.splitCompanionSquads)
+  RegisterScriptCallback("idiots_on_state_will_change", PATCH.callLegacyStateSetters)
+  RegisterScriptCallback("idiots_on_use_button", PATCH.callLegacyWaypointSetters)
 end)
 
 

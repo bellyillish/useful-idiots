@@ -10,8 +10,8 @@ combat_type = {+npcx_beh_combat_tactics_assault} assault, {+npcx_beh_combat_tact
 sound_idle = state
 
 ; behaviors and targets
-behavior_state = {+npcx_beh_substate_relax} beh_relax,  {+npcx_beh_patrol_mode} beh_path, {+npcx_beh_cover} beh_cover,  {+npcx_beh_wait} beh_wait, beh_move
-target         = {+npcx_beh_substate_relax} relax_spot, {+npcx_beh_patrol_mode} waypoint, {+npcx_beh_cover} cover_spot, {+npcx_beh_wait} look_around, follow_actor
+behavior_state = {+npcx_beh_substate_relax} beh_relax,  {+npcx_beh_patrol_mode} beh_path, {+npcx_beh_hide_in_cover} beh_cover,  {+npcx_beh_wait} beh_wait, beh_move
+target         = {+npcx_beh_substate_relax} relax_spot, {+npcx_beh_patrol_mode} waypoint, {+npcx_beh_hide_in_cover} cover_spot, {+npcx_beh_wait} look_around, follow_actor
 path_end       = {+npcx_beh_patrol_mode} loop
 
 ; animations

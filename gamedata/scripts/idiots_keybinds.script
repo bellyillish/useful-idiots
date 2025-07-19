@@ -158,6 +158,11 @@ function onKeybindEvent(event, dik)
       NPC.SELECTED_IDS = {}
     end
 
+    -- gestures mod
+    if gesture and gesture.play_stuff then
+      gesture.play_stuff("gesture_sound", "point_forward", "anm_point", true, true)
+    end
+
     playParticle(pos)
   end
 
@@ -404,14 +409,14 @@ end
 
 function onKeyRelease(key)
   if (dik_to_bind(key) == key_bindings.kCUSTOM18) then
-    UI.openCompanionManager()
+    UI.openUI()
   end
 end
 
 
 function on_game_start()
   RegisterScriptCallback("on_key_release", onKeyRelease)
-  RegisterScriptCallback("idiots_on_button", playVoiceover)
+  RegisterScriptCallback("idiots_on_use_button", playVoiceover)
 
   RegisterScriptCallback("on_key_press", function(dik)
     onKeybindEvent("press", dik)

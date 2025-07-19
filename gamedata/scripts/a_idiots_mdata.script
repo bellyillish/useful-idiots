@@ -184,6 +184,14 @@ function onNpcSpawn(npc)
   if not ui_mcm.get("idiots/options/artifacts") then
     NPC.setState(npc, "jobs", "loot_artifacts", false)
   end
+
+  -- (v1.5) restore original for backwards compatibility
+  for i, npc in ipairs(NPC.getCompanions()) do
+    if npc:has_info("npcx_beh_cover") then
+      npc:disable_info_portion("npcx_beh_cover")
+      npc:enable_info_portion("npcx_beh_hide_in_cover")
+    end
+  end
 end
 
 

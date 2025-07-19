@@ -32,10 +32,10 @@ function color(faction, alpha)
 end
 
 
-class "CompanionManager" (CUIScriptWnd)
+class "UIWheelCompanion" (CUIScriptWnd)
 
 
-function CompanionManager:__init(id) super()
+function UIWheelCompanion:__init(id) super()
   self.xml = CScriptXmlInit()
   self.xml:ParseFile("idiots_ui.xml")
 
@@ -69,7 +69,7 @@ function CompanionManager:__init(id) super()
 end
 
 
-function CompanionManager:InitDialog()
+function UIWheelCompanion:InitDialog()
   if not self.xml:NodeExist("dialog") then
     return
   end
@@ -101,7 +101,7 @@ end
 
 
 -- INDEXERS --
-function CompanionManager:InitIndexers()
+function UIWheelCompanion:InitIndexers()
   local enableIndexers = ui_mcm.get("idiots/ui/indexers")
 
   if not (enableIndexers and self.xml:NodeExist("dialog:indexers")) then
@@ -124,7 +124,7 @@ function CompanionManager:InitIndexers()
 end
 
 
-function CompanionManager:UpdateIndexers()
+function UIWheelCompanion:UpdateIndexers()
   local companions = NPC.getCompanions()
 
   for i, indexer in ipairs(self.indexers) do
@@ -159,7 +159,7 @@ end
 
 
 -- TABS --
-function CompanionManager:InitTabs()
+function UIWheelCompanion:InitTabs()
   if not self.xml:NodeExist("dialog:tabs") then
     return
   end
@@ -201,7 +201,7 @@ function CompanionManager:InitTabs()
 end
 
 
-function CompanionManager:UpdateTabs()
+function UIWheelCompanion:UpdateTabs()
   local companions = NPC.getCompanions()
 
   if self.globalTab then
@@ -251,7 +251,7 @@ function CompanionManager:UpdateTabs()
 end
 
 
-function CompanionManager:OnClickTab(index)
+function UIWheelCompanion:OnClickTab(index)
   local companions = NPC.getCompanions()
 
   if companions[index] then
@@ -267,7 +267,7 @@ end
 
 
 -- TITLEBAR --
-function CompanionManager:InitTitlebar()
+function UIWheelCompanion:InitTitlebar()
   if not self.xml:NodeExist("dialog:titlebar") then
     return
   end
@@ -288,7 +288,7 @@ function CompanionManager:InitTitlebar()
 end
 
 
-function CompanionManager:InitTitlebarButtons()
+function UIWheelCompanion:InitTitlebarButtons()
   if not self.xml:NodeExist("dialog:titlebar:actions") then
     return
   end
@@ -360,7 +360,7 @@ function CompanionManager:InitTitlebarButtons()
 end
 
 
-function CompanionManager:UpdateTitlebar()
+function UIWheelCompanion:UpdateTitlebar()
   if not self.titlebar then
     return
   end
@@ -390,7 +390,7 @@ end
 
 
 -- BUTTONS --
-function CompanionManager:InitButtons()
+function UIWheelCompanion:InitButtons()
   if not self.xml:NodeExist("dialog:actions") then
     return
   end
@@ -461,7 +461,7 @@ function CompanionManager:InitButtons()
 end
 
 
-function CompanionManager:UpdateButtons()
+function UIWheelCompanion:UpdateButtons()
   if not self.buttons then
     return
   end
@@ -586,7 +586,7 @@ function CompanionManager:UpdateButtons()
 end
 
 
-function CompanionManager:InitTooltip()
+function UIWheelCompanion:InitTooltip()
   local showTooltips  = ui_mcm.get("idiots/ui/showTooltips")
 
   if not (showTooltips and self.xml:NodeExist("tooltip") and self.xml:NodeExist("tooltip:tip")) then
@@ -604,7 +604,7 @@ function CompanionManager:InitTooltip()
 end
 
 
-function CompanionManager:SetTooltip(tip)
+function UIWheelCompanion:SetTooltip(tip)
   tip = tip ~= "" and tip or nil
 
   if not self.tooltip then
@@ -656,8 +656,8 @@ function CompanionManager:SetTooltip(tip)
 end
 
 
-function CompanionManager:OnClickButton(group, action)
-  SendScriptCallback("idiots_on_button", group, action, self)
+function UIWheelCompanion:OnClickButton(group, action)
+  SendScriptCallback("idiots_on_use_button", group, action, self)
 
   if NPC.isStateful(group, action) then
     return NPC.toggleState(self.ID, group, action)
@@ -729,7 +729,7 @@ end
 local CLOSE_TIMEOUT
 
 
-function CompanionManager:OnKeyboard(dik, action)
+function UIWheelCompanion:OnKeyboard(dik, action)
   local res  = CUIScriptWnd.OnKeyboard(self, dik, action)
   local bind = dik_to_bind(dik)
 
@@ -749,23 +749,23 @@ function CompanionManager:OnKeyboard(dik, action)
 end
 
 
-function CompanionManager:Close()
-  SendScriptCallback("idiots_on_close", self)
+function UIWheelCompanion:Close()
+  SendScriptCallback("idiots_on_close_ui", self)
 
   self:HideDialog()
 
-  Unregister_UI("CompanionManager")
+  Unregister_UI("UIWheelCompanion")
   GUI = nil
 end
 
 
 -- VOICE --
-CompanionManager.PlayVoiceOver = axr_companions.UIWheelCompanion.PlayVoiceOver
-CompanionManager.PlaySoundFile = axr_companions.UIWheelCompanion.PlaySoundFile
+UIWheelCompanion.PlayVoiceOver = axr_companions.UIWheelCompanion.PlayVoiceOver
+UIWheelCompanion.PlaySoundFile = axr_companions.UIWheelCompanion.PlaySoundFile
 
 
 -- OPEN --
-function openCompanionManager()
+function openUI()
   hide_hud_inventory()
 
   if not GUI then
@@ -776,8 +776,8 @@ function openCompanionManager()
       return
     end
 
-    GUI = CompanionManager(target and target:id() or nil)
-    SendScriptCallback("idiots_on_open", GUI)
+    GUI = UIWheelCompanion(target and target:id() or nil)
+    SendScriptCallback("idiots_on_open_ui", GUI)
   end
 
   if GUI and not GUI:IsShown() then
@@ -787,7 +787,7 @@ function openCompanionManager()
     GUI:Show(true)
 
     CLOSE_TIMEOUT = time_global()
-    Register_UI("CompanionManager", "idiots_ui")
+    Register_UI("UIWheelCompanion", "idiots_ui")
   end
 end
 
@@ -847,12 +847,12 @@ end
 function on_game_start()
   RegisterScriptCallback("actor_on_update",  onUpdateIndexers)
   RegisterScriptCallback("actor_on_update",  onUpdateButtons)
-  RegisterScriptCallback("idiots_on_state",  onStateChange)
+  RegisterScriptCallback("idiots_on_state_changed",  onStateChange)
   RegisterScriptCallback("on_screen_resolution_changed", onResolutionChange)
   RegisterScriptCallback("mcm_option_change", mcmOnOptionChange)
 end
 
 
-AddScriptCallback("idiots_on_open")
-AddScriptCallback("idiots_on_button")
-AddScriptCallback("idiots_on_close")
+AddScriptCallback("idiots_on_open_ui")
+AddScriptCallback("idiots_on_use_button")
+AddScriptCallback("idiots_on_close_ui")

@@ -21,7 +21,7 @@ NPC.LOOT_SHARING_NPCS = {}
       actions = {
         {name = "follow", next = "wait", default = true},
         {name = "wait",   next = "cover",  info = "npcx_beh_wait", teleport = false},
-        {name = "cover",  next = "relax",  info = "npcx_beh_cover", teleport = false},
+        {name = "cover",  next = "relax",  info = "npcx_beh_hide_in_cover", teleport = false},
         {name = "relax",  next = "follow", info = "npcx_beh_substate_relax", teleport = false},
         {name = "patrol", info = "npcx_beh_patrol_mode", teleport = false},
       }
@@ -638,8 +638,9 @@ NPC.LOOT_SHARING_NPCS = {}
     end
 
     if not npc then
+      SendScriptCallback("idiots_on_state_will_change", nil, group, action, enabled)
       NPC.GLOBAL_STATE[group][action] = enabled
-      SendScriptCallback("idiots_on_state", nil, group, action, enabled)
+      SendScriptCallback("idiots_on_state_change", nil, group, action, enabled)
       return
     end
 
@@ -653,6 +654,8 @@ NPC.LOOT_SHARING_NPCS = {}
 
     local info = NPC.ACTIONS_KEYED[group].actions[action].info
 
+    SendScriptCallback("idiots_on_state_will_change", npc:id(), group, action, enabled)
+
     if info then
       if enabled then
         npc:give_info_portion(info)
@@ -661,7 +664,7 @@ NPC.LOOT_SHARING_NPCS = {}
       end
     end
 
-    SendScriptCallback("idiots_on_state", npc:id(), group, action, enabled)
+    SendScriptCallback("idiots_on_state_change", npc:id(), group, action, enabled)
   end
 
 
@@ -733,7 +736,8 @@ NPC.LOOT_SHARING_NPCS = {}
   end
 
 
-  AddScriptCallback("idiots_on_state")
+  AddScriptCallback("idiots_on_state_will_change")
+  AddScriptCallback("idiots_on_state_change")
 --
 
 
