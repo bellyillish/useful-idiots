@@ -148,7 +148,9 @@ RegisterScriptCallback("idiots_on_start", function()
   end)
 
   RegisterScriptCallback("mcm_option_change", function()
-    SURGE.buildCovers(true)
+    if alife() then
+      SURGE.buildCovers(true)
+    end
   end)
 end)
 
