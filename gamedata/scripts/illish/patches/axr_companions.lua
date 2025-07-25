@@ -16,7 +16,9 @@ function PATCH.splitCompanionSquads()
 
     if not se or not squad then
       axr_companions.non_task_companions[id] = nil
-    else
+
+    -- skip guide task companions too
+    elseif tasks_guide.curr_guid.squad_id ~= squad.id then
       for member in squad:squad_members() do
         if squad:npc_count() > 1 then
           local newSquad = NPC.createOwnSquad(member.id)
