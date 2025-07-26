@@ -203,7 +203,7 @@ function onKeybindEvent(event, dik)
       local npc = selected[1]
 
       if NPC.isCompanion(npc) then
-        BEH.addWaypoint(npc, pos)
+        axr_companions.companion_add_waypoints(npc, pos)
       end
 
       showMessage("st_idiots_add_waypoint_message")
@@ -219,7 +219,7 @@ function onKeybindEvent(event, dik)
       local waypoints = BEH.getAllWaypoints(npc)
 
       if waypoints and #waypoints > 0 then
-        BEH.clearWaypoints(npc)
+        axr_companions.companion_remove_waypoints(npc)
         showMessage("st_idiots_clear_waypoints_message")
       end
     else

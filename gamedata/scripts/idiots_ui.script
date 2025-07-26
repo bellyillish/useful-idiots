@@ -689,14 +689,16 @@ function UIWheelCompanion:OnClickButton(group, action)
 
   if action == "add_waypoint" then
     if self.ID then
-      BEH.addWaypoint(self.ID, db.actor:position())
+      local npc = NPC.get(self.ID)
+      axr_companions.companion_add_waypoints(npc, db.actor:position())
       self:UpdateButtons()
     end
   end
 
   if action == "clear_waypoints" then
     if self.ID then
-      BEH.clearWaypoints(self.ID)
+      local npc = NPC.get(self.ID)
+      axr_companions.companion_remove_waypoints(npc)
       self:UpdateButtons()
     end
   end
@@ -793,31 +795,21 @@ end
 
 
 -- CALLBACKS --
-local function onStateChange(id, group, state, enabled)
-  if GUI and GUI.ID == id then
-    if GUI.singleMode then
-      NPC.GLOBAL_STATE = NPC.getAllStates(GUI.ID)
-    end
-    GUI:UpdateButtons()
-  end
-end
-
-
-local onUpdateIndexers = UTIL.throttle(function()
+onUpdateIndexers = UTIL.throttle(function()
   local enableIndexers = ui_mcm.get("idiots/ui/indexers")
 
   if enableIndexers and GUI and GUI:IsShown() then
     GUI:UpdateIndexers()
   end
-end, 25)
+end, 20)
 
 
-local onUpdateButtons = UTIL.throttle(function()
+onUpdateButtons = UTIL.throttle(function()
   if GUI and GUI:IsShown() then
     GUI:UpdateButtons()
     GUI:UpdateTabs()
   end
-end, 50)
+end, 100)
 
 
 -- CACHE CALLBACKS --
@@ -845,9 +837,8 @@ end
 
 
 function on_game_start()
-  RegisterScriptCallback("actor_on_update",  onUpdateIndexers)
-  RegisterScriptCallback("actor_on_update",  onUpdateButtons)
-  RegisterScriptCallback("idiots_on_state_change",  onStateChange)
+  RegisterScriptCallback("actor_on_update", onUpdateIndexers)
+  RegisterScriptCallback("actor_on_update", onUpdateButtons)
   RegisterScriptCallback("on_screen_resolution_changed", onResolutionChange)
   RegisterScriptCallback("mcm_option_change", mcmOnOptionChange)
 end

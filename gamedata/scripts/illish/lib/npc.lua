@@ -71,7 +71,8 @@ NPC.LOOT_SHARING_NPCS = {}
       actions = {
         {name = "best",    next = "pistol",  default = true},
         {name = "pistol",  next = "shotgun", info = "npcx_beh_weapon_pistol"},
-        {name = "shotgun", next = "rifle",   info = "npcx_beh_weapon_shotgun"},
+        {name = "shotgun", next = "smg",     info = "npcx_beh_weapon_shotgun"},
+        {name = "smg",     next = "rifle",   info = "npcx_beh_weapon_smg"},
         {name = "rifle",   next = "sniper",  info = "npcx_beh_weapon_rifle"},
         {name = "sniper",  next = "best",    info = "npcx_beh_weapon_sniper"},
       }
@@ -638,9 +639,7 @@ NPC.LOOT_SHARING_NPCS = {}
     end
 
     if not npc then
-      SendScriptCallback("idiots_on_state_will_change", nil, group, action, enabled)
-      NPC.GLOBAL_STATE[group][action] = enabled
-      SendScriptCallback("idiots_on_state_change", nil, group, action, enabled)
+        NPC.GLOBAL_STATE[group][action] = enabled
       return
     end
 
@@ -654,8 +653,6 @@ NPC.LOOT_SHARING_NPCS = {}
 
     local info = NPC.ACTIONS_KEYED[group].actions[action].info
 
-    SendScriptCallback("idiots_on_state_will_change", npc:id(), group, action, enabled)
-
     if info then
       if enabled then
         npc:give_info_portion(info)
@@ -663,8 +660,6 @@ NPC.LOOT_SHARING_NPCS = {}
         npc:disable_info_portion(info)
       end
     end
-
-    SendScriptCallback("idiots_on_state_change", npc:id(), group, action, enabled)
   end
 
 
@@ -677,9 +672,20 @@ NPC.LOOT_SHARING_NPCS = {}
       return
     end
 
+    if type(npc) == "number" then
+      npc = NPC.getCompanion(npc)
+    end
+
     if not NPC.ACTIONS_KEYED[group].cycle then
+      if npc then
+        SendScriptCallback("idiots_on_state_change", npc:id(), group, action, enabled)
+      end
       NPC.__privateSet(npc, group, action, enabled)
+
     elseif enabled then
+      if npc then
+        SendScriptCallback("idiots_on_state_change", npc:id(), group, action, enabled)
+      end
       for other in pairs(NPC.ACTIONS_KEYED[group].actions) do
         NPC.__privateSet(npc, group, other, other == action)
       end
@@ -736,7 +742,6 @@ NPC.LOOT_SHARING_NPCS = {}
   end
 
 
-  AddScriptCallback("idiots_on_state_will_change")
   AddScriptCallback("idiots_on_state_change")
 --
 

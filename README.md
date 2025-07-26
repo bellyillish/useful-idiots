@@ -44,6 +44,8 @@ Does not (and never will) overwrite any base game files to keep it as compatible
 
 - **Dynamic Emission Cover:** Works fine as both mods' dynamic cover detectors will work alongside each other for the actor. DEC's HUD meter won't show Useful Idiots' dynamic covers however, and you may prefer to disable one or the other (Useful Idiots' dynamic cover detection can be disabled for the actor in MCM).
 
+- **Voice/Gesture Mods:** All should be fully compatible as of v1.4.2.
+
 <br>
 
 ## Replacement UI
@@ -150,7 +152,8 @@ Keeps them fixed in their current position at all times. This mode is for when y
 - **Best:** determined by repair kit tier. Weapons without kits (like RPGs) are considered best. Ties are broken by comparing weapon cost.
 - **Pistol**
 - **Shotgun**
-- **Rifle/SMG**
+- **SMG**
+- **Rifle**
 - **Sniper**
 <a name="legacy-combat"></a>
 
@@ -314,7 +317,7 @@ Some mutants have inconsistent and arbitrary names for their bone IDs (because o
 
 1. The "prone" animation looks nicer when companions go into a prone position but looks janky when they move or turn. A patch is added to replace it with "prone_idle" after 1 second. Various other config fixes were also applied to make prone animations work properly.
 
-2. `{fast_set = true}` is appended to all `state_mgr.set_state()` calls (unless explicitly set to `false` in the original call). This seems to make NPCs get stuck less and makes companions feel less sluggish when responding to commands.
+2. Several animations in `state_lib` have been given the `fast_set = true` property. This makes companions much more responsive to commands and significantly reduces NPCs getting stuck in place.
 
 3. When `state_mgr.set_state()` tells NPCs to look at a position with a very small magnitude (e.g. at their feet) the NPC can disappear into an alternate dimension and never be seen again. I accidentally did this a lot early on in development. As an extra safeguard I added a patch that detects and removes this when it happens. Just in case.
 

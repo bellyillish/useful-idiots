@@ -425,8 +425,11 @@
   <string id="ui_mcm_idiots_subtitle_shotgun">
     <text>Shotgun</text>
   </string>
+  <string id="ui_mcm_idiots_subtitle_smg">
+    <text>SMG</text>
+  </string>
   <string id="ui_mcm_idiots_subtitle_rifle">
-    <text>Rifle/SMG</text>
+    <text>Rifle</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_sniper">
     <text>Sniper</text>

@@ -121,13 +121,6 @@ function PATCH.onChooseWeapon(npc, wpn, flags)
     local t1 = WPN.getType(w1)
     local t2 = WPN.getType(w2)
 
-    if t1 == "smg" then
-      t1 = "rifle"
-    end
-    if t2 == "smg" then
-      t2 = "rifle"
-    end
-
     if t1 ~= t2 and t1 == preferred then
       return true
     elseif t1 ~= t2 and t2 == preferred then

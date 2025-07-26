@@ -471,8 +471,11 @@
   <string id="ui_mcm_idiots_subtitle_shotgun">
     <text>Дробовик</text>
   </string>
+  <string id="ui_mcm_idiots_subtitle_smg">
+    <text>Пистолет-пулемет</text>
+  </string>
   <string id="ui_mcm_idiots_subtitle_rifle">
-    <text>Штурмовая винтовка/Пистолет-пулемет</text>
+    <text>Штурмовая винтовка</text>
   </string>
   <string id="ui_mcm_idiots_subtitle_sniper">
     <text>Снайперская винтовка</text>

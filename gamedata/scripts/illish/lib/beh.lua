@@ -394,45 +394,6 @@ local BEH = {}
 
     return waypoints
   end
-
-
-  function BEH.addWaypoint(npc, pos)
-    if type(npc) == "number" then
-      npc = NPC.getCompanion(npc)
-    end
-
-    if not (npc and pos) then
-      return
-    end
-
-    local x, y, z = pos.x, pos.y, pos.z
-    local index   = #BEH.getAllWaypoints(npc) + 1
-    local delay   = BEH.WAYPOINT_DELAY
-
-    local waypoint = string.format("%s,patrol | pos:%s,%s,%s", delay, x, y, z)
-    se_save_var(npc:id(), npc:name(), "pathpoint" ..index, waypoint)
-
-    return index
-  end
-
-
-  function BEH.clearWaypoints(npc)
-    if type(npc) == "number" then
-      npc = NPC.getCompanion(npc)
-    end
-
-    if not npc then
-      return
-    end
-
-    if NPC.getState(npc, "movement", "patrol") then
-      NPC.setState(npc, "movement", NPC.getActiveState(nil, "movement"), true)
-    end
-
-    for index in ipairs(BEH.getAllWaypoints(npc)) do
-      se_save_var(npc:id(), npc:name(), "pathpoint" .. index, nil)
-    end
-  end
 --
 
 

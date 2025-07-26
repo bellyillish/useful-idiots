@@ -187,8 +187,11 @@
   <string id="st_idiots_weapon_shotgun">
     <text>Shotgun</text>
   </string>
+  <string id="st_idiots_weapon_smg">
+    <text>SMG</text>
+  </string>
   <string id="st_idiots_weapon_rifle">
-    <text>Rifle/SMG</text>
+    <text>Rifle</text>
   </string>
   <string id="st_idiots_weapon_sniper">
     <text>Sniper</text>

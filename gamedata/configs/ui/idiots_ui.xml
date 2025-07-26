@@ -17,7 +17,7 @@
       <indexer>10</indexer>
     </indexers>
 
-    <container id="tabs" width="fill" height="32">
+    <container id="tabs" width="fill" height="28">
       <tab>st_idiots_tab_all</tab>
       <tab>1</tab>
       <tab>2</tab>
@@ -31,11 +31,11 @@
       <tab>10</tab>
     </container>
 
-    <container id="titlebar" width="fill" height="fit" xpad="32" ypad="24" gap="12" yalign="c">
+    <container id="titlebar" width="fill" height="fit" xpad="20" ypad="20" gap="12" yalign="c">
       <icon width="54" height="40" />
       <label id="title" width="240" xalign="l" fontSize="1">st_idiots_title_all</label>
 
-      <container id="actions" width="fill" height="fit" gap="4" xalign="r">
+      <container id="actions" width="fill" height="fit" gap="3" xalign="r">
         <action               name="add_waypoint"    size="28" compact="1" icon="idiots_icon_add_waypoint" />
         <action               name="clear_waypoints" size="28" compact="1" icon="idiots_icon_clear_waypoints" />
         <action group="light" name="auto"            size="28" compact="1" icon="idiots_icon_light_auto" xoff="24" />
@@ -54,57 +54,58 @@
       </container>
     </container>
 
-    <container id="actions" xpad="32" ypad="24" tpad="0" gap="8">
+    <container id="actions" xpad="20" ypad="18" tpad="2" gap="6">
       <group gap="1">
-        <action group="movement" name="follow" width="120" height="30" xalign="c" />
-        <action group="movement" name="wait"   width="120" height="30" xalign="c" />
-        <action group="movement" name="cover"  width="120" height="30" xalign="c" />
-        <action group="movement" name="relax"  width="120" height="30" xalign="c" />
-        <action group="movement" name="patrol" width="120" height="30" xalign="c" />
+        <action group="movement" name="follow" width="122" height="28" xalign="c" />
+        <action group="movement" name="wait"   width="122" height="28" xalign="c" />
+        <action group="movement" name="cover"  width="122" height="28" xalign="c" />
+        <action group="movement" name="relax"  width="122" height="28" xalign="c" />
+        <action group="movement" name="patrol" width="122" height="28" xalign="c" />
       </group>
 
       <group gap="1">
-        <action group="formation" name="bunch"   width="120" height="30" xalign="c" />
-        <action group="formation" name="spread"  width="120" height="30" xalign="c" />
-        <action group="formation" name="line"    width="120" height="30" xalign="c" />
-        <action group="formation" name="covered" width="120" height="30" xalign="c" />
+        <action group="formation" name="bunch"   width="122" height="28" xalign="c" />
+        <action group="formation" name="spread"  width="122" height="28" xalign="c" />
+        <action group="formation" name="line"    width="122" height="28" xalign="c" />
+        <action group="formation" name="covered" width="122" height="28" xalign="c" />
       </group>
 
       <group gap="1">
-        <action group="stance" name="stand" width="120" height="30" xalign="c" />
-        <action group="stance" name="sneak" width="120" height="30" xalign="c" />
-        <action group="stance" name="prone" width="120" height="30" xalign="c" />
+        <action group="stance" name="stand" width="122" height="28" xalign="c" />
+        <action group="stance" name="sneak" width="122" height="28" xalign="c" />
+        <action group="stance" name="prone" width="122" height="28" xalign="c" />
       </group>
 
       <group gap="1">
-        <action group="distance" name="normal" width="120" height="30" xalign="c" />
-        <action group="distance" name="near"   width="120" height="30" xalign="c" />
-        <action group="distance" name="far"    width="120" height="30" xalign="c" />
+        <action group="distance" name="normal" width="122" height="28" xalign="c" />
+        <action group="distance" name="near"   width="122" height="28" xalign="c" />
+        <action group="distance" name="far"    width="122" height="28" xalign="c" />
       </group>
 
       <group gap="1">
-        <action group="readiness" name="attack" width="120" height="30" xalign="c" />
-        <action group="readiness" name="defend" width="120" height="30" xalign="c" />
-        <action group="readiness" name="ignore" width="120" height="30" xalign="c" />
+        <action group="readiness" name="attack" width="122" height="28" xalign="c" />
+        <action group="readiness" name="defend" width="122" height="28" xalign="c" />
+        <action group="readiness" name="ignore" width="122" height="28" xalign="c" />
       </group>
 
       <group gap="1">
-        <action group="combat" name="default"  width="120" height="30" xalign="c" />
-        <action group="combat" name="assault"  width="120" height="30" xalign="c" />
-        <action group="combat" name="support"  width="120" height="30" xalign="c" />
-        <action group="combat" name="guard"    width="120" height="30" xalign="c" />
-        <action group="combat" name="snipe"    width="120" height="30" xalign="c" />
-        <action group="combat" name="monolith" width="120" height="30" xalign="c" />
-        <action group="combat" name="camper"   width="120" height="30" xalign="c" />
-        <action group="combat" name="zombied"  width="120" height="30" xalign="c" />
+        <action group="combat" name="default"  width="122" height="28" xalign="c" />
+        <action group="combat" name="assault"  width="122" height="28" xalign="c" />
+        <action group="combat" name="support"  width="122" height="28" xalign="c" />
+        <action group="combat" name="guard"    width="122" height="28" xalign="c" />
+        <action group="combat" name="snipe"    width="122" height="28" xalign="c" />
+        <action group="combat" name="monolith" width="122" height="28" xalign="c" />
+        <action group="combat" name="camper"   width="122" height="28" xalign="c" />
+        <action group="combat" name="zombied"  width="122" height="28" xalign="c" />
       </group>
 
       <group gap="1">
-        <action group="weapon" name="best"    width="120" height="30" xalign="c" />
-        <action group="weapon" name="pistol"  width="120" height="30" xalign="c" />
-        <action group="weapon" name="shotgun" width="120" height="30" xalign="c" />
-        <action group="weapon" name="rifle"   width="120" height="30" xalign="c" />
-        <action group="weapon" name="sniper"  width="120" height="30" xalign="c" />
+        <action group="weapon" name="best"    width="122" height="28" xalign="c" />
+        <action group="weapon" name="pistol"  width="122" height="28" xalign="c" />
+        <action group="weapon" name="shotgun" width="122" height="28" xalign="c" />
+        <action group="weapon" name="smg"     width="122" height="28" xalign="c" />
+        <action group="weapon" name="rifle"   width="122" height="28" xalign="c" />
+        <action group="weapon" name="sniper"  width="122" height="28" xalign="c" />
       </group>
     </container>
   </dialog>
