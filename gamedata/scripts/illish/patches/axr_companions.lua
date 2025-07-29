@@ -209,6 +209,20 @@ function PATCH.callLegacyStateSetters(id, group, action, enabled)
 end
 
 
+-- Prevent sleeping from teleporting offline companions
+local PATCH_get_script_target = sim_squad_scripted.sim_squad_scripted.get_script_target
+
+function sim_squad_scripted.sim_squad_scripted:get_script_target()
+  local target = PATCH_get_script_target(self)
+
+  if axr_companions.companion_squads[self.id] and target == 0 and self.online ~= true then
+    return self.id
+  end
+
+  return target
+end
+
+
 RegisterScriptCallback("idiots_on_start", function()
   RegisterScriptCallback("npc_on_hit_callback", PATCH.onHitCompanion)
   RegisterScriptCallback("actor_on_first_update", PATCH.splitCompanionSquads)

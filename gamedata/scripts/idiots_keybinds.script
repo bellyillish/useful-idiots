@@ -89,33 +89,40 @@ end
 
 
 function onKeybindEvent(event, dik)
-  local selected   = table.keys(NPC.SELECTED_IDS)
   local companions = NPC.getCompanions()
 
   if #companions == 0 then
     return
   end
 
+  local selected = #companions == 1
+    and companions
+    or  table.keys(NPC.SELECTED_IDS)
+
   if checkKeybind(event, dik, "point", "select") then
-    local target = NPC.getTargetCompanion()
+    if #companions > 1 then
+      local target = NPC.getTargetCompanion()
 
-    if target then
-      local result = NPC.select(target)
-      local index  = NPC.indexOfCompanion(target)
-      local count  = #table.keys(NPC.SELECTED_IDS)
+      if target then
+        local result = NPC.select(target)
+        local index  = NPC.indexOfCompanion(target)
+        local count  = #table.keys(NPC.SELECTED_IDS)
 
-      if result
-        then showMessage("st_idiots_select_message", index, count)
-      elseif count > 0
-        then showMessage("st_idiots_deselect_message", index, count)
-        else showMessage("st_idiots_deselect_all_message")
+        if result
+          then showMessage("st_idiots_select_message", index, count)
+        elseif count > 0
+          then showMessage("st_idiots_deselect_message", index, count)
+          else showMessage("st_idiots_deselect_all_message")
+        end
       end
     end
   end
 
   if checkKeybind(event, dik, "point", "deselect") then
-    if NPC.deselectAll() then
-      showMessage("st_idiots_deselect_all_message")
+    if #companions > 1 then
+      if NPC.deselectAll() then
+        showMessage("st_idiots_deselect_all_message")
+      end
     end
   end
 
@@ -299,6 +306,11 @@ end
 
 
 function checkKeybind(event, dik, group, action)
+  local companions = NPC.getCompanions()
+  if #companions == 0 then
+    return
+  end
+
   local uuid    = "idiots"
   local kformat = "idiots/keybinds/%s/%s_%s"
 
@@ -324,7 +336,9 @@ function checkKeybind(event, dik, group, action)
     return false
   end
 
-  local selected = table.keys(NPC.SELECTED_IDS)
+  local selected = #companions == 1
+    and companions
+    or  table.keys(NPC.SELECTED_IDS)
 
   if action == "cycle_" .. group then
     local nextState
