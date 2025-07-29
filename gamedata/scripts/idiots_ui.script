@@ -713,7 +713,12 @@ function UIWheelCompanion:OnClickButton(group, action)
 
   if action == "unstick" then
     local npc = self.ID and NPC.getCompanion(self.ID)
+
     if npc then
+      local data = a_idiots_mdata.initStorage()
+      data.companionStates[npc:id()] = NPC.getAllStates(npc)
+      BEH.saveStorage(npc:id(), data.beh)
+
       alife():teleport_object(npc:id(), npc:game_vertex_id(), npc:level_vertex_id(), npc:position())
     end
   end

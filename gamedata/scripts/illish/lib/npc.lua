@@ -332,6 +332,10 @@ NPC.LOOT_SHARING_NPCS = {}
       ::continue::
     end
 
+    table.sort(companions, function(a, b)
+      return a:id() < b:id()
+    end)
+
     return companions
   end
 

@@ -98,6 +98,10 @@ function xr_danger.is_danger(npc, danger)
     return false
   end
 
+  if get_object_story_id(npc:id()) then
+    return false
+  end
+
   if danger:dependent_object() then
     dangerObject = danger:dependent_object()
   end
@@ -110,7 +114,7 @@ function xr_danger.is_danger(npc, danger)
     return false
   end
 
-  if (dangerObject:id() == 0 and npc:relation(dangerObject) < 1) or npc:relation(dangerObject) < 2 then
+  if dangerObject:id() == 0 and npc:relation(dangerObject) < 1 or dangerObject:id() ~= 0 and npc:relation(dangerObject) < 2 then
     return false
   end
 
