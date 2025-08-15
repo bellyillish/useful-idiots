@@ -99,11 +99,6 @@ function axr_companions.companion_squad_can_teleport(squad)
 end
 
 
--- Disable vanilla companion wheel
-function axr_companions.on_key_release()
-end
-
-
 -- Disable vanilla "move to point" keybind
 function axr_companions.move_to_point()
 end
@@ -227,6 +222,9 @@ RegisterScriptCallback("idiots_on_start", function()
   RegisterScriptCallback("npc_on_hit_callback", PATCH.onHitCompanion)
   RegisterScriptCallback("actor_on_first_update", PATCH.splitCompanionSquads)
   RegisterScriptCallback("idiots_on_state_change", PATCH.callLegacyStateSetters)
+
+  -- Disable vanilla companion wheel
+  UnregisterScriptCallback("on_key_release", axr_companions.on_key_release)
 end)
 
 

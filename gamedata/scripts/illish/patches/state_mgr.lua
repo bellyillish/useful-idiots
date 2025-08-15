@@ -25,6 +25,13 @@ function state_mgr.set_state(npc, state, callback, timeout, target, extra)
     end
   end
 
+  -- Force {fast_set = true} on all companion animations because it seems to
+  -- fix some issues with them getting stuck or being unresponsive
+  if NPC.isCompanion(npc) then
+    extra = extra or {}
+    extra.fast_set = extra.fast_set ~= false
+  end
+
   -- Validate look_position and look_dir because directions with very small
   -- or zero magnitudes can make NPCs/companions disappear
   if target and target.look_position then
@@ -54,42 +61,3 @@ state_lib.states.prone_sniper_fire.direction = nil
 
 state_mgr_animation_list.animations.prone.prop.moving      = nil
 state_mgr_animation_list.animations.prone_idle.prop.moving = nil
-
-
--- force fast_set on these animations to curb stuck NPCs
-PATCH.FAST_SET = {
-  "assault",
-  "assault_fire",
-  "assault_no_wpn",
-  "panic",
-  "patrol",
-  "patrol_fire",
-  "prone",
-  "prone_fire",
-  "prone_idle",
-  "prone_sniper_fire",
-  "raid",
-  "raid_fire",
-  "run",
-  "rush",
-  "sneak",
-  "sneak_fire",
-  "sneak_no_wpn",
-  "sneak_run_no_wpn",
-  "sneak_run",
-  "sprint",
-  "threat",
-  "threat_danger",
-  "threat_fire",
-  "threat_heli",
-  "threat_na",
-  "threat_sniper_fire",
-  "walk",
-  "walk_noweap",
-}
-
-for i, state in ipairs(PATCH.FAST_SET) do
-  if state_lib.states[state] then
-    state_lib.states[state].fast_set = true
-  end
-end
