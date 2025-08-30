@@ -10,7 +10,7 @@ function xr_help_wounded.evaluator_wounded_exist:evaluate()
 
   if NPC.isCompanion(npc) then
     if not st.help_wounded_cond then
-      st.help_wounded_cond = xr_logic.parse_condlist(npc, "beh", "help_wounded_enabled", st.help_wounded_enabled)
+      st.help_wounded_cond = xr_logic.parse_condlist(npc, "beh", "help_wounded_enabled", tostring(st.help_wounded_enabled))
     end
 
     st.help_wounded_enabled = xr_logic.pick_section_from_condlist(db.actor, npc, st.help_wounded_cond) == "true"
